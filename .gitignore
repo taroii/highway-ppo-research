@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Trained models and logs
+trained_models/
+*.zip
+*.pkl
+*/tensorboard/
+*/events.out.tfevents.*
+
+# Highway-env clone
+HighwayEnv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Conda
+*.conda
+
+# Claude
+.claude
