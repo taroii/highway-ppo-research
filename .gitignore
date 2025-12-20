@@ -13,7 +13,6 @@ build/
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
 
 # Trained models and logs
 trained_models/
