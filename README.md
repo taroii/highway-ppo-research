@@ -48,6 +48,12 @@ git clone https://github.com/eleurent/highway-env.git HighwayEnv
 
 ## Quick Start
 
+### Notebook
+
+See all set up / training details in src/testing.ipynb. 
+
+## Misc. (old stuff)
+
 ### Training
 
 ```bash
