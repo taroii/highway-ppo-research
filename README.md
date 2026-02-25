@@ -23,15 +23,21 @@ git clone https://github.com/eleurent/highway-env.git HighwayEnv
 
 ## Reward Structure
 
-The environment uses `highway-fast-v0` with `duration=30` and `policy_frequency=1`, giving **30 steps per episode**.
+Exact reward structure can be found in ```HighwayEnv/highway_env/envs/highway_env.py```. "The reward is defined to foster driving at high speed, on the rightmost lanes, and to avoid collisions." 
 
-Per-step reward is normalized to **[0, 1]**:
-- Raw reward: `collision_reward * crashed + high_speed_reward * scaled_speed + right_lane_reward * lane_fraction`
-- Defaults: `-1 * crashed + 0.4 * speed_score + 0.1 * lane_score`
-- Normalized via linear map from `[-1, 0.5]` to `[0, 1]`, then multiplied by `on_road_reward` (1 if on road, 0 if not)
+- collision_reward: 1.0 if crashed, 0.0 otherwise.
+- right_lane_reward: lane_index / (num_lanes - 1)
+- high_speed_reward: clip(lmap(forward_speed, [20, 30], [0, 1]), 0, 1)
+- on_road_reward: 1.0 if on road, 0.0 otherwise.
 
-**Theoretical max reward per episode: 30.0** (full speed, rightmost lane, no collision, all 30 steps).
+Where forward_speed = speed * cos(heading).
 
-## Tree-Based Adaptive Discretization
+The weighted sum is:
+
+raw = -1.0 * crashed + 0.1 * right_lane + 0.4 * high_speed
+
+It's then normalized so for each step, reward values are in [0, 1].
+
+By default, there are 40 steps per episode (playthrough). Hence the max theoretical reward is 40, but in practice we'd have to get lucky to get in an environment where the car can speed through the right lane with no obstructions. 
 
 

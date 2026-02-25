@@ -65,7 +65,7 @@ def make_env(agent_type: str, render_mode=None):
     kwargs = {"config": config}
     if render_mode:
         kwargs["render_mode"] = render_mode
-    return gym.make("highway-v0", **kwargs)
+    return gym.make("highway-fast-v0", **kwargs)
 
 
 def record_episode(agent, agent_type: str, video_folder: str, seed: int):

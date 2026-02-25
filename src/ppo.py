@@ -325,7 +325,7 @@ class PPO:
 def make_highway_env():
     """Highway env with default config, only overriding action type."""
     env = gym.make(
-        "highway-v0",
+        "highway-fast-v0",
         config={
             "action": {
                 "type": "DiscreteAction",
@@ -344,10 +344,13 @@ def make_highway_env():
 
 if __name__ == "__main__":
     TOTAL_TIMESTEPS = 100_000
-    env = make_highway_env()
+    n_envs = 6  # 6 parallel environments
+
+    # Vectorized training env
+    train_env = gym.vector.AsyncVectorEnv([make_highway_env for _ in range(n_envs)])
 
     agent = PPO(
-        env,
+        train_env,
         hidden=[256, 256],
         n_steps=128,
         batch_size=64,
@@ -363,27 +366,29 @@ if __name__ == "__main__":
     )
 
     print("Starting from-scratch PPO training...")
-    print(f"Obs shape: {env.observation_space.shape}")
-    print(f"Action space: {env.action_space}")
+    print(f"Obs shape: {train_env.single_observation_space.shape}")
+    print(f"Action space: {train_env.single_action_space}")
+    print(f"Num envs: {train_env.num_envs}")
     print()
 
     episode_rewards = agent.learn(total_timesteps=TOTAL_TIMESTEPS, print_every=10000)
 
     agent.save("checkpoints/ppo.pt", episode_rewards)
+    train_env.close()
 
-    # Evaluate
+    # Evaluate with a single env
     print("\nEvaluating (deterministic)...")
+    eval_env = make_highway_env()
     eval_rewards = []
     for _ in range(20):
-        obs, _ = env.reset()
+        obs, _ = eval_env.reset()
         total_reward = 0.0
         done = truncated = False
         while not (done or truncated):
             action = agent.predict(obs, deterministic=True)
-            obs, reward, done, truncated, _ = env.step(action)
+            obs, reward, done, truncated, _ = eval_env.step(action)
             total_reward += reward
         eval_rewards.append(total_reward)
 
-    print(f"Eval over 20 episodes/playthroughs: mean={np.mean(eval_rewards):.2f}, std={np.std(eval_rewards):.2f}")
-
-    env.close()
+    print(f"Eval over 20 episodes: mean={np.mean(eval_rewards):.2f}, std={np.std(eval_rewards):.2f}")
+    eval_env.close()

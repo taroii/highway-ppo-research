@@ -4,4 +4,4 @@ highway-env
 ipywidgets
 stable-baselines3
 tensorboard
-"gymnasium[other]"
+gymnasium[other]
