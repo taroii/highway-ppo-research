@@ -273,7 +273,7 @@ class ZoomingPPO:
         obs_dim = int(np.prod(env.observation_space.shape))
 
         # Zooming action space manager (2D: acceleration, steering)
-        self.zooming = ActionZooming(da=2)
+        self.zooming = ActionZooming(da=1)
         self.net = ZoomingActorCritic(obs_dim, self.zooming.n_actions, hidden)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
 
@@ -519,7 +519,7 @@ def make_highway_env_continuous():
         config={
             "action": {
                 "type": "ContinuousAction",
-                "longitudinal": True,
+                "longitudinal": False,
                 "lateral": True,
             },
         },

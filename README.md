@@ -21,9 +21,13 @@ pip install -r requirements.txt
 git clone https://github.com/eleurent/highway-env.git HighwayEnv
 ```
 
+## Environment Setup
+
+All agents use `highway-fast-v0` with steering-only control (`longitudinal: False, lateral: True`). The PPO baseline uses `DiscreteAction` with 5 steering angles. The zooming variants use `ContinuousAction` with adaptive discretization of the 1D steering space.
+
 ## Reward Structure
 
-Exact reward structure can be found in ```HighwayEnv/highway_env/envs/highway_env.py```. "The reward is defined to foster driving at high speed, on the rightmost lanes, and to avoid collisions." 
+Exact reward structure can be found in ```HighwayEnv/highway_env/envs/highway_env.py```. "The reward is defined to foster driving at high speed, on the rightmost lanes, and to avoid collisions."
 
 - collision_reward: 1.0 if crashed, 0.0 otherwise.
 - right_lane_reward: lane_index / (num_lanes - 1)
@@ -38,13 +42,17 @@ raw = -1.0 * crashed + 0.1 * right_lane + 0.4 * high_speed
 
 It's then normalized so for each step, reward values are in [0, 1].
 
-Additionally, a steering penalty is applied via `SteeringPenaltyWrapper` (defined in `src/ppo.py`):
+Additionally, `SteeringPenaltyWrapper` (defined in `src/ppo.py`) applies two reward shaping terms:
 
 ```
-penalty = 0.1 * |steering| / (pi/4)
-reward = normalized_reward - penalty
+steering_penalty = 0.1 * |steering| / (pi/4)
+forward_bonus    = 0.1 * max(vx, 0)
+reward = normalized_reward - steering_penalty + forward_bonus
 ```
 
-This discourages unnecessary turning. With 25 discrete actions (5×5 grid of acceleration × steering), only 5 go straight — without this penalty the agent swerves constantly. The coefficient 0.1 means max steering costs 10% of the max reward per step, enough to encourage straight driving while still allowing lane changes to avoid collisions.
+- **Steering penalty**: Discourages unnecessary turning. The coefficient 0.1 means max steering costs 10% of the max reward per step, enough to encourage straight driving while still allowing lane changes.
+- **Forward bonus**: Rewards positive x-velocity. Since the agent only controls steering (no acceleration), this encourages maintaining a heading that preserves forward progress rather than drifting sideways.
+
+All three agents (PPO, ZoomingPPO, ContextualZoomingPPO) use steering-only control (`longitudinal: False, lateral: True`), so the agent controls only the steering angle while speed is managed automatically.
 
 By default, there are 40 steps per episode (playthrough). Hence the max theoretical reward is 40, but in practice we'd have to get lucky to get in an environment where the car can speed through the right lane with no obstructions.

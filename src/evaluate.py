@@ -1,10 +1,11 @@
 """
-Evaluate a trained PPO or ZoomingPPO agent: run episodes, record videos
-for the best and worst episodes.
+Evaluate a trained PPO, ZoomingPPO, or ContextualZoomingPPO agent:
+run episodes, record videos for the best and worst episodes.
 
 Usage:
     python src/evaluate.py checkpoints/ppo.pt --type ppo
     python src/evaluate.py checkpoints/zooming_ppo.pt --type zooming
+    python src/evaluate.py checkpoints/contextual_zooming_ppo.pt --type contextual
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from ppo import PPO, make_highway_env, SteeringPenaltyWrapper
 from zooming_ppo import ZoomingPPO, make_highway_env_continuous
+from zooming_ppo_contextual import ContextualZoomingPPO, make_highway_env_continuous as make_highway_env_contextual
 
 
 def run_episode(agent, env, agent_type: str):
@@ -48,16 +50,16 @@ def make_env(agent_type: str, render_mode=None):
         config = {
             "action": {
                 "type": "DiscreteAction",
-                "longitudinal": True,
+                "longitudinal": False,
                 "lateral": True,
                 "actions_per_axis": 5,
             },
         }
-    else:
+    else:  # zooming or contextual
         config = {
             "action": {
                 "type": "ContinuousAction",
-                "longitudinal": True,
+                "longitudinal": False,
                 "lateral": True,
             },
         }
@@ -88,7 +90,7 @@ def record_episode(agent, agent_type: str, video_folder: str, seed: int):
 def main():
     parser = argparse.ArgumentParser(description="Evaluate a trained agent and record videos")
     parser.add_argument("checkpoint", help="Path to .pt checkpoint")
-    parser.add_argument("--type", choices=["ppo", "zooming"], required=True,
+    parser.add_argument("--type", choices=["ppo", "zooming", "contextual"], required=True,
                         help="Agent type")
     parser.add_argument("--episodes", type=int, default=10,
                         help="Number of evaluation episodes")
@@ -100,8 +102,10 @@ def main():
     env = make_env(agent_type)
     if agent_type == "ppo":
         agent = PPO.load(args.checkpoint, env)
-    else:
+    elif agent_type == "zooming":
         agent = ZoomingPPO.load(args.checkpoint, env)
+    else:
+        agent = ContextualZoomingPPO.load(args.checkpoint, env)
 
     print(f"Loaded {agent_type} agent from {args.checkpoint}")
 

@@ -39,12 +39,14 @@ try:
 except ImportError:
     pass
 
-from src.state_partition import (
+from zooming import Cube, CubeStats
+from state_partition import (
     StatePartitionTree,
     StateLeaf,
     ActionZooming,
     ActionSplitInfo,
 )
+from ppo import SteeringPenaltyWrapper
 
 
 # ---------------------------------------------------------------------------
@@ -308,7 +310,7 @@ class ContextualZoomingPPO:
         # State partition tree (starts as single leaf)
         self.tree = StatePartitionTree(
             obs_dim=self.obs_dim,
-            da=2,
+            da=1,
             max_depth=max_tree_depth,
             min_samples_split=min_samples_split,
             kl_threshold=kl_threshold,
@@ -644,39 +646,63 @@ class ContextualZoomingPPO:
         }, path)
         print(f"Saved ContextualZoomingPPO checkpoint to {path}")
 
+    @classmethod
+    def load(cls, path: str, env: "gym.Env") -> "ContextualZoomingPPO":
+        data = torch.load(path, weights_only=False)
+        agent = cls(env, hidden=data["hidden"])
+
+        # Reconstruct tree structure
+        td = data["tree_data"]
+        agent.tree._split_dim = td["split_dim"]
+        agent.tree._split_val = td["split_val"]
+        agent.tree._left = td["left"]
+        agent.tree._right = td["right"]
+        agent.tree._depth = td["depth"]
+        agent.tree._next_leaf_id = td["next_leaf_id"]
+
+        # Reconstruct leaves
+        agent.tree._leaves = [None] * len(agent.tree._split_dim)
+        for node_id_str, ld in data["leaves_data"].items():
+            node_id = int(node_id_str)
+            zooming = ActionZooming(da=td["da"])
+            zooming.active_cubes = []
+            zooming.stats = []
+            for cs in ld["zooming"]:
+                cube = Cube(lower=np.array(cs["lower"]), s=cs["s"], d=cs["d"])
+                zooming.active_cubes.append(cube)
+                zooming.stats.append(CubeStats(Q=0.0, n_play=cs["n_play"]))
+            leaf = StateLeaf(leaf_id=ld["leaf_id"], zooming=zooming)
+            agent.tree._leaves[node_id] = leaf
+
+        # Rebuild network with correct leaf layout
+        leaf_action_counts = {
+            lf.leaf_id: lf.zooming.n_actions
+            for lf in agent.tree.all_leaves()
+        }
+        agent.net = ContextualActorCritic(
+            data["obs_dim"], leaf_action_counts, data["hidden"]
+        )
+        agent.net.load_state_dict(data["net_state_dict"])
+        return agent
+
 
 # ---------------------------------------------------------------------------
-# Environment factory (unchanged)
+# Environment factory
 # ---------------------------------------------------------------------------
 
 def make_highway_env_continuous():
-    """Highway env with ContinuousAction (2D: acceleration, steering)."""
+    """Highway env with ContinuousAction (steering only)."""
     env = gym.make(
         "highway-fast-v0",
         config={
             "action": {
                 "type": "ContinuousAction",
-                "longitudinal": True,
+                "longitudinal": False,
                 "lateral": True,
             },
-            "observation": {
-                "type": "Kinematics",
-                "vehicles_count": 5,
-                "features": ["presence", "x", "y", "vx", "vy"],
-                "features_range": {
-                    "x": [-100, 100],
-                    "y": [-100, 100],
-                    "vx": [-20, 20],
-                    "vy": [-20, 20],
-                },
-                "normalize": True,
-                "absolute": False,
-            },
-            "duration": 30,
-            "policy_frequency": 1,
         },
     )
-    return env
+    return SteeringPenaltyWrapper(env)
 
 
 # ---------------------------------------------------------------------------

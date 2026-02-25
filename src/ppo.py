@@ -29,18 +29,23 @@ except ImportError:
 # ---------------------------------------------------------------------------
 
 class SteeringPenaltyWrapper(gym.Wrapper):
-    """Penalize steering magnitude to encourage going straight."""
+    """Penalize steering magnitude and reward forward (x) progress."""
 
-    def __init__(self, env, coeff: float = 0.1):
+    def __init__(self, env, steering_coeff: float = 0.1, forward_coeff: float = 0.1):
         super().__init__(env)
-        self.coeff = coeff
+        self.steering_coeff = steering_coeff
+        self.forward_coeff = forward_coeff
         self._max_steering = np.pi / 4  # ContinuousAction default range
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
-        steering = abs(self.env.unwrapped.vehicle.action["steering"])
-        penalty = self.coeff * steering / self._max_steering
-        reward -= penalty
+        vehicle = self.env.unwrapped.vehicle
+        # Steering penalty
+        steering = abs(vehicle.action["steering"])
+        reward -= self.steering_coeff * steering / self._max_steering
+        # Forward progress bonus: reward positive x-velocity
+        vx = vehicle.velocity[0]
+        reward += self.forward_coeff * max(vx, 0.0)
         return obs, reward, terminated, truncated, info
 
 
@@ -349,7 +354,7 @@ def make_highway_env():
         config={
             "action": {
                 "type": "DiscreteAction",
-                "longitudinal": True,
+                "longitudinal": False,
                 "lateral": True,
                 "actions_per_axis": 5,
             },

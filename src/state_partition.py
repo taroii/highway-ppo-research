@@ -41,7 +41,7 @@ class ActionSplitInfo:
 class ActionZooming:
     """Manages a flat list of active cubes in [0,1]^2 as discrete actions."""
 
-    def __init__(self, da: int = 2):
+    def __init__(self, da: int = 1):
         self.da = da
         root = Cube(lower=np.zeros(da), s=1.0, d=da)
         self.active_cubes: List[Cube] = root.split_children()
@@ -152,7 +152,7 @@ class StatePartitionTree:
     def __init__(
         self,
         obs_dim: int,
-        da: int = 2,
+        da: int = 1,
         max_depth: int = 8,
         min_samples_split: int = 128,
         kl_threshold: float = 0.1,
