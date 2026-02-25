@@ -155,8 +155,10 @@ class PPO:
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-        obs_dim = int(np.prod(env.observation_space.shape))
-        n_actions = env.action_space.n
+        obs_space = getattr(env, "single_observation_space", env.observation_space)
+        act_space = getattr(env, "single_action_space", env.action_space)
+        obs_dim = int(np.prod(obs_space.shape))
+        n_actions = act_space.n
         self.net = ActorCritic(obs_dim, n_actions, hidden)
         self.optimizer = torch.optim.Adam(self.net.parameters(), lr=lr)
 
