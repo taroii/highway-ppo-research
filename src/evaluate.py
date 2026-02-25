@@ -23,7 +23,7 @@ except ImportError:
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from ppo import PPO, make_highway_env
+from ppo import PPO, make_highway_env, SteeringPenaltyWrapper
 from zooming_ppo import ZoomingPPO, make_highway_env_continuous
 
 
@@ -65,7 +65,7 @@ def make_env(agent_type: str, render_mode=None):
     kwargs = {"config": config}
     if render_mode:
         kwargs["render_mode"] = render_mode
-    return gym.make("highway-fast-v0", **kwargs)
+    return SteeringPenaltyWrapper(gym.make("highway-fast-v0", **kwargs))
 
 
 def record_episode(agent, agent_type: str, video_folder: str, seed: int):

@@ -38,6 +38,13 @@ raw = -1.0 * crashed + 0.1 * right_lane + 0.4 * high_speed
 
 It's then normalized so for each step, reward values are in [0, 1].
 
-By default, there are 40 steps per episode (playthrough). Hence the max theoretical reward is 40, but in practice we'd have to get lucky to get in an environment where the car can speed through the right lane with no obstructions. 
+Additionally, a steering penalty is applied via `SteeringPenaltyWrapper` (defined in `src/ppo.py`):
 
+```
+penalty = 0.1 * |steering| / (pi/4)
+reward = normalized_reward - penalty
+```
 
+This discourages unnecessary turning. With 25 discrete actions (5×5 grid of acceleration × steering), only 5 go straight — without this penalty the agent swerves constantly. The coefficient 0.1 means max steering costs 10% of the max reward per step, enough to encourage straight driving while still allowing lane changes to avoid collisions.
+
+By default, there are 40 steps per episode (playthrough). Hence the max theoretical reward is 40, but in practice we'd have to get lucky to get in an environment where the car can speed through the right lane with no obstructions.

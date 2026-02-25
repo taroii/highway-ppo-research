@@ -28,6 +28,7 @@ except ImportError:
     pass
 
 from zooming import Cube, CubeStats
+from ppo import SteeringPenaltyWrapper
 
 
 # ---------------------------------------------------------------------------
@@ -523,7 +524,7 @@ def make_highway_env_continuous():
             },
         },
     )
-    return env
+    return SteeringPenaltyWrapper(env)
 
 
 # ---------------------------------------------------------------------------
