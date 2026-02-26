@@ -46,7 +46,7 @@ from state_partition import (
     ActionZooming,
     ActionSplitInfo,
 )
-from ppo import SteeringPenaltyWrapper
+from ppo import CustomRewardWrapper
 
 
 # ---------------------------------------------------------------------------
@@ -702,7 +702,7 @@ def make_highway_env_continuous():
             },
         },
     )
-    return SteeringPenaltyWrapper(env)
+    return CustomRewardWrapper(env)
 
 
 # ---------------------------------------------------------------------------

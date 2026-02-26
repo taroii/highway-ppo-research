@@ -1,8 +1,10 @@
 """
-Compare training curves from two checkpoints (PPO vs ZoomingPPO).
+Compare training curves from checkpoints (PPO, ZoomingPPO, ContextualZoomingPPO).
 
 Usage:
     python src/compare.py checkpoints/ppo.pt checkpoints/zooming_ppo.pt
+    python src/compare.py checkpoints/ppo.pt checkpoints/zooming_ppo.pt checkpoints/contextual_zooming_ppo.pt
+    python src/compare.py checkpoints/ppo.pt checkpoints/zooming_ppo.pt --labels "PPO" "Zooming"
 """
 
 from __future__ import annotations
@@ -12,6 +14,10 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 from pathlib import Path
+
+
+COLORS = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple"]
+DEFAULT_LABELS = ["PPO (discrete)", "Zooming PPO (adaptive)", "Contextual Zooming PPO"]
 
 
 def rolling_mean(data, window=50):
@@ -29,39 +35,35 @@ def rolling_mean(data, window=50):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Compare training curves from two checkpoints")
-    parser.add_argument("checkpoint1", help="First checkpoint .pt file")
-    parser.add_argument("checkpoint2", help="Second checkpoint .pt file")
+    parser = argparse.ArgumentParser(description="Compare training curves from checkpoints")
+    parser.add_argument("checkpoints", nargs="+", help="Checkpoint .pt files to compare")
     parser.add_argument("--window", type=int, default=50, help="Rolling average window")
     parser.add_argument("--output", default="plots/comparison.png", help="Output plot path")
-    parser.add_argument("--labels", nargs=2, default=["PPO (discrete)", "Zooming PPO (adaptive)"],
-                        help="Labels for the two curves")
+    parser.add_argument("--labels", nargs="+", default=None,
+                        help="Labels for each curve (defaults to built-in names)")
     args = parser.parse_args()
 
-    # Load episode rewards from checkpoints
-    data1 = torch.load(args.checkpoint1, weights_only=False)
-    data2 = torch.load(args.checkpoint2, weights_only=False)
+    labels = args.labels or DEFAULT_LABELS[:len(args.checkpoints)]
+    if len(labels) < len(args.checkpoints):
+        labels += [Path(cp).stem for cp in args.checkpoints[len(labels):]]
 
-    rewards1 = np.array(data1["episode_rewards"])
-    rewards2 = np.array(data2["episode_rewards"])
-
-    print(f"{args.labels[0]}: {len(rewards1)} episodes, "
-          f"final mean(last 50)={np.mean(rewards1[-50:]):.2f}")
-    print(f"{args.labels[1]}: {len(rewards2)} episodes, "
-          f"final mean(last 50)={np.mean(rewards2[-50:]):.2f}")
-
-    # Compute rolling averages
-    smooth1 = rolling_mean(rewards1, args.window)
-    smooth2 = rolling_mean(rewards2, args.window)
+    # Load and summarize
+    all_rewards = []
+    for cp, label in zip(args.checkpoints, labels):
+        data = torch.load(cp, weights_only=False)
+        rewards = np.array(data["episode_rewards"])
+        all_rewards.append(rewards)
+        print(f"{label}: {len(rewards)} episodes, "
+              f"final mean(last 50)={np.mean(rewards[-50:]):.2f}")
 
     # Plot
     fig, ax = plt.subplots(figsize=(10, 5))
 
-    ax.plot(rewards1, alpha=0.15, color="tab:blue")
-    ax.plot(smooth1, label=args.labels[0], color="tab:blue", linewidth=2)
-
-    ax.plot(rewards2, alpha=0.15, color="tab:orange")
-    ax.plot(smooth2, label=args.labels[1], color="tab:orange", linewidth=2)
+    for i, (rewards, label) in enumerate(zip(all_rewards, labels)):
+        color = COLORS[i % len(COLORS)]
+        smooth = rolling_mean(rewards, args.window)
+        #ax.plot(rewards, alpha=0.08, color=color)
+        ax.plot(smooth, label=label, color=color, linewidth=2)
 
     ax.set_xlabel("Episode")
     ax.set_ylabel("Episode Reward")

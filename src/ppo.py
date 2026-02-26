@@ -28,24 +28,42 @@ except ImportError:
 # Steering penalty wrapper
 # ---------------------------------------------------------------------------
 
-class SteeringPenaltyWrapper(gym.Wrapper):
-    """Penalize steering magnitude and reward forward (x) progress."""
+class CustomRewardWrapper(gym.Wrapper):
+    """Custom reward computed directly from vehicle state.
 
-    def __init__(self, env, steering_coeff: float = 0.1, forward_coeff: float = 0.1):
+    raw = -1.0*crashed + 0.4*speed + 0.1*right_lane + 0.1*progress - 0.1*steering
+    reward = lmap(raw, [-1.1, 0.6], [0, 1]) * on_road
+
+    progress = clip(delta_x / 30, 0, 1), where delta_x is x-position change per step.
+    At 30 m/s going straight, delta_x ≈ 30 per 1s step → progress = 1.
+    """
+
+    def __init__(self, env):
         super().__init__(env)
-        self.steering_coeff = steering_coeff
-        self.forward_coeff = forward_coeff
-        self._max_steering = np.pi / 4  # ContinuousAction default range
+        self._last_x = None
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self._last_x = self.env.unwrapped.vehicle.position[0]
+        return obs, info
 
     def step(self, action):
-        obs, reward, terminated, truncated, info = self.env.step(action)
+        obs, _, terminated, truncated, info = self.env.step(action)
         vehicle = self.env.unwrapped.vehicle
-        # Steering penalty
-        steering = abs(vehicle.action["steering"])
-        reward -= self.steering_coeff * steering / self._max_steering
-        # Forward progress bonus: reward positive x-velocity
-        vx = vehicle.velocity[0]
-        reward += self.forward_coeff * max(vx, 0.0)
+        road = self.env.unwrapped.road
+
+        crashed = float(vehicle.crashed)
+        on_road = float(vehicle.on_road)
+        speed = float(np.clip((vehicle.speed - 20) / 10, 0, 1))
+        neighbours = road.network.all_side_lanes(vehicle.lane_index)
+        right_lane = vehicle.lane_index[2] / max(len(neighbours) - 1, 1)
+        delta_x = vehicle.position[0] - self._last_x
+        self._last_x = vehicle.position[0]
+        progress = float(np.clip(delta_x / 30, 0, 1))
+        steering = abs(vehicle.action["steering"]) / (np.pi / 4)
+
+        raw = -1.0 * crashed + 0.4 * speed + 0.1 * right_lane + 0.1 * progress - 0.1 * steering
+        reward = (raw - (-1.1)) / (0.6 - (-1.1)) * on_road
         return obs, reward, terminated, truncated, info
 
 
@@ -360,7 +378,7 @@ def make_highway_env():
             },
         },
     )
-    return SteeringPenaltyWrapper(env)
+    return CustomRewardWrapper(env)
 
 
 # ---------------------------------------------------------------------------
