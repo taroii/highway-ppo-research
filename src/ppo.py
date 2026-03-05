@@ -17,6 +17,7 @@ from torch.distributions import Categorical
 import gymnasium as gym
 from typing import List, Tuple, Dict
 from pathlib import Path
+import math
 
 try:
     import highway_env  # noqa: F401
@@ -31,11 +32,21 @@ except ImportError:
 class CustomRewardWrapper(gym.Wrapper):
     """Custom reward computed directly from vehicle state.
 
-    raw = -1.0*crashed + 0.4*speed + 0.1*right_lane + 0.1*progress - 0.1*steering
-    reward = lmap(raw, [-1.1, 0.6], [0, 1]) * on_road
+    raw = -1.0*crashed + 0.4*speed + 0.1*right_lane + 0.2*progress + 0.1*heading_align - 0.1*steering
+    reward = lmap(raw, [-1.5, 0.8], [0, 1]) * on_road
 
-    progress = clip(delta_x / 30, 0, 1), where delta_x is x-position change per step.
-    At 30 m/s going straight, delta_x ≈ 30 per 1s step → progress = 1.
+    Changes from previous version:
+      - progress = delta_x / 30, unclipped (negative when moving backward).
+        Removes the asymmetric clipping that made circles profitable.
+      - heading_align = cos(vehicle.heading): +0.1 when facing forward (+x),
+        -0.1 when facing backward, 0 when facing sideways.
+        Penalises sustained turning regardless of instantaneous delta_x.
+      - Normalization bounds updated to [-1.5, 0.8] to reflect new range.
+
+    Worst case: -1.0 (crash) + 0.0 (speed) + 0.0 (right_lane)
+                - 0.2 (progress, hard reverse) - 0.1 (heading, facing back)
+                - 0.1 (steering) = -1.5
+    Best case:   0.0 + 0.4 + 0.1 + 0.2 (progress) + 0.1 (heading) - 0.0 = +0.8
     """
 
     def __init__(self, env):
@@ -55,15 +66,32 @@ class CustomRewardWrapper(gym.Wrapper):
         crashed = float(vehicle.crashed)
         on_road = float(vehicle.on_road)
         speed = float(np.clip((vehicle.speed - 20) / 10, 0, 1))
+
         neighbours = road.network.all_side_lanes(vehicle.lane_index)
         right_lane = vehicle.lane_index[2] / max(len(neighbours) - 1, 1)
+
+        # Unclipped progress — negative delta_x now hurts
         delta_x = vehicle.position[0] - self._last_x
         self._last_x = vehicle.position[0]
-        progress = float(np.clip(delta_x / 30, 0, 1))
+        progress = delta_x / 30
+
+        # Heading alignment: cos(heading) = 1.0 facing +x, -1.0 facing -x, 0 sideways.
+        # Scaled to [-0.1, +0.1] contribution.
+        heading_align = math.cos(vehicle.heading)
+
         steering = abs(vehicle.action["steering"]) / (np.pi / 4)
 
-        raw = -1.0 * crashed + 0.4 * speed + 0.1 * right_lane + 0.1 * progress - 0.1 * steering
-        reward = (raw - (-1.1)) / (0.6 - (-1.1)) * on_road
+        raw = (
+            -1.0 * crashed
+            + 0.4  * speed
+            + 0.1  * right_lane
+            + 0.2  * progress
+            + 0.1  * heading_align
+            - 0.1  * steering
+        )
+
+        # Normalize to [0, 1]; multiply by on_road so off-road = 0 reward
+        reward = (raw - (-1.5)) / (0.8 - (-1.5)) * on_road
         return obs, reward, terminated, truncated, info
 
 
