@@ -2,6 +2,10 @@
 
 Research project exploring theoretically-grounded adaptive action space discretization for policy gradient methods on MDPs, tested on highway-env.
 
+## TODO:
+- test new approaches/pipelines
+- modify visualize python scripts (evaluate and compare) to include newly created implementations 
+
 ## Research Direction
 
 Open Problems:
