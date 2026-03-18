@@ -414,7 +414,7 @@ def make_highway_env():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    TOTAL_TIMESTEPS = 100_000
+    TOTAL_TIMESTEPS = 200_000
     env = make_highway_env()
 
     agent = PPO(

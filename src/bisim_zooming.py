@@ -638,6 +638,47 @@ class ClusteredZoomingSAC:
         }, path)
         print(f"Saved ClusteredZoomingSAC checkpoint to {path}")
 
+    @classmethod
+    def load(cls, path: str, env: gym.Env) -> "ClusteredZoomingSAC":
+        data = torch.load(path, weights_only=False)
+        cluster_centers = data["cluster_centers"]
+        feature_dim = cluster_centers.shape[1]
+
+        # Reconstruct encoder
+        obs_dim = int(np.prod(env.observation_space.shape))
+        encoder = MLPEncoder(obs_dim, feature_dim)
+        encoder.load_state_dict(data["encoder"])
+
+        agent = cls(encoder=encoder, cluster_centers=cluster_centers, env=env)
+
+        # Restore per-cluster zooming state and networks
+        for c, cd in enumerate(data["cluster_data"]):
+            # Rebuild zooming cubes
+            agent.zoomings[c].active_cubes = []
+            agent.zoomings[c].stats = []
+            for cs in cd["zooming_state"]:
+                from zooming import Cube, CubeStats
+                cube = Cube(lower=np.array(cs["lower"]), s=cs["s"], d=cs["d"])
+                agent.zoomings[c].active_cubes.append(cube)
+                agent.zoomings[c].stats.append(CubeStats(Q=0.0, n_play=cs["n_play"]))
+
+            n_act = agent.zoomings[c].n_actions
+
+            # Rebuild networks with correct action count
+            agent.actors[c] = RebuildableHead(feature_dim, n_act)
+            agent.q1s[c] = RebuildableHead(feature_dim, n_act)
+            agent.q2s[c] = RebuildableHead(feature_dim, n_act)
+            agent.q1_targets[c] = RebuildableHead(feature_dim, n_act)
+            agent.q2_targets[c] = RebuildableHead(feature_dim, n_act)
+
+            agent.actors[c].load_state_dict(cd["actor"])
+            agent.q1s[c].load_state_dict(cd["q1"])
+            agent.q2s[c].load_state_dict(cd["q2"])
+            agent.q1_targets[c].load_state_dict(agent.q1s[c].state_dict())
+            agent.q2_targets[c].load_state_dict(agent.q2s[c].state_dict())
+
+        return agent
+
 
 # ---------------------------------------------------------------------------
 # Environment factory
@@ -662,7 +703,7 @@ def make_highway_env_continuous():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    BISIM_TIMESTEPS = 50_000
+    BISIM_TIMESTEPS = 100_000
     ZOOMING_TIMESTEPS = 100_000
     FEATURE_DIM = 10
     N_CLUSTERS = 4

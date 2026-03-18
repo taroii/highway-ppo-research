@@ -1,21 +1,19 @@
 """
-Continuous-action SAC with bisimulation metric representation learning
-for HighwayEnv.
+From-scratch SAC for HighwayEnv (continuous steering).
 
-Faithful adaptation of the Deep Bisimulation for Control (DBC) algorithm
-from Zhang et al. (ICLR 2021).  Uses a Gaussian (tanh-squashed) policy
-with continuous steering, matching the original paper's SAC formulation.
+Standard Soft Actor-Critic with:
+  - Gaussian actor with tanh squashing
+  - Twin Q-functions + targets with soft updates
+  - Auto-tuned entropy temperature
 
-Key adaptations from the original DBC codebase:
-  - MLP encoder instead of CNN (HighwayEnv gives flat kinematic obs).
-  - Continuous action concatenated directly into transition model and
-    Q-functions (no one-hot encoding).
-  - Single file, no external dependencies beyond torch/gymnasium.
+No encoder or representation learning — operates directly on flat
+kinematic observations.  Serves as a baseline for comparing against
+BisimSAC (which adds bisimulation representation learning on top of
+the same SAC core).
 """
 
 from __future__ import annotations
 
-import math
 import random
 from pathlib import Path
 from typing import List
@@ -31,56 +29,11 @@ try:
 except ImportError:
     pass
 
-
-# ---------------------------------------------------------------------------
-# Reward wrapper (same as ppo.py)
-# ---------------------------------------------------------------------------
-
-class CustomRewardWrapper(gym.Wrapper):
-    """Custom reward computed directly from vehicle state."""
-
-    def __init__(self, env):
-        super().__init__(env)
-        self._last_x = None
-
-    def reset(self, **kwargs):
-        obs, info = self.env.reset(**kwargs)
-        self._last_x = self.env.unwrapped.vehicle.position[0]
-        return obs, info
-
-    def step(self, action):
-        obs, _, terminated, truncated, info = self.env.step(action)
-        vehicle = self.env.unwrapped.vehicle
-        road = self.env.unwrapped.road
-
-        crashed = float(vehicle.crashed)
-        on_road = float(vehicle.on_road)
-        speed = float(np.clip((vehicle.speed - 20) / 10, 0, 1))
-
-        neighbours = road.network.all_side_lanes(vehicle.lane_index)
-        right_lane = vehicle.lane_index[2] / max(len(neighbours) - 1, 1)
-
-        delta_x = vehicle.position[0] - self._last_x
-        self._last_x = vehicle.position[0]
-        progress = delta_x / 30
-
-        heading_align = math.cos(vehicle.heading)
-        steering = abs(vehicle.action["steering"]) / (np.pi / 4)
-
-        raw = (
-            -1.0 * crashed
-            + 0.4 * speed
-            + 0.1 * right_lane
-            + 0.2 * progress
-            + 0.1 * heading_align
-            - 0.1 * steering
-        )
-        reward = (raw - (-1.5)) / (0.8 - (-1.5)) * on_road
-        return obs, reward, terminated, truncated, info
+from ppo import CustomRewardWrapper
 
 
 # ---------------------------------------------------------------------------
-# Weight init (from the original DBC codebase)
+# Weight init
 # ---------------------------------------------------------------------------
 
 def weight_init(m):
@@ -90,40 +43,7 @@ def weight_init(m):
 
 
 # ---------------------------------------------------------------------------
-# Encoder
-# ---------------------------------------------------------------------------
-
-class MLPEncoder(nn.Module):
-    """MLP encoder for flat (kinematic) observations."""
-
-    def __init__(self, obs_dim: int, feature_dim: int, hidden_dim: int = 256):
-        super().__init__()
-        self.feature_dim = feature_dim
-        self.net = nn.Sequential(
-            nn.Linear(obs_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, feature_dim),
-            nn.LayerNorm(feature_dim),
-        )
-        self.apply(weight_init)
-
-    def forward(self, obs, detach=False):
-        h = self.net(obs)
-        if detach:
-            h = h.detach()
-        return h
-
-    def copy_conv_weights_from(self, source):
-        """For compatibility with the original paper's weight tying.
-        With MLPs we tie the full encoder weights."""
-        for src_p, trg_p in zip(source.parameters(), self.parameters()):
-            trg_p.data.copy_(src_p.data)
-
-
-# ---------------------------------------------------------------------------
-# Gaussian actor (tanh-squashed, following original SAC / DBC)
+# Gaussian actor (tanh-squashed)
 # ---------------------------------------------------------------------------
 
 LOG_STD_MIN = -5
@@ -131,20 +51,18 @@ LOG_STD_MAX = 2
 
 
 class GaussianActor(nn.Module):
-    """Continuous actor: Gaussian policy squashed through tanh."""
-
-    def __init__(self, feature_dim: int, action_dim: int, hidden_dim: int = 256):
+    def __init__(self, obs_dim: int, action_dim: int, hidden_dim: int = 256):
         super().__init__()
         self.trunk = nn.Sequential(
-            nn.Linear(feature_dim, hidden_dim), nn.ReLU(),
+            nn.Linear(obs_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
         )
         self.fc_mu = nn.Linear(hidden_dim, action_dim)
         self.fc_log_std = nn.Linear(hidden_dim, action_dim)
         self.apply(weight_init)
 
-    def forward(self, z, compute_pi=True, compute_log_pi=True):
-        h = self.trunk(z)
+    def forward(self, obs, compute_pi=True, compute_log_pi=True):
+        h = self.trunk(obs)
         mu = self.fc_mu(h)
         log_std = self.fc_log_std(h)
         log_std = torch.clamp(log_std, LOG_STD_MIN, LOG_STD_MAX)
@@ -161,12 +79,10 @@ class GaussianActor(nn.Module):
             log_pi = (
                 -0.5 * noise.pow(2) - log_std
             ).sum(-1, keepdim=True) - 0.5 * np.log(2 * np.pi) * mu.size(-1)
-            # Squashing correction
             log_pi -= torch.log(F.relu(1 - torch.tanh(pi).pow(2)) + 1e-6).sum(-1, keepdim=True)
         else:
             log_pi = None
 
-        # Apply tanh squashing
         mu = torch.tanh(mu)
         if pi is not None:
             pi = torch.tanh(pi)
@@ -175,66 +91,21 @@ class GaussianActor(nn.Module):
 
 
 # ---------------------------------------------------------------------------
-# Q-function (obs+action concatenation, as in the original paper)
+# Q-function
 # ---------------------------------------------------------------------------
 
 class QFunction(nn.Module):
-    def __init__(self, feature_dim: int, action_dim: int, hidden_dim: int = 256):
+    def __init__(self, obs_dim: int, action_dim: int, hidden_dim: int = 256):
         super().__init__()
         self.trunk = nn.Sequential(
-            nn.Linear(feature_dim + action_dim, hidden_dim), nn.ReLU(),
+            nn.Linear(obs_dim + action_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, 1),
         )
         self.apply(weight_init)
 
-    def forward(self, z, action):
-        return self.trunk(torch.cat([z, action], dim=-1))
-
-
-# ---------------------------------------------------------------------------
-# Transition model (probabilistic, as in the paper)
-# ---------------------------------------------------------------------------
-
-class ProbabilisticTransitionModel(nn.Module):
-    def __init__(self, feature_dim: int, action_dim: int, hidden_dim: int = 256,
-                 min_sigma: float = 1e-4, max_sigma: float = 10.0):
-        super().__init__()
-        self.fc = nn.Linear(feature_dim + action_dim, hidden_dim)
-        self.ln = nn.LayerNorm(hidden_dim)
-        self.fc_mu = nn.Linear(hidden_dim, feature_dim)
-        self.fc_sigma = nn.Linear(hidden_dim, feature_dim)
-        self.min_sigma = min_sigma
-        self.max_sigma = max_sigma
-
-    def forward(self, x):
-        x = torch.relu(self.ln(self.fc(x)))
-        mu = self.fc_mu(x)
-        sigma = torch.sigmoid(self.fc_sigma(x))
-        sigma = self.min_sigma + (self.max_sigma - self.min_sigma) * sigma
-        return mu, sigma
-
-    def sample_prediction(self, x):
-        mu, sigma = self(x)
-        return mu + sigma * torch.randn_like(sigma)
-
-
-# ---------------------------------------------------------------------------
-# Reward decoder
-# ---------------------------------------------------------------------------
-
-class RewardDecoder(nn.Module):
-    def __init__(self, feature_dim: int, hidden_dim: int = 256):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(feature_dim, hidden_dim),
-            nn.LayerNorm(hidden_dim),
-            nn.ReLU(),
-            nn.Linear(hidden_dim, 1),
-        )
-
-    def forward(self, z):
-        return self.net(z)
+    def forward(self, obs, action):
+        return self.trunk(torch.cat([obs, action], dim=-1))
 
 
 # ---------------------------------------------------------------------------
@@ -290,51 +161,36 @@ def soft_update_params(net: nn.Module, target_net: nn.Module, tau: float):
 
 
 # ---------------------------------------------------------------------------
-# BisimSAC agent (continuous actions)
+# SAC agent
 # ---------------------------------------------------------------------------
 
-class BisimSAC:
-    """Continuous-action SAC with bisimulation representation learning.
-
-    Closely follows the original DBC architecture:
-      - Shared encoder between actor and critic (with weight tying)
-      - Target encoder + target Q-networks with soft updates
-      - Gaussian actor with tanh squashing
-      - Q-functions that take (z, action) as input
-      - Bisimulation metric loss on the encoder (Equation 4)
-    """
+class SAC:
+    """Standard Soft Actor-Critic with continuous actions."""
 
     def __init__(
         self,
         env: gym.Env,
-        feature_dim: int = 10,
         hidden_dim: int = 256,
         gamma: float = 0.99,
         tau: float = 0.005,
-        encoder_tau: float = 0.005,
         actor_lr: float = 1e-3,
         critic_lr: float = 1e-3,
-        encoder_lr: float = 1e-3,
         alpha_lr: float = 1e-4,
-        transition_lr: float = 1e-3,
         batch_size: int = 128,
         buffer_capacity: int = 100_000,
         learning_starts: int = 1000,
         actor_update_freq: int = 2,
         critic_target_update_freq: int = 2,
-        bisim_coef: float = 0.5,
         init_temperature: float = 0.1,
         seed: int = 0,
     ):
         self.env = env
         self.gamma = gamma
         self.tau = tau
-        self.encoder_tau = encoder_tau
         self.batch_size = batch_size
         self.learning_starts = learning_starts
         self.actor_update_freq = actor_update_freq
         self.critic_target_update_freq = critic_target_update_freq
-        self.bisim_coef = bisim_coef
 
         torch.manual_seed(seed)
         np.random.seed(seed)
@@ -346,47 +202,28 @@ class BisimSAC:
         self.action_dim = action_dim
         self.obs_dim = obs_dim
 
-        # Encoder (shared between actor and critic, as in the paper)
-        self.encoder = MLPEncoder(obs_dim, feature_dim, hidden_dim).to(self.device)
-        self.encoder_target = MLPEncoder(obs_dim, feature_dim, hidden_dim).to(self.device)
-        self.encoder_target.load_state_dict(self.encoder.state_dict())
-
         # Actor
-        self.actor = GaussianActor(feature_dim, action_dim, hidden_dim).to(self.device)
+        self.actor = GaussianActor(obs_dim, action_dim, hidden_dim).to(self.device)
 
         # Twin Q-functions + targets
-        self.q1 = QFunction(feature_dim, action_dim, hidden_dim).to(self.device)
-        self.q2 = QFunction(feature_dim, action_dim, hidden_dim).to(self.device)
-        self.q1_target = QFunction(feature_dim, action_dim, hidden_dim).to(self.device)
-        self.q2_target = QFunction(feature_dim, action_dim, hidden_dim).to(self.device)
+        self.q1 = QFunction(obs_dim, action_dim, hidden_dim).to(self.device)
+        self.q2 = QFunction(obs_dim, action_dim, hidden_dim).to(self.device)
+        self.q1_target = QFunction(obs_dim, action_dim, hidden_dim).to(self.device)
+        self.q2_target = QFunction(obs_dim, action_dim, hidden_dim).to(self.device)
         self.q1_target.load_state_dict(self.q1.state_dict())
         self.q2_target.load_state_dict(self.q2.state_dict())
-
-        # Transition model + reward decoder
-        self.transition_model = ProbabilisticTransitionModel(
-            feature_dim, action_dim, hidden_dim
-        ).to(self.device)
-        self.reward_decoder = RewardDecoder(feature_dim, hidden_dim).to(self.device)
 
         # Auto-tuned entropy temperature
         self.log_alpha = torch.tensor(np.log(init_temperature), dtype=torch.float32,
                                       device=self.device, requires_grad=True)
-        self.target_entropy = -action_dim  # -|A| as in the paper
+        self.target_entropy = -action_dim
 
-        # Optimizers (matches paper's structure: separate optimizers for each component)
+        # Optimizers
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
         self.critic_optimizer = torch.optim.Adam(
             list(self.q1.parameters()) + list(self.q2.parameters()), lr=critic_lr
         )
-        self.encoder_optimizer = torch.optim.Adam(
-            self.encoder.parameters(), lr=encoder_lr
-        )
         self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=alpha_lr)
-        self.transition_optimizer = torch.optim.Adam(
-            list(self.transition_model.parameters()) +
-            list(self.reward_decoder.parameters()),
-            lr=transition_lr,
-        )
 
         # Replay buffer
         self.buffer = ReplayBuffer(obs_dim, action_dim, buffer_capacity, self.device)
@@ -403,45 +240,39 @@ class BisimSAC:
         obs_t = torch.as_tensor(obs.flatten(), dtype=torch.float32,
                                 device=self.device).unsqueeze(0)
         with torch.no_grad():
-            z = self.encoder(obs_t)
-            mu, pi, _, _ = self.actor(z, compute_log_pi=False)
+            mu, pi, _, _ = self.actor(obs_t, compute_log_pi=False)
             if deterministic:
                 return mu.cpu().numpy().flatten()
             return pi.cpu().numpy().flatten()
 
     # ------------------------------------------------------------------
-    # Critic update (SAC with shared encoder, encoder gradients flow through)
+    # Critic update
     # ------------------------------------------------------------------
 
     def _update_critic(self, obs, actions, rewards, next_obs, not_dones):
         with torch.no_grad():
-            z_next = self.encoder_target(next_obs)
-            _, policy_action, log_pi, _ = self.actor(z_next)
-            q1_next = self.q1_target(z_next, policy_action)
-            q2_next = self.q2_target(z_next, policy_action)
+            _, policy_action, log_pi, _ = self.actor(next_obs)
+            q1_next = self.q1_target(next_obs, policy_action)
+            q2_next = self.q2_target(next_obs, policy_action)
             target_v = torch.min(q1_next, q2_next) - self.alpha.detach() * log_pi
             target_q = rewards + not_dones * self.gamma * target_v
 
-        z = self.encoder(obs)
-        q1_pred = self.q1(z, actions)
-        q2_pred = self.q2(z, actions)
+        q1_pred = self.q1(obs, actions)
+        q2_pred = self.q2(obs, actions)
         critic_loss = F.mse_loss(q1_pred, target_q) + F.mse_loss(q2_pred, target_q)
 
         self.critic_optimizer.zero_grad()
-        self.encoder_optimizer.zero_grad()
         critic_loss.backward()
         self.critic_optimizer.step()
-        self.encoder_optimizer.step()
 
     # ------------------------------------------------------------------
     # Actor and alpha update
     # ------------------------------------------------------------------
 
     def _update_actor_and_alpha(self, obs):
-        z = self.encoder(obs, detach=True)
-        _, pi, log_pi, log_std = self.actor(z)
-        q1_pi = self.q1(z.detach(), pi)
-        q2_pi = self.q2(z.detach(), pi)
+        _, pi, log_pi, _ = self.actor(obs)
+        q1_pi = self.q1(obs, pi)
+        q2_pi = self.q2(obs, pi)
         q_pi = torch.min(q1_pi, q2_pi)
 
         actor_loss = (self.alpha.detach() * log_pi - q_pi).mean()
@@ -457,101 +288,20 @@ class BisimSAC:
         self.alpha_optimizer.step()
 
     # ------------------------------------------------------------------
-    # Transition + reward model update
-    # ------------------------------------------------------------------
-
-    def _update_transition_reward(self, obs, actions, rewards, next_obs):
-        z = self.encoder(obs, detach=True)
-        z_next = self.encoder(next_obs, detach=True)
-
-        pred_mu, pred_sigma = self.transition_model(torch.cat([z, actions], dim=1))
-
-        # Gaussian NLL
-        diff = (pred_mu - z_next) / pred_sigma
-        transition_loss = (0.5 * diff.pow(2) + torch.log(pred_sigma)).mean()
-
-        # Reward prediction
-        pred_z_next = self.transition_model.sample_prediction(
-            torch.cat([z, actions], dim=1)
-        )
-        pred_reward = self.reward_decoder(pred_z_next)
-        reward_loss = F.mse_loss(pred_reward, rewards)
-
-        total_loss = transition_loss + reward_loss
-
-        self.transition_optimizer.zero_grad()
-        total_loss.backward()
-        self.transition_optimizer.step()
-
-        return total_loss.item()
-
-    # ------------------------------------------------------------------
-    # Bisimulation encoder loss (Equation 4)
-    # ------------------------------------------------------------------
-
-    def _update_encoder_bisim(self, obs, actions, rewards):
-        z = self.encoder(obs)
-
-        batch_size = obs.size(0)
-        perm = torch.randperm(batch_size)
-        z2 = z[perm]
-
-        with torch.no_grad():
-            pred_mu1, pred_sigma1 = self.transition_model(
-                torch.cat([z.detach(), actions], dim=1)
-            )
-            pred_mu2 = pred_mu1[perm]
-            pred_sigma2 = pred_sigma1[perm]
-            rewards2 = rewards[perm]
-
-        # ||z_i - z_j||_1
-        z_dist = F.smooth_l1_loss(z, z2, reduction='none')
-
-        # |r_i - r_j|
-        r_dist = F.smooth_l1_loss(rewards, rewards2, reduction='none')
-
-        # W_2 between predicted Gaussians (closed-form)
-        transition_dist = torch.sqrt(
-            (pred_mu1 - pred_mu2).pow(2) + (pred_sigma1 - pred_sigma2).pow(2)
-        )
-
-        bisimilarity = r_dist + self.gamma * transition_dist
-        encoder_loss = (z_dist - bisimilarity).pow(2).mean()
-
-        return encoder_loss
-
-    # ------------------------------------------------------------------
-    # Combined update (matches Algorithm 1 from the paper)
+    # Combined update
     # ------------------------------------------------------------------
 
     def _update(self, step: int):
         obs, actions, rewards, next_obs, not_dones = self.buffer.sample(self.batch_size)
 
-        # 1. Critic (encoder gradients flow through)
         self._update_critic(obs, actions, rewards, next_obs, not_dones)
 
-        # 2. Transition model + reward decoder
-        transition_loss = self._update_transition_reward(obs, actions, rewards, next_obs)
-
-        # 3. Bisimulation encoder loss
-        encoder_loss = self._update_encoder_bisim(obs, actions, rewards)
-        total_aux = self.bisim_coef * encoder_loss
-
-        self.encoder_optimizer.zero_grad()
-        self.transition_optimizer.zero_grad()
-        total_aux.backward()
-        self.encoder_optimizer.step()
-        self.transition_optimizer.step()
-
-        # 4. Actor + alpha
         if step % self.actor_update_freq == 0:
             self._update_actor_and_alpha(obs)
 
-        # 5. Soft-update targets
         if step % self.critic_target_update_freq == 0:
             soft_update_params(self.q1, self.q1_target, self.tau)
             soft_update_params(self.q2, self.q2_target, self.tau)
-            soft_update_params(self.encoder, self.encoder_target, self.encoder_tau)
 
     # ------------------------------------------------------------------
     # Training loop
@@ -574,7 +324,6 @@ class BisimSAC:
             next_obs_flat = next_obs.flatten().astype(np.float32)
             terminal = done or truncated
 
-            # Ensure action is stored as a flat array
             action_flat = np.atleast_1d(action).astype(np.float32)
             self.buffer.add(obs_flat, action_flat, reward, next_obs_flat, terminal)
             current_ep_reward += reward
@@ -607,30 +356,23 @@ class BisimSAC:
     def save(self, path: str, episode_rewards: List[float] = None):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         torch.save({
-            "encoder": self.encoder.state_dict(),
             "actor": self.actor.state_dict(),
             "q1": self.q1.state_dict(),
             "q2": self.q2.state_dict(),
-            "transition_model": self.transition_model.state_dict(),
-            "reward_decoder": self.reward_decoder.state_dict(),
             "log_alpha": self.log_alpha.detach().item(),
             "episode_rewards": episode_rewards or [],
         }, path)
-        print(f"Saved BisimSAC checkpoint to {path}")
+        print(f"Saved SAC checkpoint to {path}")
 
     @classmethod
-    def load(cls, path: str, env: gym.Env) -> "BisimSAC":
+    def load(cls, path: str, env: gym.Env) -> "SAC":
         data = torch.load(path, weights_only=False)
         agent = cls(env)
-        agent.encoder.load_state_dict(data["encoder"])
-        agent.encoder_target.load_state_dict(data["encoder"])
         agent.actor.load_state_dict(data["actor"])
         agent.q1.load_state_dict(data["q1"])
         agent.q2.load_state_dict(data["q2"])
         agent.q1_target.load_state_dict(data["q1"])
         agent.q2_target.load_state_dict(data["q2"])
-        agent.transition_model.load_state_dict(data["transition_model"])
-        agent.reward_decoder.load_state_dict(data["reward_decoder"])
         agent.log_alpha = torch.tensor(
             data["log_alpha"], dtype=torch.float32, requires_grad=True
         )
@@ -666,36 +408,31 @@ if __name__ == "__main__":
     TOTAL_TIMESTEPS = 200_000
     env = make_highway_env_continuous()
 
-    agent = BisimSAC(
+    agent = SAC(
         env,
-        feature_dim=10,
         hidden_dim=256,
         gamma=0.99,
         tau=0.005,
-        encoder_tau=0.005,
         actor_lr=1e-3,
         critic_lr=1e-3,
-        encoder_lr=1e-3,
         alpha_lr=1e-4,
-        transition_lr=1e-3,
         batch_size=128,
         buffer_capacity=100_000,
         learning_starts=1000,
         actor_update_freq=2,
         critic_target_update_freq=2,
-        bisim_coef=0.5,
         init_temperature=0.1,
         seed=42,
     )
 
-    print("Starting Continuous Bisimulation SAC training...")
+    print("Starting SAC training...")
     print(f"Obs shape: {env.observation_space.shape}")
     print(f"Action space: {env.action_space}")
     print()
 
     episode_rewards = agent.learn(total_timesteps=TOTAL_TIMESTEPS, print_every=10000)
 
-    agent.save("checkpoints/continuous_bisim_sac.pt", episode_rewards)
+    agent.save("checkpoints/sac.pt", episode_rewards)
 
     # Evaluate
     print("\nEvaluating (deterministic)...")

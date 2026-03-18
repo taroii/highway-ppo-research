@@ -1,11 +1,19 @@
 """
-Evaluate a trained PPO, ZoomingPPO, or ContextualZoomingPPO agent:
-run episodes, record videos for the best and worst episodes.
+Evaluate a trained agent and record videos for the best and worst episodes.
+
+Supported agent types:
+    ppo             - discrete PPO (src/ppo.py)
+    sac             - continuous SAC (src/sac.py)
+    bisim           - continuous BisimSAC (src/continuous_bisim.py)
+    zooming         - Zooming PPO (src/zooming_ppo.py)
+    bisim_zooming   - Bisim-guided Clustered Zooming SAC (src/bisim_zooming.py)
 
 Usage:
     python src/evaluate.py checkpoints/ppo.pt --type ppo
+    python src/evaluate.py checkpoints/sac.pt --type sac
+    python src/evaluate.py checkpoints/continuous_bisim.pt --type bisim
     python src/evaluate.py checkpoints/zooming_ppo.pt --type zooming
-    python src/evaluate.py checkpoints/contextual_zooming_ppo.pt --type contextual
+    python src/evaluate.py checkpoints/bisim_zooming.pt --type bisim_zooming
 """
 
 from __future__ import annotations
@@ -25,8 +33,10 @@ except ImportError:
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from ppo import PPO, make_highway_env, CustomRewardWrapper
+from sac import SAC
 from zooming_ppo import ZoomingPPO, make_highway_env_continuous
-from zooming_ppo_contextual import ContextualZoomingPPO, make_highway_env_continuous as make_highway_env_contextual
+from continuous_bisim import BisimSAC
+from bisim_zooming import ClusteredZoomingSAC
 
 
 def run_episode(agent, env, agent_type: str):
@@ -55,7 +65,7 @@ def make_env(agent_type: str, render_mode=None):
                 "actions_per_axis": 5,
             },
         }
-    else:  # zooming or contextual
+    else:  # sac, bisim, zooming, or bisim_zooming
         config = {
             "action": {
                 "type": "ContinuousAction",
@@ -90,8 +100,8 @@ def record_episode(agent, agent_type: str, video_folder: str, seed: int):
 def main():
     parser = argparse.ArgumentParser(description="Evaluate a trained agent and record videos")
     parser.add_argument("checkpoint", help="Path to .pt checkpoint")
-    parser.add_argument("--type", choices=["ppo", "zooming", "contextual"], required=True,
-                        help="Agent type")
+    parser.add_argument("--type", choices=["ppo", "sac", "bisim", "zooming", "bisim_zooming"],
+                        required=True, help="Agent type")
     parser.add_argument("--episodes", type=int, default=10,
                         help="Number of evaluation episodes")
     args = parser.parse_args()
@@ -102,10 +112,14 @@ def main():
     env = make_env(agent_type)
     if agent_type == "ppo":
         agent = PPO.load(args.checkpoint, env)
+    elif agent_type == "sac":
+        agent = SAC.load(args.checkpoint, env)
+    elif agent_type == "bisim":
+        agent = BisimSAC.load(args.checkpoint, env)
     elif agent_type == "zooming":
         agent = ZoomingPPO.load(args.checkpoint, env)
     else:
-        agent = ContextualZoomingPPO.load(args.checkpoint, env)
+        agent = ClusteredZoomingSAC.load(args.checkpoint, env)
 
     print(f"Loaded {agent_type} agent from {args.checkpoint}")
 

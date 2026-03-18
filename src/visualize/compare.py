@@ -1,9 +1,8 @@
 """
-Compare training curves from checkpoints (PPO, ZoomingPPO, ContextualZoomingPPO).
+Compare training curves from checkpoints.
 
 Usage:
-    python src/compare.py checkpoints/ppo.pt checkpoints/zooming_ppo.pt
-    python src/compare.py checkpoints/ppo.pt checkpoints/zooming_ppo.pt checkpoints/contextual_zooming_ppo.pt
+    python src/compare.py checkpoints/ppo.pt checkpoints/continuous_bisim.pt checkpoints/zooming_ppo.pt checkpoints/bisim_zooming.pt
     python src/compare.py checkpoints/ppo.pt checkpoints/zooming_ppo.pt --labels "PPO" "Zooming"
 """
 
@@ -17,7 +16,7 @@ from pathlib import Path
 
 
 COLORS = ["tab:blue", "tab:orange", "tab:green", "tab:red", "tab:purple"]
-DEFAULT_LABELS = ["PPO (discrete)", "Zooming PPO (adaptive)", "Contextual Zooming PPO"]
+DEFAULT_LABELS = ["PPO (discrete)", "SAC (continuous)", "BisimSAC (continuous)", "Zooming PPO (adaptive)", "Bisim Zooming SAC"]
 
 
 def rolling_mean(data, window=50):
