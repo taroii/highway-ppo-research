@@ -39,7 +39,8 @@ try:
 except ImportError:
     pass
 
-from continuous_bisim import BisimSAC, CustomRewardWrapper, MLPEncoder
+from ppo import CustomRewardWrapper
+from continuous_bisim import BisimSAC, MLPEncoder
 from zooming_ppo import ActionZooming, SplitInfo
 
 
@@ -72,6 +73,109 @@ def kmeans(data: np.ndarray, k: int, max_iters: int = 100,
     dists = np.linalg.norm(data[:, None, :] - centers[None, :, :], axis=2)
     labels = dists.argmin(axis=1)
     return centers, labels
+
+
+def silhouette_score(data: np.ndarray, labels: np.ndarray) -> float:
+    """Compute mean silhouette score (no sklearn dependency).
+
+    For each sample, silhouette = (b - a) / max(a, b) where
+      a = mean intra-cluster distance,
+      b = mean distance to nearest other cluster.
+
+    To keep this fast on large buffers, we subsample if n > 5000.
+    """
+    n = data.shape[0]
+    if n > 5000:
+        rng = np.random.default_rng(0)
+        idx = rng.choice(n, 5000, replace=False)
+        data = data[idx]
+        labels = labels[idx]
+        n = 5000
+
+    unique_labels = np.unique(labels)
+    if len(unique_labels) < 2:
+        return -1.0
+
+    scores = np.zeros(n)
+    for i in range(n):
+        same = data[labels == labels[i]]
+        if len(same) > 1:
+            a = np.mean(np.linalg.norm(same - data[i], axis=1))
+        else:
+            a = 0.0
+
+        b = np.inf
+        for lbl in unique_labels:
+            if lbl == labels[i]:
+                continue
+            other = data[labels == lbl]
+            b = min(b, np.mean(np.linalg.norm(other - data[i], axis=1)))
+
+        scores[i] = (b - a) / max(a, b) if max(a, b) > 0 else 0.0
+
+    return float(np.mean(scores))
+
+
+def analyze_feature_dim(all_z: np.ndarray, feature_dim: int):
+    """Analyze variance spectrum of encoder outputs to diagnose feature_dim.
+
+    Prints per-dimension explained variance ratio and warns if the
+    current feature_dim looks too large (wasted dims) or too small
+    (all dims are saturated).
+    """
+    # Center the data
+    z_centered = all_z - all_z.mean(axis=0)
+    # Covariance eigenvalues (descending)
+    cov = np.cov(z_centered, rowvar=False)
+    eigenvalues = np.linalg.eigvalsh(cov)[::-1]  # descending
+    total_var = eigenvalues.sum()
+    ratios = eigenvalues / total_var if total_var > 0 else eigenvalues
+
+    print(f"\n  Variance spectrum (feature_dim={feature_dim}):")
+    cumulative = 0.0
+    for i, (ev, r) in enumerate(zip(eigenvalues, ratios)):
+        cumulative += r
+        bar = "#" * int(r * 50)
+        print(f"    dim {i:>2d}: var={ev:.4f}  ratio={r:.3f}  cum={cumulative:.3f}  {bar}")
+
+    # Find how many dims capture 95% of variance
+    cum_ratios = np.cumsum(ratios)
+    dims_95 = int(np.searchsorted(cum_ratios, 0.95)) + 1
+    dims_99 = int(np.searchsorted(cum_ratios, 0.99)) + 1
+
+    print(f"\n  Dims for 95% variance: {dims_95}/{feature_dim}")
+    print(f"  Dims for 99% variance: {dims_99}/{feature_dim}")
+
+    if dims_95 < feature_dim * 0.5:
+        print(f"  WARNING: Only {dims_95} dims needed for 95% variance. "
+              f"feature_dim={feature_dim} may be too large — "
+              f"consider reducing to ~{max(dims_99, dims_95 + 1)}.")
+    elif dims_95 == feature_dim:
+        print(f"  WARNING: All {feature_dim} dims are needed for 95% variance. "
+              f"feature_dim may be too small — consider increasing it.")
+    else:
+        print(f"  feature_dim={feature_dim} looks reasonable.")
+
+
+def select_n_clusters(all_z: np.ndarray, k_range: range,
+                      seed: int = 0) -> int:
+    """Try each k in k_range, return the one with highest silhouette score."""
+    print(f"\n  Evaluating k in {list(k_range)}:")
+    best_k = k_range[0]
+    best_score = -1.0
+
+    for k in k_range:
+        centers, labels = kmeans(all_z, k, seed=seed)
+        score = silhouette_score(all_z, labels)
+        marker = ""
+        if score > best_score:
+            best_score = score
+            best_k = k
+            marker = "  <-- best so far"
+        print(f"    k={k}: silhouette={score:.4f}{marker}")
+
+    print(f"\n  Selected k={best_k} (silhouette={best_score:.4f})")
+    return best_k
 
 
 # ---------------------------------------------------------------------------
@@ -706,10 +810,10 @@ if __name__ == "__main__":
     BISIM_TIMESTEPS = 100_000
     ZOOMING_TIMESTEPS = 100_000
     FEATURE_DIM = 10
-    N_CLUSTERS = 4
+    K_RANGE = range(2, 9)  # candidates for N_CLUSTERS; best chosen by silhouette
     SEED = 42
 
-    # ===== Phase 1: Train BisimSAC to learn encoder φ =====
+    # ===== Phase 1: Train BisimSAC to learn encoder varphi =====
     print("=" * 60)
     print("Phase 1: Training BisimSAC encoder")
     print("=" * 60)
@@ -737,10 +841,10 @@ if __name__ == "__main__":
     )
     bisim_agent.save("checkpoints/bisim_phase1.pt", bisim_rewards)
 
-    # ===== Phase 2: Cluster latent space =====
+    # ===== Phase 1.5: Analyze encoder representation =====
     print()
     print("=" * 60)
-    print("Phase 2: Clustering latent space with k-means")
+    print("Phase 1.5: Analyzing encoder & selecting N_CLUSTERS")
     print("=" * 60)
 
     encoder = bisim_agent.encoder
@@ -758,6 +862,18 @@ if __name__ == "__main__":
         all_z = np.concatenate(zs, axis=0)
 
     print(f"Encoded {n_samples} observations -> latent shape {all_z.shape}")
+
+    # Diagnose feature_dim
+    analyze_feature_dim(all_z, FEATURE_DIM)
+
+    # Select best N_CLUSTERS via silhouette score
+    N_CLUSTERS = select_n_clusters(all_z, K_RANGE, seed=SEED)
+
+    # ===== Phase 2: Cluster latent space =====
+    print()
+    print("=" * 60)
+    print(f"Phase 2: Clustering latent space with k-means (k={N_CLUSTERS})")
+    print("=" * 60)
 
     centers, labels = kmeans(all_z, N_CLUSTERS, seed=SEED)
 

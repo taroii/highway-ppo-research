@@ -15,7 +15,6 @@ Key adaptations from the original DBC codebase:
 
 from __future__ import annotations
 
-import math
 import random
 from pathlib import Path
 from typing import List
@@ -31,52 +30,7 @@ try:
 except ImportError:
     pass
 
-
-# ---------------------------------------------------------------------------
-# Reward wrapper (same as ppo.py)
-# ---------------------------------------------------------------------------
-
-class CustomRewardWrapper(gym.Wrapper):
-    """Custom reward computed directly from vehicle state."""
-
-    def __init__(self, env):
-        super().__init__(env)
-        self._last_x = None
-
-    def reset(self, **kwargs):
-        obs, info = self.env.reset(**kwargs)
-        self._last_x = self.env.unwrapped.vehicle.position[0]
-        return obs, info
-
-    def step(self, action):
-        obs, _, terminated, truncated, info = self.env.step(action)
-        vehicle = self.env.unwrapped.vehicle
-        road = self.env.unwrapped.road
-
-        crashed = float(vehicle.crashed)
-        on_road = float(vehicle.on_road)
-        speed = float(np.clip((vehicle.speed - 20) / 10, 0, 1))
-
-        neighbours = road.network.all_side_lanes(vehicle.lane_index)
-        right_lane = vehicle.lane_index[2] / max(len(neighbours) - 1, 1)
-
-        delta_x = vehicle.position[0] - self._last_x
-        self._last_x = vehicle.position[0]
-        progress = delta_x / 30
-
-        heading_align = math.cos(vehicle.heading)
-        steering = abs(vehicle.action["steering"]) / (np.pi / 4)
-
-        raw = (
-            -1.0 * crashed
-            + 0.4 * speed
-            + 0.1 * right_lane
-            + 0.2 * progress
-            + 0.1 * heading_align
-            - 0.1 * steering
-        )
-        reward = (raw - (-1.5)) / (0.8 - (-1.5)) * on_road
-        return obs, reward, terminated, truncated, info
+from ppo import CustomRewardWrapper  # noqa: F401 — single source of truth
 
 
 # ---------------------------------------------------------------------------
