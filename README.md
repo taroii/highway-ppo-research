@@ -31,3 +31,32 @@ All agents use `highway-fast-v0` with steering-only control (`longitudinal: Fals
 - Bonus for optimism paper (https://arxiv.org/abs/1806.03335)
 - Bisimulation paper (https://arxiv.org/abs/2006.10742)
 - Zooming paper (https://arxiv.org/abs/2006.10875)
+
+## Reward Function
+
+#### Racetrack
+
+Environment: `racetrack-v0` with `ContinuousAction` (steering only, no acceleration).
+
+**Per-step reward** (built-in, no custom wrapper):
+
+```
+lane_centering = 1 / (1 + 4 * lateral_offset²)   # 1.0 when perfectly centered, decays with offset
+action_penalty = -0.3 * |steering|                 # penalizes large steering inputs
+collision      = -1.0 * crashed                    # -1.0 on crash, else 0.0
+
+raw = lane_centering + action_penalty + collision
+reward = lmap(raw, [-1, 1], [0, 1]) * on_road
+```
+
+- `on_road` multiplier zeros out reward if the vehicle leaves the road
+- Best case per step: **1.0** (centered, no steering, no crash)
+- Worst case per step: **0.0** (crash or off-road)
+
+**Episode length:**
+
+- `duration=300` is in simulated seconds, not steps
+- Agent acts at `policy_frequency=5` Hz → `self.time += 0.2` per step
+- Max steps per episode: **300 / 0.2 = 1500**
+- Theoretical max cumulative reward: **~1500**
+- Episodes terminate early on crash or going off-road (`terminate_off_road=True`)
