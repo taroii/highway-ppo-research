@@ -10,6 +10,7 @@ Supported agent types:
     racetrack_ppo   - discrete PPO on racetrack (src/racetrack/ppo_racetrack.py)
     racetrack_sac   - continuous SAC on racetrack (src/racetrack/sac_racetrack.py)
     racetrack_zooming - Zooming PPO on racetrack (src/racetrack/zooming_ppo_racetrack.py)
+    racetrack_bisim - BisimSAC on racetrack (src/racetrack/bisim_racetrack.py)
 
 Usage:
     python src/visualize/evaluate.py checkpoints/ppo.pt --type ppo
@@ -20,6 +21,7 @@ Usage:
     python src/visualize/evaluate.py checkpoints/ppo_racetrack.pt --type racetrack_ppo
     python src/visualize/evaluate.py checkpoints/sac_racetrack.pt --type racetrack_sac
     python src/visualize/evaluate.py checkpoints/zooming_ppo_racetrack.pt --type racetrack_zooming
+    python src/visualize/evaluate.py checkpoints/bisim_sac_racetrack.pt --type racetrack_bisim
 """
 
 from __future__ import annotations
@@ -64,7 +66,7 @@ def run_episode(agent, env, agent_type: str):
     return total_reward
 
 
-RACETRACK_TYPES = {"racetrack_ppo", "racetrack_sac", "racetrack_zooming"}
+RACETRACK_TYPES = {"racetrack_ppo", "racetrack_sac", "racetrack_zooming", "racetrack_bisim"}
 
 
 def make_env(agent_type: str, render_mode=None):
@@ -109,7 +111,7 @@ def _make_racetrack_env(agent_type: str, render_mode=None):
                 "actions_per_axis": 5,
             },
         }
-    else:  # racetrack_sac, racetrack_zooming
+    else:  # racetrack_sac, racetrack_zooming, racetrack_bisim
         config = {
             "action": {
                 "type": "ContinuousAction",
@@ -130,10 +132,16 @@ def record_episode(agent, agent_type: str, video_folder: str, seed: int):
     env = RecordVideo(env, video_folder=video_folder, episode_trigger=lambda e: True)
 
     obs, _ = env.reset(seed=seed)
-    # Ensure the viewer is initialized before setting the video wrapper,
-    # so that _automatic_rendering can capture intermediate simulation frames.
-    env.unwrapped.render()
-    env.unwrapped.set_record_video_wrapper(env)
+    # Ensure the underlying highway_env renders offscreen (no pygame window).
+    # gymnasium may intercept render_mode via wrappers, leaving the base env
+    # with None, and highway_env needs offscreen_rendering=True to avoid
+    # opening a display window.
+    inner = env.unwrapped
+    if inner.render_mode is None:
+        inner.render_mode = "rgb_array"
+    inner.config["offscreen_rendering"] = True
+    inner.render()
+    inner.set_record_video_wrapper(env)
     total_reward = 0.0
     done = truncated = False
     while not (done or truncated):
@@ -150,6 +158,7 @@ def main():
     parser.add_argument("--type", choices=[
                             "ppo", "sac", "bisim", "zooming", "bisim_zooming",
                             "racetrack_ppo", "racetrack_sac", "racetrack_zooming",
+                            "racetrack_bisim",
                         ],
                         required=True, help="Agent type")
     parser.add_argument("--episodes", type=int, default=10,
@@ -164,7 +173,7 @@ def main():
         agent = PPO.load(args.checkpoint, env)
     elif agent_type in ("sac", "racetrack_sac"):
         agent = SAC.load(args.checkpoint, env)
-    elif agent_type == "bisim":
+    elif agent_type in ("bisim", "racetrack_bisim"):
         agent = BisimSAC.load(args.checkpoint, env)
     elif agent_type in ("zooming", "racetrack_zooming"):
         agent = ZoomingPPO.load(args.checkpoint, env)

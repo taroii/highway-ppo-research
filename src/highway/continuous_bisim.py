@@ -80,7 +80,7 @@ class MLPEncoder(nn.Module):
 # Gaussian actor (tanh-squashed, following original SAC / DBC)
 # ---------------------------------------------------------------------------
 
-LOG_STD_MIN = -5
+LOG_STD_MIN = -10
 LOG_STD_MAX = 2
 
 
@@ -567,13 +567,20 @@ class BisimSAC:
             "reward_decoder": self.reward_decoder.state_dict(),
             "log_alpha": self.log_alpha.detach().item(),
             "episode_rewards": episode_rewards or [],
+            "feature_dim": self.encoder.feature_dim,
+            "hidden_dim": self.encoder.net[0].out_features,
         }, path)
         print(f"Saved BisimSAC checkpoint to {path}")
 
     @classmethod
-    def load(cls, path: str, env: gym.Env) -> "BisimSAC":
+    def load(cls, path: str, env: gym.Env, **kwargs) -> "BisimSAC":
         data = torch.load(path, weights_only=False)
-        agent = cls(env)
+        # Restore architecture hyperparams from checkpoint if available
+        if "feature_dim" in data:
+            kwargs.setdefault("feature_dim", data["feature_dim"])
+        if "hidden_dim" in data:
+            kwargs.setdefault("hidden_dim", data["hidden_dim"])
+        agent = cls(env, **kwargs)
         agent.encoder.load_state_dict(data["encoder"])
         agent.encoder_target.load_state_dict(data["encoder"])
         agent.actor.load_state_dict(data["actor"])

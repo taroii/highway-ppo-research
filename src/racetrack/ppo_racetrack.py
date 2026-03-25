@@ -54,7 +54,7 @@ def make_racetrack_env():
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    TOTAL_TIMESTEPS = 500_000
+    TOTAL_TIMESTEPS = 50_000
     env = make_racetrack_env()
 
     agent = PPO(
