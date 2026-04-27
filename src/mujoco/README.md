@@ -63,7 +63,8 @@ Output checkpoints to `checkpoints/mujoco/`, plots to `plots/mujoco/`.
 
 - Which subset of MuJoCo tasks to evaluate? Suggested starting point:
   HalfCheetah (smooth, dense reward), Hopper (sparser, easier to crash —
-  may show the largest zooming benefit), Walker2d.
+  may show the largest zooming benefit), Walker2d. 
+  TARO's ANSWSER: Use Ant or Humanoid. We only need one to show benefit on high dimensional action space.
 - Hyperparameters: SAC ones from `src/highway/sac.py` are tuned for
   racetrack (gamma=0.9, short episodes). MuJoCo typically wants
   gamma=0.99 and longer training (~1M steps).

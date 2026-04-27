@@ -51,7 +51,7 @@ Output checkpoints to `checkpoints/dmcs/`, plots to `plots/dmcs/`.
 
 - Task selection. Cartpole-swingup is small and fast (good for sweep
   iteration); cheetah-run and walker-walk are the classic DMCS
-  benchmarks.
+  benchmarks. TARO's Notes: these three tasks are enough.
 - Pixel vs feature observations. DMCS exposes both; feature obs are
   lower-dim and faster.
 - Episode length. DMCS episodes are 1000 steps by default; consider
