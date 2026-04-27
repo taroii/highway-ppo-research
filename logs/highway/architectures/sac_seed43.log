@@ -1,0 +1,37 @@
+C:\Users\Polar\miniconda3\envs\highway\lib\site-packages\pygame\pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+SAC on racetrack-v0  seed=43  steps=150000
+[   5000/150000]  ep= 487  reward(last50)=   4.55  alpha=0.1000
+[  10000/150000]  ep= 514  reward(last50)=  80.36  alpha=0.0829
+[  15000/150000]  ep= 520  reward(last50)= 162.08  alpha=0.0686
+[  20000/150000]  ep= 528  reward(last50)= 249.56  alpha=0.0570
+[  25000/150000]  ep= 543  reward(last50)= 346.43  alpha=0.0481
+[  30000/150000]  ep= 548  reward(last50)= 425.24  alpha=0.0419
+[  35000/150000]  ep= 556  reward(last50)= 467.44  alpha=0.0391
+[  40000/150000]  ep= 570  reward(last50)= 463.27  alpha=0.0386
+[  45000/150000]  ep= 577  reward(last50)= 468.62  alpha=0.0391
+[  50000/150000]  ep= 586  reward(last50)= 499.13  alpha=0.0397
+[  55000/150000]  ep= 594  reward(last50)= 554.14  alpha=0.0401
+[  60000/150000]  ep= 605  reward(last50)= 444.74  alpha=0.0400
+[  65000/150000]  ep= 612  reward(last50)= 473.40  alpha=0.0403
+[  70000/150000]  ep= 619  reward(last50)= 555.55  alpha=0.0403
+[  75000/150000]  ep= 628  reward(last50)= 553.82  alpha=0.0406
+[  80000/150000]  ep= 634  reward(last50)= 580.01  alpha=0.0404
+[  85000/150000]  ep= 639  reward(last50)= 600.74  alpha=0.0407
+[  90000/150000]  ep= 647  reward(last50)= 576.49  alpha=0.0406
+[  95000/150000]  ep= 655  reward(last50)= 660.78  alpha=0.0404
+[ 100000/150000]  ep= 661  reward(last50)= 632.19  alpha=0.0406
+[ 105000/150000]  ep= 667  reward(last50)= 683.77  alpha=0.0403
+[ 110000/150000]  ep= 673  reward(last50)= 684.79  alpha=0.0404
+[ 115000/150000]  ep= 679  reward(last50)= 732.51  alpha=0.0401
+[ 120000/150000]  ep= 688  reward(last50)= 682.85  alpha=0.0401
+[ 125000/150000]  ep= 694  reward(last50)= 683.78  alpha=0.0402
+[ 130000/150000]  ep= 710  reward(last50)= 575.93  alpha=0.0402
+[ 135000/150000]  ep= 714  reward(last50)= 603.03  alpha=0.0408
+[ 140000/150000]  ep= 718  reward(last50)= 629.61  alpha=0.0405
+[ 145000/150000]  ep= 723  reward(last50)= 655.43  alpha=0.0403
+[ 150000/150000]  ep= 727  reward(last50)= 682.89  alpha=0.0401
+Saved SAC checkpoint to checkpoints/highway/architectures/sac_seed43.pt
+
+Evaluating (deterministic)...
+Eval(20): mean=610.90  std=670.21

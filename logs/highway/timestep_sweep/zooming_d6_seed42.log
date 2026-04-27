@@ -1,0 +1,128 @@
+C:\Users\Polar\miniconda3\envs\highway\lib\site-packages\pygame\pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Zooming DQN on racetrack-v0  init_depth=3  max_depth=6  seed=42  steps=600000
+[   5000/600000]  ep= 285  reward(last50)=  39.97  n_actions=8  total_splits=0
+[  10000/600000]  ep= 290  reward(last50)= 116.19  n_actions=8  total_splits=0
+[  15000/600000]  ep= 293  reward(last50)= 195.07  n_actions=8  total_splits=0
+[  20000/600000]  ep= 303  reward(last50)= 308.37  n_actions=8  total_splits=0
+[  25000/600000]  ep= 312  reward(last50)= 396.25  n_actions=8  total_splits=0
+[  30000/600000]  ep= 316  reward(last50)= 470.82  n_actions=8  total_splits=0
+[  35000/600000]  ep= 322  reward(last50)= 570.08  n_actions=8  total_splits=0
+[  40000/600000]  ep= 327  reward(last50)= 653.67  n_actions=8  total_splits=0
+[  45000/600000]  ep= 330  reward(last50)= 731.42  n_actions=8  total_splits=0
+[  50000/600000]  ep= 338  reward(last50)= 766.01  n_actions=8  total_splits=0
+[  55000/600000]  ep= 344  reward(last50)= 718.99  n_actions=8  total_splits=0
+[  60000/600000]  ep= 351  reward(last50)= 733.89  n_actions=8  total_splits=0
+[  65000/600000]  ep= 358  reward(last50)= 744.48  n_actions=8  total_splits=0
+[  70000/600000]  ep= 363  reward(last50)= 772.30  n_actions=8  total_splits=0
+[  75000/600000]  ep= 368  reward(last50)= 804.06  n_actions=8  total_splits=0
+[  80000/600000]  ep= 371  reward(last50)= 840.00  n_actions=8  total_splits=0
+[  85000/600000]  ep= 378  reward(last50)= 785.63  n_actions=8  total_splits=0
+[  90000/600000]  ep= 383  reward(last50)= 811.66  n_actions=8  total_splits=0
+[  95000/600000]  ep= 387  reward(last50)= 839.42  n_actions=8  total_splits=0
+[ 100000/600000]  ep= 398  reward(last50)= 779.27  n_actions=8  total_splits=0
+[ 105000/600000]  ep= 402  reward(last50)= 803.32  n_actions=8  total_splits=0
+[ 110000/600000]  ep= 409  reward(last50)= 793.04  n_actions=8  total_splits=0
+[ 115000/600000]  ep= 415  reward(last50)= 772.61  n_actions=8  total_splits=0
+[ 120000/600000]  ep= 420  reward(last50)= 774.54  n_actions=15  total_splits=7
+[ 125000/600000]  ep= 699  reward(last50)=   5.90  n_actions=22  total_splits=14
+[ 130000/600000]  ep=1006  reward(last50)=  23.30  n_actions=27  total_splits=19
+[ 135000/600000]  ep=1154  reward(last50)=  19.39  n_actions=30  total_splits=22
+[ 140000/600000]  ep=1282  reward(last50)=  31.37  n_actions=33  total_splits=25
+[ 145000/600000]  ep=1690  reward(last50)=   9.02  n_actions=34  total_splits=26
+[ 150000/600000]  ep=2010  reward(last50)=  16.47  n_actions=38  total_splits=30
+[ 155000/600000]  ep=2224  reward(last50)=  14.89  n_actions=42  total_splits=34
+[ 160000/600000]  ep=2475  reward(last50)=  11.34  n_actions=45  total_splits=37
+[ 165000/600000]  ep=2689  reward(last50)=  13.73  n_actions=45  total_splits=37
+[ 170000/600000]  ep=2894  reward(last50)=  15.56  n_actions=45  total_splits=37
+[ 175000/600000]  ep=3128  reward(last50)=  13.62  n_actions=47  total_splits=39
+[ 180000/600000]  ep=3424  reward(last50)=  11.92  n_actions=49  total_splits=41
+[ 185000/600000]  ep=3652  reward(last50)=   9.52  n_actions=50  total_splits=42
+[ 190000/600000]  ep=4084  reward(last50)=   6.54  n_actions=56  total_splits=48
+[ 195000/600000]  ep=4443  reward(last50)=  11.40  n_actions=57  total_splits=49
+[ 200000/600000]  ep=4651  reward(last50)=  14.44  n_actions=57  total_splits=49
+[ 205000/600000]  ep=4930  reward(last50)=   7.14  n_actions=58  total_splits=50
+[ 210000/600000]  ep=5265  reward(last50)=   9.06  n_actions=60  total_splits=52
+[ 215000/600000]  ep=5544  reward(last50)=  13.44  n_actions=61  total_splits=53
+[ 220000/600000]  ep=5875  reward(last50)=   9.52  n_actions=63  total_splits=55
+[ 225000/600000]  ep=6119  reward(last50)=  16.00  n_actions=63  total_splits=55
+[ 230000/600000]  ep=6295  reward(last50)=  19.94  n_actions=63  total_splits=55
+[ 235000/600000]  ep=6459  reward(last50)=  21.54  n_actions=63  total_splits=55
+[ 240000/600000]  ep=6622  reward(last50)=  18.12  n_actions=63  total_splits=55
+[ 245000/600000]  ep=6782  reward(last50)=  24.01  n_actions=63  total_splits=55
+[ 250000/600000]  ep=6935  reward(last50)=  24.25  n_actions=63  total_splits=55
+[ 255000/600000]  ep=7094  reward(last50)=  24.70  n_actions=63  total_splits=55
+[ 260000/600000]  ep=7362  reward(last50)=   6.43  n_actions=64  total_splits=56
+[ 265000/600000]  ep=7651  reward(last50)=  13.61  n_actions=64  total_splits=56
+[ 270000/600000]  ep=7844  reward(last50)=  19.29  n_actions=64  total_splits=56
+[ 275000/600000]  ep=8025  reward(last50)=  22.54  n_actions=64  total_splits=56
+[ 280000/600000]  ep=8175  reward(last50)=  21.91  n_actions=64  total_splits=56
+[ 285000/600000]  ep=8320  reward(last50)=  26.10  n_actions=64  total_splits=56
+[ 290000/600000]  ep=8452  reward(last50)=  28.25  n_actions=64  total_splits=56
+[ 295000/600000]  ep=8564  reward(last50)=  38.84  n_actions=64  total_splits=56
+[ 300000/600000]  ep=8664  reward(last50)=  45.94  n_actions=64  total_splits=56
+[ 305000/600000]  ep=8749  reward(last50)=  43.85  n_actions=64  total_splits=56
+[ 310000/600000]  ep=8843  reward(last50)=  48.62  n_actions=64  total_splits=56
+[ 315000/600000]  ep=8923  reward(last50)=  43.91  n_actions=64  total_splits=56
+[ 320000/600000]  ep=8989  reward(last50)=  64.82  n_actions=64  total_splits=56
+[ 325000/600000]  ep=9051  reward(last50)=  62.58  n_actions=64  total_splits=56
+[ 330000/600000]  ep=9096  reward(last50)=  88.49  n_actions=64  total_splits=56
+[ 335000/600000]  ep=9146  reward(last50)=  81.19  n_actions=64  total_splits=56
+[ 340000/600000]  ep=9182  reward(last50)= 103.87  n_actions=64  total_splits=56
+[ 345000/600000]  ep=9208  reward(last50)= 139.59  n_actions=64  total_splits=56
+[ 350000/600000]  ep=9236  reward(last50)= 164.16  n_actions=64  total_splits=56
+[ 355000/600000]  ep=9247  reward(last50)= 186.15  n_actions=64  total_splits=56
+[ 360000/600000]  ep=9268  reward(last50)= 232.09  n_actions=64  total_splits=56
+[ 365000/600000]  ep=9282  reward(last50)= 251.99  n_actions=64  total_splits=56
+[ 370000/600000]  ep=9293  reward(last50)= 303.72  n_actions=64  total_splits=56
+[ 375000/600000]  ep=9308  reward(last50)= 291.80  n_actions=64  total_splits=56
+[ 380000/600000]  ep=9319  reward(last50)= 344.08  n_actions=64  total_splits=56
+[ 385000/600000]  ep=9326  reward(last50)= 421.20  n_actions=64  total_splits=56
+[ 390000/600000]  ep=9342  reward(last50)= 363.02  n_actions=64  total_splits=56
+[ 395000/600000]  ep=9358  reward(last50)= 370.02  n_actions=64  total_splits=56
+[ 400000/600000]  ep=9366  reward(last50)= 412.19  n_actions=64  total_splits=56
+[ 405000/600000]  ep=9382  reward(last50)= 327.56  n_actions=64  total_splits=56
+[ 410000/600000]  ep=9390  reward(last50)= 352.01  n_actions=64  total_splits=56
+[ 415000/600000]  ep=9400  reward(last50)= 429.37  n_actions=64  total_splits=56
+[ 420000/600000]  ep=9409  reward(last50)= 428.14  n_actions=64  total_splits=56
+[ 425000/600000]  ep=9423  reward(last50)= 398.43  n_actions=64  total_splits=56
+[ 430000/600000]  ep=9438  reward(last50)= 408.15  n_actions=64  total_splits=56
+[ 435000/600000]  ep=9445  reward(last50)= 412.62  n_actions=64  total_splits=56
+[ 440000/600000]  ep=9453  reward(last50)= 418.21  n_actions=64  total_splits=56
+[ 445000/600000]  ep=9462  reward(last50)= 447.85  n_actions=64  total_splits=56
+[ 450000/600000]  ep=9473  reward(last50)= 466.16  n_actions=64  total_splits=56
+[ 455000/600000]  ep=9481  reward(last50)= 517.61  n_actions=64  total_splits=56
+[ 460000/600000]  ep=9490  reward(last50)= 536.95  n_actions=64  total_splits=56
+[ 465000/600000]  ep=9503  reward(last50)= 453.40  n_actions=64  total_splits=56
+[ 470000/600000]  ep=9512  reward(last50)= 447.53  n_actions=64  total_splits=56
+[ 475000/600000]  ep=9520  reward(last50)= 477.88  n_actions=64  total_splits=56
+[ 480000/600000]  ep=9529  reward(last50)= 480.58  n_actions=64  total_splits=56
+[ 485000/600000]  ep=9537  reward(last50)= 483.59  n_actions=64  total_splits=56
+[ 490000/600000]  ep=9544  reward(last50)= 535.60  n_actions=64  total_splits=56
+[ 495000/600000]  ep=9557  reward(last50)= 510.96  n_actions=64  total_splits=56
+[ 500000/600000]  ep=9574  reward(last50)= 399.99  n_actions=64  total_splits=56
+[ 505000/600000]  ep=9587  reward(last50)= 392.19  n_actions=64  total_splits=56
+[ 510000/600000]  ep=9616  reward(last50)= 226.32  n_actions=64  total_splits=56
+[ 515000/600000]  ep=9625  reward(last50)= 226.94  n_actions=64  total_splits=56
+[ 520000/600000]  ep=9635  reward(last50)= 258.79  n_actions=64  total_splits=56
+[ 525000/600000]  ep=9648  reward(last50)= 287.11  n_actions=64  total_splits=56
+[ 530000/600000]  ep=9663  reward(last50)= 376.77  n_actions=64  total_splits=56
+[ 535000/600000]  ep=9669  reward(last50)= 429.36  n_actions=64  total_splits=56
+[ 540000/600000]  ep=9685  reward(last50)= 399.97  n_actions=64  total_splits=56
+[ 545000/600000]  ep=9698  reward(last50)= 376.75  n_actions=64  total_splits=56
+[ 550000/600000]  ep=9706  reward(last50)= 397.97  n_actions=64  total_splits=56
+[ 555000/600000]  ep=9722  reward(last50)= 321.77  n_actions=64  total_splits=56
+[ 560000/600000]  ep=9729  reward(last50)= 375.96  n_actions=64  total_splits=56
+[ 565000/600000]  ep=9737  reward(last50)= 430.39  n_actions=64  total_splits=56
+[ 570000/600000]  ep=9755  reward(last50)= 386.95  n_actions=64  total_splits=56
+[ 575000/600000]  ep=9760  reward(last50)= 439.96  n_actions=64  total_splits=56
+[ 580000/600000]  ep=9766  reward(last50)= 468.46  n_actions=64  total_splits=56
+[ 585000/600000]  ep=9772  reward(last50)= 547.97  n_actions=64  total_splits=56
+[ 590000/600000]  ep=9782  reward(last50)= 515.27  n_actions=64  total_splits=56
+[ 595000/600000]  ep=9789  reward(last50)= 517.12  n_actions=64  total_splits=56
+[ 600000/600000]  ep=9798  reward(last50)= 599.69  n_actions=64  total_splits=56
+Saved DQN checkpoint to checkpoints\highway\timestep_sweep\zooming_d6_seed42.pt
+
+Evaluating (deterministic)...
+Eval(20): mean=221.31  std=403.97
+Final cubes: 64  total_splits: 56

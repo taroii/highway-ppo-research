@@ -43,3 +43,6 @@ Thumbs.db
 
 # Papers
 papers
+
+# checkpoints
+checkpoints/

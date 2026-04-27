@@ -1,0 +1,38 @@
+C:\Users\Polar\miniconda3\envs\highway\lib\site-packages\pygame\pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Zooming DQN on racetrack-v0  init_depth=3  max_depth=4  seed=42  steps=150000
+[   5000/150000]  ep= 290  reward(last50)=  39.38  n_actions=8  total_splits=0
+[  10000/150000]  ep= 299  reward(last50)= 114.68  n_actions=8  total_splits=0
+[  15000/150000]  ep= 304  reward(last50)= 198.43  n_actions=8  total_splits=0
+[  20000/150000]  ep= 312  reward(last50)= 310.37  n_actions=8  total_splits=0
+[  25000/150000]  ep= 317  reward(last50)= 396.35  n_actions=8  total_splits=0
+[  30000/150000]  ep= 325  reward(last50)= 483.10  n_actions=15  total_splits=7
+[  35000/150000]  ep= 549  reward(last50)=  28.11  n_actions=16  total_splits=8
+[  40000/150000]  ep= 614  reward(last50)=  55.60  n_actions=16  total_splits=8
+[  45000/150000]  ep= 637  reward(last50)=  93.67  n_actions=16  total_splits=8
+[  50000/150000]  ep= 656  reward(last50)= 153.68  n_actions=16  total_splits=8
+[  55000/150000]  ep= 669  reward(last50)= 219.02  n_actions=16  total_splits=8
+[  60000/150000]  ep= 674  reward(last50)= 268.12  n_actions=16  total_splits=8
+[  65000/150000]  ep= 687  reward(last50)= 344.65  n_actions=16  total_splits=8
+[  70000/150000]  ep= 694  reward(last50)= 384.91  n_actions=16  total_splits=8
+[  75000/150000]  ep= 699  reward(last50)= 428.74  n_actions=16  total_splits=8
+[  80000/150000]  ep= 709  reward(last50)= 470.60  n_actions=16  total_splits=8
+[  85000/150000]  ep= 718  reward(last50)= 529.77  n_actions=16  total_splits=8
+[  90000/150000]  ep= 728  reward(last50)= 482.22  n_actions=16  total_splits=8
+[  95000/150000]  ep= 740  reward(last50)= 514.74  n_actions=16  total_splits=8
+[ 100000/150000]  ep= 745  reward(last50)= 494.73  n_actions=16  total_splits=8
+[ 105000/150000]  ep= 759  reward(last50)= 471.46  n_actions=16  total_splits=8
+[ 110000/150000]  ep= 766  reward(last50)= 472.49  n_actions=16  total_splits=8
+[ 115000/150000]  ep= 773  reward(last50)= 503.40  n_actions=16  total_splits=8
+[ 120000/150000]  ep= 780  reward(last50)= 530.94  n_actions=16  total_splits=8
+[ 125000/150000]  ep= 788  reward(last50)= 577.73  n_actions=16  total_splits=8
+[ 130000/150000]  ep= 793  reward(last50)= 555.21  n_actions=16  total_splits=8
+[ 135000/150000]  ep= 799  reward(last50)= 603.35  n_actions=16  total_splits=8
+[ 140000/150000]  ep= 805  reward(last50)= 681.45  n_actions=16  total_splits=8
+[ 145000/150000]  ep= 809  reward(last50)= 728.78  n_actions=16  total_splits=8
+[ 150000/150000]  ep= 816  reward(last50)= 738.72  n_actions=16  total_splits=8
+Saved DQN checkpoint to checkpoints/highway/architectures/zooming_d4_seed42.pt
+
+Evaluating (deterministic)...
+Eval(20): mean=595.75  std=654.80
+Final cubes: 16  total_splits: 8
