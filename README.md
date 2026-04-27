@@ -1,6 +1,6 @@
 # Adaptive Discretization for Policy Optimization
 
-Research project exploring theoretically-grounded adaptive action space discretization for policy gradient methods on MDPs.
+Research project exploring theoretically-grounded adaptive action space discretization for continuous MDPs.
 
 ## Installation
 
