@@ -5,3 +5,4 @@ ipywidgets
 stable-baselines3
 tensorboard
 gymnasium[other]
+shimmy[dm-control]
