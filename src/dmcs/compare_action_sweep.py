@@ -1,26 +1,26 @@
 """
-Plot the action-budget sweep: final reward vs action budget N for
+Plot the DMCS action-budget sweep: final reward vs action budget N for
 uniform and zooming, aggregated across seeds.
 
 The hypothesis the sweep tests is that **zooming's advantage over
-uniform grows with N** because uniform pays the full N-output Q-learning
-cost from step 1 while zooming bootstraps from a coarser grid (init=8
-cubes) and only refines where UCB-driven plays concentrate.
+uniform grows with N** because uniform pays the full ``n * da``-output
+Q-learning cost from step 1 while zooming bootstraps from a coarser
+grid (init=2 bins per axis at ``init_depth=1``) and only refines where
+UCB-driven plays concentrate.
 
 Caveat — at fixed training budget, large N may look bad here purely
-because a bigger bandit needs more samples; the companion
-``compare_timestep_sweep.py`` separates that confound.
+because a bigger bandit needs more samples; the timestep-sweep phase
+of ``run_dmcs_pipeline.sh`` separates that confound.
 
-The right shape for that claim is a 2-line plot of *final reward* vs
-*action budget*, not stacked reward curves.  This script auto-discovers
-checkpoints under ``checkpoints/highway/action_sweep/`` named:
+Auto-discovers checkpoints under ``checkpoints/dmcs/<task>/action_sweep/``
+named:
 
     uniform_n{N}_seed{S}.pt
     zooming_n{N}_seed{S}.pt
 
 Usage:
-    python src/highway/compare_action_sweep.py
-    python src/highway/compare_action_sweep.py --window 100
+    python src/dmcs/compare_action_sweep.py
+    python src/dmcs/compare_action_sweep.py --task walker-walk --window 100
 """
 
 from __future__ import annotations
@@ -73,20 +73,26 @@ def _discover(checkpoints_dir: Path, window: int) -> Dict[str, Dict[int, List[fl
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--checkpoints-dir", type=Path,
-                   default=Path("checkpoints/highway/action_sweep"))
+    p.add_argument("--task", type=str, default="cartpole-swingup",
+                   help="DMCS task slug (used for default paths and title).")
+    p.add_argument("--checkpoints-dir", type=Path, default=None,
+                   help="Defaults to checkpoints/dmcs/<task>/action_sweep/.")
     p.add_argument("--window", type=int, default=50,
                    help="Average over the last `window` episodes per run.")
-    p.add_argument("--output", type=Path,
-                   default=Path("plots/highway/action_sweep.png"))
-    p.add_argument("--title", type=str,
-                   default="Action-budget sweep — racetrack-v0")
+    p.add_argument("--output", type=Path, default=None,
+                   help="Defaults to plots/dmcs/<task>_action_sweep.png.")
+    p.add_argument("--title", type=str, default=None,
+                   help="Defaults to 'Action-budget sweep — dm_control/<task>'.")
     args = p.parse_args()
 
-    finals = _discover(args.checkpoints_dir, args.window)
+    ckpt_dir = args.checkpoints_dir or Path(f"checkpoints/dmcs/{args.task}/action_sweep")
+    out_path = args.output or Path(f"plots/dmcs/{args.task}_action_sweep.png")
+    title = args.title or f"Action-budget sweep — dm_control/{args.task}"
+
+    finals = _discover(ckpt_dir, args.window)
     if not finals["uniform"] and not finals["zooming"]:
-        print(f"No checkpoints found under {args.checkpoints_dir}. "
-              f"Run src/highway/run_action_sweep.py --run first.")
+        print(f"No checkpoints found under {ckpt_dir}. "
+              f"Run src/dmcs/run_action_sweep.py --run first.")
         return
 
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -111,18 +117,18 @@ def main() -> None:
     ax.set_xscale("log", base=2)
     ax.set_xticks(sorted({n for arm in finals for n in finals[arm]}))
     ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
-    ax.set_xlabel("Action budget N (log scale)")
+    ax.set_xlabel("Action budget N (per axis; log scale)")
     ax.set_ylabel(f"Final reward (mean of last {args.window} episodes)")
-    ax.set_title(args.title)
+    ax.set_title(title)
     ax.legend(loc="best")
     ax.grid(True, alpha=0.3)
 
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(args.output, dpi=150, bbox_inches="tight")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_path, dpi=150, bbox_inches="tight")
     print("\nFinal reward by arm × N (mean ± stderr across seeds):")
     for line in summary:
         print(line)
-    print(f"\nPlot saved to {args.output}")
+    print(f"\nPlot saved to {out_path}")
 
 
 if __name__ == "__main__":

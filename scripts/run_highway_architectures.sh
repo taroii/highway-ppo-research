@@ -1,31 +1,28 @@
 #!/usr/bin/env bash
 #
-# Architectures experiment — SAC vs Uniform vs Zooming on racetrack-v0.
-# Runs all three across multiple seeds, then plots.
+# Highway architectures: SAC vs Uniform vs Zooming on racetrack-v0 at a
+# fixed action budget, several seeds.
 #
 # Outputs:
 #   checkpoints/highway/architectures/<arm>_seed<S>.pt
 #   plots/highway/architectures.png
 #
-# This is a different experiment from src/highway/run_scarcity_sweep.py.
-# The pipeline tests whether *adaptive zooming* beats *uniform discretization*
-# at a single matched action budget; the scarcity sweep tests how that gap
-# scales with action budget N.
+# Usage:
+#   ./scripts/run_highway_architectures.sh
+#   N_ACTIONS=32 ./scripts/run_highway_architectures.sh
 #
 # Knobs (env vars):
 #   SEEDS              space-separated list, default "42 43 44 45 46"
-#   SAC_TIMESTEPS      default 50000
+#   SAC_TIMESTEPS      default 150000
 #   DQN_TIMESTEPS      default 150000   (uniform + zooming)
-#   N_ACTIONS          action budget per axis, default 16.  Uniform uses
-#                      this as bins per axis; zooming uses it as the
-#                      total-cells budget (n_actions * da).
-#   INIT_DEPTH         zooming starting depth (2^INIT_DEPTH bins per axis
-#                      at start), default 3.
+#   N_ACTIONS          action budget per axis, default 16
+#   INIT_DEPTH         zooming starting depth, default 3
 #   PYTHON             interpreter, default "python" — override on Windows:
-#                        PYTHON="/c/Users/Polar/miniconda3/envs/highway/python.exe" ./run_highway_pipeline.sh
+#                        PYTHON="/c/Users/Polar/miniconda3/envs/highway/python.exe" \
+#                          ./scripts/run_highway_architectures.sh
 #
 # Per-run stdout is tee'd to logs/highway/architectures/<label>.log.
-# A failing run is logged and the pipeline continues.
+# A failing run is logged and the script continues.
 #
 set -uo pipefail
 
@@ -66,7 +63,7 @@ run_one() {
     fi
 }
 
-echo "highway architectures pipeline"
+echo "highway architectures"
 echo "  seeds:          $SEEDS"
 echo "  sac timesteps:  $SAC_TIMESTEPS"
 echo "  dqn timesteps:  $DQN_TIMESTEPS"
@@ -97,13 +94,6 @@ for seed in $SEEDS; do
 done
 
 echo
-echo "=== runs complete: ${ok}/${total} succeeded ==="
-if [ "${#failed[@]}" -gt 0 ]; then
-    echo "failed runs:"
-    printf "  %s\n" "${failed[@]}"
-fi
-
-echo
 echo "=== running compare.py ==="
 "$PYTHON" src/highway/compare.py \
     --checkpoints-dir "$CKPT_DIR" \
@@ -111,9 +101,11 @@ echo "=== running compare.py ==="
     --title "Architectures — racetrack-v0"
 
 echo
-echo "=== running timestep sweep (uniform vs zooming, N=64, 600k steps) ==="
-echo "    config hardcoded in src/highway/run_timestep_sweep.py"
-"$PYTHON" src/highway/run_timestep_sweep.py --run
+echo "=== runs complete: ${ok}/${total} succeeded ==="
+if [ "${#failed[@]}" -gt 0 ]; then
+    echo "failed runs:"
+    printf "  %s\n" "${failed[@]}"
+fi
 
 echo
-echo "=== pipeline done ==="
+echo "=== architectures done ==="

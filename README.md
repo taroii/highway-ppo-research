@@ -13,19 +13,26 @@ git clone https://github.com/eleurent/highway-env.git HighwayEnv
 
 ## Running experiments
 
-Each script runs the architectures A/B (SAC vs Uniform vs Zooming) for several seeds, then a long-horizon timestep sweep at a larger action budget. GPU is auto-detected if available.
+Three independent scripts per task family under `scripts/`. GPU is auto-detected if available.
 
+**Highway** (racetrack-v0, 1-D action):
 ```bash
-# Highway (racetrack-v0, 1-D action)
-./scripts/run_highway_pipeline.sh
-
-# DMCS — task slug as positional arg
-./scripts/run_dmcs_pipeline.sh                    # cartpole-swingup (default, 1-D)
-./scripts/run_dmcs_pipeline.sh walker-walk        # 6-D action
-./scripts/run_dmcs_pipeline.sh cheetah-run        # 6-D action
+./scripts/run_highway_architectures.sh                            # SAC vs Uniform vs Zooming
+./scripts/run_highway_action_sweep.sh                             # Uniform vs Zooming, N ∈ {8,16,32,64}
+TS_N_ACTIONS=64 ./scripts/run_highway_timestep_sweep.sh           # long-horizon at chosen N
 ```
 
-Both pipelines accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.
+**DMCS** — pass the task slug as a positional arg:
+```bash
+./scripts/run_dmcs_architectures.sh                               # cartpole-swingup (default)
+./scripts/run_dmcs_architectures.sh walker-walk
+./scripts/run_dmcs_architectures.sh cheetah-run
+
+./scripts/run_dmcs_action_sweep.sh walker-walk
+TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh walker-walk
+```
+
+All scripts accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.
 
 Outputs land under `checkpoints/<family>/<task>/<phase>/` and `plots/<family>/...`.
 

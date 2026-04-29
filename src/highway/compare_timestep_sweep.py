@@ -12,7 +12,7 @@ Auto-discovers checkpoints under ``checkpoints/highway/timestep_sweep/``
 named:
 
     uniform_n{N}_seed{S}.pt
-    zooming_d{D}_seed{S}.pt   (where N == 2**D)
+    zooming_n{N}_seed{S}.pt
 
 Usage:
     python src/highway/compare_timestep_sweep.py
