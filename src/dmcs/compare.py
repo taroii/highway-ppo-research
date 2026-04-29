@@ -104,7 +104,7 @@ def main() -> None:
             continue
         color = colors[label]
         x = np.arange(n_min)
-        ax.plot(x, mean, label=f"{label} (n={len(paths)})",
+        ax.plot(x, mean, label=f"{label} (seeds={len(paths)})",
                 color=color, linewidth=2)
         if len(paths) >= 2:
             ax.fill_between(x, mean - stderr, mean + stderr,

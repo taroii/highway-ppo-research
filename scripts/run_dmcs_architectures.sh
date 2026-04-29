@@ -17,7 +17,7 @@
 #   SEEDS              space-separated list, default "42 43 44 45 46"
 #   SAC_TIMESTEPS      default 300000
 #   DQN_TIMESTEPS      default 300000   (uniform + zooming)
-#   N_ACTIONS          action budget per axis, default 16
+#   N_ACTIONS          action budget per axis, default 32
 #   INIT_DEPTH         zooming starting depth, default 1
 #                      (= 2 bins per axis at start; max adaptive room)
 #   PYTHON             interpreter, default "python"
@@ -32,7 +32,7 @@ TASK="${1:-cartpole-swingup}"
 SEEDS="${SEEDS:-42 43 44 45 46}"
 SAC_TIMESTEPS="${SAC_TIMESTEPS:-300000}"
 DQN_TIMESTEPS="${DQN_TIMESTEPS:-300000}"
-N_ACTIONS="${N_ACTIONS:-16}"
+N_ACTIONS="${N_ACTIONS:-32}"
 INIT_DEPTH="${INIT_DEPTH:-1}"
 PYTHON="${PYTHON:-python}"
 
