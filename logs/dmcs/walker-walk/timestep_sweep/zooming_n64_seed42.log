@@ -1,1 +1,0 @@
-src/dmcs/run_zooming.py --task walker-walk --seed 42 --init_depth 1 --n_actions 64 --total_timesteps 1 --output checkpoints/dmcs/walker-walk/timestep_sweep/zooming_n64_seed42.pt

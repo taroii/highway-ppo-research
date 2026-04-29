@@ -1,1 +1,0 @@
-src/dmcs/run_uniform.py --task walker-walk --seed 42 --n_actions 16 --total_timesteps 1 --output checkpoints/dmcs/walker-walk/architectures/uniform_n16_seed42.pt

@@ -1,1 +1,0 @@
-src/highway/run_sac.py --seed 42 --total_timesteps 1 --output checkpoints/highway/architectures/sac_seed42.pt
