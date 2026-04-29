@@ -1,6 +1,11 @@
 """
 DQN with a fixed uniform action grid (no state-conditioning, no splits).
 
+Uses the factored grid + branching Q-net underneath; for racetrack
+(``da == 1``) this reduces to a single 1-D grid with a single Q-head,
+i.e., the original joint formulation.  Unifying on the factored path
+keeps highway and DMCS on a shared agent core.
+
 Usage:
     python src/highway/run_uniform.py
     python src/highway/run_uniform.py --n_actions 32 --seed 43
@@ -16,9 +21,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np
 
-from src.highway.action_manager import make_grid
-from src.highway.dqn import DQN, EpsGreedy
+from src.highway.dqn import EpsGreedy
+from src.highway.dqn_factored import BranchingDQN
 from src.highway.env import make_racetrack_env
+from src.highway.uniform_grid_factored import FactoredUniformActionGrid
 
 
 def main(seed: int = 42, n_actions: int = 16, total_timesteps: int = 150_000,
@@ -29,8 +35,8 @@ def main(seed: int = 42, n_actions: int = 16, total_timesteps: int = 150_000,
     env = make_racetrack_env()
     action_dim = int(np.prod(env.action_space.shape))
 
-    grid = make_grid("uniform", da=action_dim, uniform_n=n_actions)
-    agent = DQN(
+    grid = FactoredUniformActionGrid(da=action_dim, n=n_actions)
+    agent = BranchingDQN(
         env=env,
         grid=grid,
         selection_policy=EpsGreedy(eps_start=1.0, eps_end=0.05,
@@ -48,8 +54,9 @@ def main(seed: int = 42, n_actions: int = 16, total_timesteps: int = 150_000,
         seed=seed,
     )
 
-    print(f"Uniform DQN on racetrack-v0  N={n_actions}  seed={seed}  "
-          f"steps={total_timesteps}")
+    print(f"Uniform DQN on racetrack-v0  da={action_dim}  "
+          f"n={n_actions} (per axis -> {n_actions * action_dim} total cells)  "
+          f"seed={seed}  steps={total_timesteps}")
     rewards = agent.learn(total_timesteps=total_timesteps, print_every=5_000)
     agent.save(output, rewards)
 
@@ -67,14 +74,16 @@ def main(seed: int = 42, n_actions: int = 16, total_timesteps: int = 150_000,
     print(f"Eval(20): mean={eval_mean:.2f}  std={eval_std:.2f}")
     env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
-            "n_actions": n_actions, "episode_rewards": rewards}
+            "n_actions": n_actions, "n_per_axis": grid.n_per_axis(),
+            "episode_rewards": rewards}
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--n_actions", type=int, default=16,
-                   help="Total actions in the fixed grid (per axis if da>1).")
+                   help="Bins per action axis.  Total cells = n_actions * da.  "
+                        "Match the same arg on run_zooming.py for the budget A/B.")
     p.add_argument("--total_timesteps", type=int, default=150_000)
     p.add_argument("--output", type=str, default=None)
     args = p.parse_args()

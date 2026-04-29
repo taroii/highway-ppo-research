@@ -1,0 +1,1 @@
+src/dmcs/run_sac.py --task walker-walk --seed 42 --total_timesteps 1 --output checkpoints/dmcs/walker-walk/architectures/sac_seed42.pt

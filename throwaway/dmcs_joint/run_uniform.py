@@ -1,29 +1,3 @@
-"""
-DQN with a factored uniform action grid on DMCS tasks.
-
-Each axis has ``n_actions`` bins independently; total cells = ``n * da``
-(additive in ``da``, sidesteps the ``n^da`` Cartesian blowup).  For
-``da == 1`` (cartpole-swingup) this is equivalent to a single 1-D grid
-of ``n`` cells.
-
-Apples-to-apples partner for src/dmcs/run_zooming.py: same
-``BranchingDQN`` core, same Q-net topology, same TD target — only the
-grid is non-adaptive (fixed bins, no splits).
-
-Matched-budget contract with ``run_zooming.py``:
-    pass the same ``--n_actions`` to both.  Zooming uses it as
-    ``total_budget = n_actions * da`` (a global cap on total cells
-    across axes); uniform uses it as the per-axis bin count (also
-    ``n_actions * da`` total cells, fixed).  So both arms have the
-    same total cell count; the only difference is whether those
-    cells are placed adaptively (zooming) or on a fixed even grid
-    (uniform).
-
-Usage:
-    python src/dmcs/run_uniform.py --task walker-walk
-    python src/dmcs/run_uniform.py --task cheetah-run --n_actions 32
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -35,12 +9,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np
 
 from src.dmcs.env import make_dmcs_env
-from src.highway.dqn import EpsGreedy
-from src.highway.dqn_factored import BranchingDQN
-from src.highway.uniform_grid_factored import FactoredUniformActionGrid
+from src.highway.action_manager import make_grid
+from src.highway.dqn import DQN, EpsGreedy
 
 
-def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
+def main(task: str = "cartpole-swingup", seed: int = 42, n_actions: int = 16,
          total_timesteps: int = 300_000, output: str | None = None) -> dict:
     if output is None:
         output = f"checkpoints/dmcs/{task}/uniform_n{n_actions}_seed{seed}.pt"
@@ -48,8 +21,8 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
     env = make_dmcs_env(task)
     action_dim = int(np.prod(env.action_space.shape))
 
-    grid = FactoredUniformActionGrid(da=action_dim, n=n_actions)
-    agent = BranchingDQN(
+    grid = make_grid("uniform", da=action_dim, uniform_n=n_actions)
+    agent = DQN(
         env=env,
         grid=grid,
         selection_policy=EpsGreedy(eps_start=1.0, eps_end=0.05,
@@ -67,9 +40,8 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
         seed=seed,
     )
 
-    print(f"Uniform DQN on dm_control/{task}  da={action_dim}  "
-          f"n={n_actions} (per axis -> {n_actions * action_dim} total cells)  "
-          f"seed={seed}  steps={total_timesteps}")
+    print(f"Uniform DQN on dm_control/{task}  N={n_actions}  seed={seed}  "
+          f"steps={total_timesteps}")
     rewards = agent.learn(total_timesteps=total_timesteps, print_every=10_000)
     agent.save(output, rewards)
 
@@ -87,18 +59,16 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
     print(f"Eval(10): mean={eval_mean:.2f}  std={eval_std:.2f}")
     env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
-            "n_actions": n_actions, "n_per_axis": grid.n_per_axis(),
-            "episode_rewards": rewards}
+            "n_actions": n_actions, "episode_rewards": rewards}
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--task", type=str, default="walker-walk",
+    p.add_argument("--task", type=str, default="cartpole-swingup",
                    help="DMCS task slug.")
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--n_actions", type=int, default=16,
-                   help="Bins per action axis.  Total cells = n_actions * da.  "
-                        "Match the same arg on run_zooming.py for the budget A/B.")
+                   help="Total actions in the fixed grid (per axis if da>1).")
     p.add_argument("--total_timesteps", type=int, default=300_000)
     p.add_argument("--output", type=str, default=None)
     args = p.parse_args()

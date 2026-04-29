@@ -165,7 +165,7 @@ class SAC:
         np.random.seed(seed)
         random.seed(seed)
 
-        self.device = torch.device("cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.obs_dim = int(np.prod(env.observation_space.shape))
         self.action_dim = int(np.prod(env.action_space.shape))
 
@@ -297,7 +297,8 @@ class SAC:
         agent.q1_target.load_state_dict(data["q1"])
         agent.q2_target.load_state_dict(data["q2"])
         agent.log_alpha = torch.tensor(
-            data["log_alpha"], dtype=torch.float32, requires_grad=True
+            data["log_alpha"], dtype=torch.float32,
+            device=agent.device, requires_grad=True
         )
         return agent
 

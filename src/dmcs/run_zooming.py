@@ -1,3 +1,27 @@
+"""
+DQN with a factored adaptive zooming grid on DMCS tasks.
+
+Per-axis 1-D zooming trees + branching Q-net (Tavakoli, Pardo, Kormushev,
+"Action Branching Architectures for Deep Reinforcement Learning",
+AAAI 2018).  A single global cell budget caps the *sum* of bins across
+axes, so the algorithm can spend more cells on important axes (the
+ones the policy visits often) and less on quiet ones.
+
+For ``da == 1`` (cartpole-swingup), the factored grid reduces to a
+single 1-D zooming tree — equivalent to the joint formulation but with
+a corrected multi-split warm-start.
+
+Matched-budget contract with ``run_uniform.py``:
+    pass the same ``--n_actions`` to both.  Zooming sets
+    ``total_budget = n_actions * da``; uniform pins each axis to
+    ``n_actions`` bins.  Both arms therefore have the same total cell
+    count; only the placement differs (adaptive vs fixed even grid).
+
+Usage:
+    python src/dmcs/run_zooming.py --task walker-walk
+    python src/dmcs/run_zooming.py --task cheetah-run --n_actions 32
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -9,22 +33,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np
 
 from src.dmcs.env import make_dmcs_env
-from src.highway.action_manager import make_grid
-from src.highway.dqn import DQN, UCB
+from src.highway.dqn import UCB
+from src.highway.dqn_factored import BranchingDQN
+from src.highway.zooming_factored import FactoredActionZooming
 
 
-def main(task: str = "cartpole-swingup", seed: int = 42,
-         init_depth: int = 3, max_depth: int = 4,
+def main(task: str = "walker-walk", seed: int = 42,
+         init_depth: int = 1, n_actions: int = 16,
          total_timesteps: int = 300_000, output: str | None = None) -> dict:
     if output is None:
-        output = f"checkpoints/dmcs/{task}/zooming_d{max_depth}_seed{seed}.pt"
+        output = f"checkpoints/dmcs/{task}/zooming_n{n_actions}_seed{seed}.pt"
 
     env = make_dmcs_env(task)
     action_dim = int(np.prod(env.action_space.shape))
+    total_budget = n_actions * action_dim
 
-    grid = make_grid("zooming", da=action_dim,
-                     init_depth=init_depth, max_depth=max_depth)
-    agent = DQN(
+    grid = FactoredActionZooming(
+        da=action_dim,
+        init_depth=init_depth,
+        total_budget=total_budget,
+    )
+    agent = BranchingDQN(
         env=env,
         grid=grid,
         selection_policy=UCB(c_start=0.3, c_end=0.03,
@@ -42,8 +71,10 @@ def main(task: str = "cartpole-swingup", seed: int = 42,
         seed=seed,
     )
 
-    print(f"Zooming DQN on dm_control/{task}  init_depth={init_depth}  "
-          f"max_depth={max_depth}  seed={seed}  steps={total_timesteps}")
+    print(f"Zooming DQN on dm_control/{task}  da={action_dim}  "
+          f"init_depth={init_depth} (start={grid.total_cells} cells)  "
+          f"n={n_actions} -> total_budget={total_budget}  "
+          f"seed={seed}  steps={total_timesteps}")
     rewards = agent.learn(total_timesteps=total_timesteps, print_every=10_000)
     agent.save(output, rewards)
 
@@ -59,25 +90,35 @@ def main(task: str = "cartpole-swingup", seed: int = 42,
         eval_rewards.append(ep)
     eval_mean, eval_std = float(np.mean(eval_rewards)), float(np.std(eval_rewards))
     print(f"Eval(10): mean={eval_mean:.2f}  std={eval_std:.2f}")
-    print(f"Final cubes: {grid.n_actions}  total_splits: {agent.total_splits}")
+    print(f"Final n_per_axis: {grid.n_per_axis()}  "
+          f"total_cells: {grid.total_cells}/{total_budget}  "
+          f"total_splits: {agent.total_splits}")
     env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
-            "n_actions_final": grid.n_actions, "total_splits": agent.total_splits,
+            "n_per_axis_final": grid.n_per_axis(),
+            "total_cells_final": grid.total_cells,
+            "total_budget": total_budget,
+            "total_splits": agent.total_splits,
             "episode_rewards": rewards}
 
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--task", type=str, default="cartpole-swingup",
-                   help="DMCS task slug.")
+    p.add_argument("--task", type=str, default="walker-walk",
+                   help="DMCS task slug; cartpole-swingup also valid (da=1).")
     p.add_argument("--seed", type=int, default=42)
-    p.add_argument("--init_depth", type=int, default=3,
-                   help="Pre-split depth: starts with 2^(init_depth*da) cubes.")
-    p.add_argument("--max_depth", type=int, default=4,
-                   help="Maximum split depth: cubes capped at 2^(max_depth*da).")
+    p.add_argument("--init_depth", type=int, default=1,
+                   help="Starting bins per axis = 2^init_depth.  Default 1 "
+                        "(2 bins per axis: 'go left vs go right') leaves the "
+                        "algorithm maximum room for adaptive splits.  "
+                        "Set higher for a warmer start at the cost of "
+                        "fewer split decisions.")
+    p.add_argument("--n_actions", type=int, default=16,
+                   help="Matched-budget partner for run_uniform.py: "
+                        "total_budget = n_actions * da.  Default 16.")
     p.add_argument("--total_timesteps", type=int, default=300_000)
     p.add_argument("--output", type=str, default=None)
     args = p.parse_args()
     main(task=args.task, seed=args.seed, init_depth=args.init_depth,
-         max_depth=args.max_depth, total_timesteps=args.total_timesteps,
+         n_actions=args.n_actions, total_timesteps=args.total_timesteps,
          output=args.output)

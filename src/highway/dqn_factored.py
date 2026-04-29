@@ -1,25 +1,28 @@
 """
-DQN over a discrete action grid (uniform or zooming).
+Branching DQN over a factored action grid.
 
-Design:
-  - Shared MLP trunk over flat obs + a single linear Q-head whose output
-    dim equals the grid's current n_actions.
-  - On a zooming split, the head is rebuilt: child rows inherit their
-    parent's Q-row + small noise; survivor rows are copied over.
-  - The target network is rebuilt the same way, then its child rows are
-    snapped to match the online network's child rows (survivor rows are
-    left alone so the slow-averaging target signal is preserved).
-  - Adam state for the shared trunk is preserved across head rebuilds.
-  - Action selection is a pluggable policy: ``EpsGreedy`` (uniform arms)
-    or ``UCB`` (zooming arms, uses per-cube play counts as the
-    confidence-bonus denominator).
+Mirrors src/highway/dqn.py but for ``FactoredActionZooming``:
+
+  - Q-net: shared trunk + ``da`` independent linear heads, head ``i``
+    sized to that axis's current bin count.
+  - Replay buffer stores ``da`` action indices per transition.
+  - TD target follows the action-branching recipe (Tavakoli, Pardo,
+    Kormushev, AAAI 2018):
+        target = r + gamma * (1/da) * sum_i max_{a'_i} Q_target_i(s', a'_i)
+    The per-axis Bellman losses are summed.
+  - On a split in axis ``i`` only that head is rebuilt; child rows are
+    warm-started from their parent (parent_row + small noise), and the
+    target head's child rows are snapped to the online head's children.
+
+Action-selection policies (``EpsGreedy``, ``UCB``) and the
+``soft_update``/``weight_init`` helpers are reused from ``dqn.py``.
 """
 
 from __future__ import annotations
 
 import random
 from pathlib import Path
-from typing import List, Optional, Protocol, Tuple
+from typing import List, Optional, Tuple
 
 import gymnasium as gym
 import numpy as np
@@ -27,98 +30,47 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.highway.action_manager import ActionGrid
+from src.highway.dqn import SelectionPolicy, soft_update, weight_init
 from src.highway.zooming import SplitInfo
+from src.highway.zooming_factored import FactoredActionZooming
 
 
 # ---------------------------------------------------------------------------
-# Action-selection policies
+# Branching Q-network
 # ---------------------------------------------------------------------------
 
-class SelectionPolicy(Protocol):
-    def select(self, q_values: np.ndarray, step: int,
-               play_counts: np.ndarray) -> int: ...
+class BranchingQNetwork(nn.Module):
+    """Shared trunk + one linear head per action axis."""
 
-
-class EpsGreedy:
-    def __init__(self, eps_start: float = 1.0, eps_end: float = 0.05,
-                 decay_steps: int = 60_000):
-        self.eps_start = eps_start
-        self.eps_end = eps_end
-        self.decay_steps = decay_steps
-
-    def select(self, q_values, step, play_counts):
-        frac = min(1.0, step / max(1, self.decay_steps))
-        eps = self.eps_start + (self.eps_end - self.eps_start) * frac
-        if np.random.random() < eps:
-            return int(np.random.randint(len(q_values)))
-        return int(q_values.argmax())
-
-
-class UCB:
-    """Q(s, a) + c(step) * sqrt(log(total) / n(a)).
-
-    ``c`` anneals linearly from ``c_start`` to ``c_end`` over
-    ``decay_steps``.  Without annealing, UCB keeps exploring forever —
-    every freshly-split cube has n=0 and dominates argmax, which on
-    racetrack means forced steering extremes that crash the car.
-    """
-
-    def __init__(self, c_start: float = 0.3, c_end: float = 0.03,
-                 decay_steps: int = 60_000):
-        self.c_start = c_start
-        self.c_end = c_end
-        self.decay_steps = decay_steps
-
-    def _c(self, step: int) -> float:
-        frac = min(1.0, step / max(1, self.decay_steps))
-        return self.c_start + (self.c_end - self.c_start) * frac
-
-    def select(self, q_values, step, play_counts):
-        c = self._c(step)
-        total = max(2, int(play_counts.sum()))
-        with np.errstate(divide="ignore"):
-            bonus = c * np.sqrt(np.log(total) / np.maximum(1, play_counts))
-        return int((q_values + bonus).argmax())
-
-
-# ---------------------------------------------------------------------------
-# Q-network: shared trunk + single output head
-# ---------------------------------------------------------------------------
-
-def weight_init(m: nn.Module) -> None:
-    if isinstance(m, nn.Linear):
-        nn.init.orthogonal_(m.weight.data)
-        m.bias.data.fill_(0.0)
-
-
-class QNetwork(nn.Module):
-    def __init__(self, obs_dim: int, n_actions: int, hidden_dim: int = 256):
+    def __init__(self, obs_dim: int, n_per_axis: List[int],
+                 hidden_dim: int = 256):
         super().__init__()
         self.hidden_dim = hidden_dim
         self.trunk = nn.Sequential(
             nn.Linear(obs_dim, hidden_dim), nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim), nn.ReLU(),
         )
-        self.head = nn.Linear(hidden_dim, n_actions)
+        self.heads = nn.ModuleList(
+            [nn.Linear(hidden_dim, n) for n in n_per_axis]
+        )
         self.apply(weight_init)
 
-    @property
-    def n_actions(self) -> int:
-        return self.head.out_features
+    def n_per_axis(self) -> List[int]:
+        return [h.out_features for h in self.heads]
 
-    def forward(self, obs: torch.Tensor) -> torch.Tensor:
-        return self.head(self.trunk(obs))
+    def forward(self, obs: torch.Tensor) -> List[torch.Tensor]:
+        h = self.trunk(obs)
+        return [head(h) for head in self.heads]
 
-    def rebuild_head(self, new_n: int, splits: List[SplitInfo]) -> None:
-        """Resize the head to ``new_n``; transfer surviving rows; init
-        children from their parent's row + small noise."""
-        old = self.head
+    def rebuild_head_axis(self, axis: int, new_n: int,
+                          splits: List[SplitInfo]) -> None:
+        """Resize axis ``axis``'s head to ``new_n``; transfer surviving
+        rows; init children from parent rows + small noise."""
+        old = self.heads[axis]
         old_w, old_b = old.weight.data, old.bias.data
         new = nn.Linear(old.in_features, new_n).to(old.weight.device)
         removed = {s.old_idx for s in splits}
         surviving_old = [i for i in range(old.out_features) if i not in removed]
-
         with torch.no_grad():
             nn.init.orthogonal_(new.weight.data)
             new.bias.data.fill_(0.0)
@@ -130,32 +82,32 @@ class QNetwork(nn.Module):
                 for new_idx in split.new_indices:
                     new.weight.data[new_idx] = pw + torch.randn_like(pw) * 0.01
                     new.bias.data[new_idx] = pb + torch.randn_like(pb) * 0.01
-
-        self.head = new
+        self.heads[axis] = new
 
 
 # ---------------------------------------------------------------------------
-# Replay buffer
+# Replay buffer (multi-axis actions)
 # ---------------------------------------------------------------------------
 
-class DQNReplayBuffer:
-    def __init__(self, obs_dim: int, capacity: int,
+class BranchingReplayBuffer:
+    def __init__(self, obs_dim: int, da: int, capacity: int,
                  device: torch.device = torch.device("cpu")):
         self.capacity = capacity
+        self.da = da
         self.device = device
         self.obs = np.zeros((capacity, obs_dim), dtype=np.float32)
         self.next_obs = np.zeros((capacity, obs_dim), dtype=np.float32)
-        self.actions = np.zeros(capacity, dtype=np.int64)
+        self.actions = np.zeros((capacity, da), dtype=np.int64)
         self.rewards = np.zeros(capacity, dtype=np.float32)
         self.not_dones = np.zeros(capacity, dtype=np.float32)
         self.idx = 0
         self.full = False
 
-    def add(self, obs, action, reward, next_obs, done):
+    def add(self, obs, action_per_axis, reward, next_obs, done):
         i = self.idx
         np.copyto(self.obs[i], obs)
         np.copyto(self.next_obs[i], next_obs)
-        self.actions[i] = action
+        self.actions[i] = action_per_axis
         self.rewards[i] = reward
         self.not_dones[i] = 0.0 if done else 1.0
         self.idx = (self.idx + 1) % self.capacity
@@ -176,31 +128,26 @@ class DQNReplayBuffer:
         return self.capacity if self.full else self.idx
 
 
-def soft_update(net: nn.Module, target: nn.Module, tau: float) -> None:
-    for p, tp in zip(net.parameters(), target.parameters()):
-        tp.data.copy_(tau * p.data + (1 - tau) * tp.data)
-
-
 # ---------------------------------------------------------------------------
-# DQN agent
+# Branching DQN agent
 # ---------------------------------------------------------------------------
 
-class DQN:
+class BranchingDQN:
     def __init__(
         self,
         env: gym.Env,
-        grid: ActionGrid,
+        grid: FactoredActionZooming,
         selection_policy: SelectionPolicy,
         hidden_dim: int = 256,
-        gamma: float = 0.9,
-        tau: float = 0.01,
-        lr: float = 5e-4,
-        batch_size: int = 128,
-        buffer_capacity: int = 100_000,
-        learning_starts: int = 2000,
+        gamma: float = 0.99,
+        tau: float = 0.005,
+        lr: float = 3e-4,
+        batch_size: int = 256,
+        buffer_capacity: int = 1_000_000,
+        learning_starts: int = 10_000,
         target_update_freq: int = 2,
         split_check_freq: int = 2000,
-        split_delay: int = 30_000,
+        split_delay: int = 60_000,
         seed: int = 0,
     ):
         self.env = env
@@ -215,6 +162,7 @@ class DQN:
         self.split_check_freq = split_check_freq
         self.split_delay = split_delay
         self.hidden_dim = hidden_dim
+        self.da = grid.da
 
         torch.manual_seed(seed)
         np.random.seed(seed)
@@ -223,12 +171,14 @@ class DQN:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.obs_dim = int(np.prod(env.observation_space.shape))
 
-        self.q = QNetwork(self.obs_dim, grid.n_actions, hidden_dim).to(self.device)
-        self.q_target = QNetwork(self.obs_dim, grid.n_actions, hidden_dim).to(self.device)
+        n_per_axis = grid.n_per_axis()
+        self.q = BranchingQNetwork(self.obs_dim, n_per_axis, hidden_dim).to(self.device)
+        self.q_target = BranchingQNetwork(self.obs_dim, n_per_axis, hidden_dim).to(self.device)
         self.q_target.load_state_dict(self.q.state_dict())
 
         self.optimizer = torch.optim.Adam(self.q.parameters(), lr=lr)
-        self.buffer = DQNReplayBuffer(self.obs_dim, buffer_capacity, self.device)
+        self.buffer = BranchingReplayBuffer(self.obs_dim, self.da, buffer_capacity,
+                                            self.device)
         self.total_splits = 0
 
     # ------------------------------------------------------------------
@@ -236,16 +186,20 @@ class DQN:
     # ------------------------------------------------------------------
 
     def select_action(self, obs: np.ndarray, step: int,
-                      deterministic: bool = False) -> Tuple[int, np.ndarray]:
+                      deterministic: bool = False) -> Tuple[np.ndarray, np.ndarray]:
         obs_t = torch.as_tensor(obs.flatten(), dtype=torch.float32,
                                 device=self.device).unsqueeze(0)
         with torch.no_grad():
-            q_values = self.q(obs_t).squeeze(0).cpu().numpy()
-        if deterministic:
-            local_idx = int(q_values.argmax())
-        else:
-            local_idx = self.policy.select(q_values, step, self.grid.play_counts())
-        return local_idx, self.grid.get_env_action(local_idx)
+            q_lists = self.q(obs_t)
+        play_counts = self.grid.play_counts_per_axis()
+        idx_per_axis = np.empty(self.da, dtype=np.int64)
+        for i, q in enumerate(q_lists):
+            q_np = q.squeeze(0).cpu().numpy()
+            if deterministic:
+                idx_per_axis[i] = int(q_np.argmax())
+            else:
+                idx_per_axis[i] = self.policy.select(q_np, step, play_counts[i])
+        return idx_per_axis, self.grid.get_env_action(idx_per_axis)
 
     # ------------------------------------------------------------------
     # Q update
@@ -253,13 +207,21 @@ class DQN:
 
     def _update(self):
         obs, actions, rewards, next_obs, not_dones = self.buffer.sample(self.batch_size)
+        # actions: (B, da) int64
 
         with torch.no_grad():
-            q_next = self.q_target(next_obs).max(dim=1).values
-            target = rewards + not_dones * self.gamma * q_next
+            next_q_list = self.q_target(next_obs)               # list of (B, n_i)
+            next_max_per_axis = torch.stack(
+                [q.max(dim=1).values for q in next_q_list], dim=1
+            )                                                   # (B, da)
+            next_v = next_max_per_axis.mean(dim=1)              # (B,)
+            target = rewards + not_dones * self.gamma * next_v  # (B,)
 
-        q_taken = self.q(obs).gather(1, actions.view(-1, 1)).squeeze(1)
-        loss = F.smooth_l1_loss(q_taken, target)
+        q_list = self.q(obs)                                    # list of (B, n_i)
+        loss = torch.zeros((), dtype=q_list[0].dtype, device=q_list[0].device)
+        for i, q in enumerate(q_list):
+            q_taken = q.gather(1, actions[:, i:i + 1]).squeeze(1)
+            loss = loss + F.smooth_l1_loss(q_taken, target)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -270,20 +232,20 @@ class DQN:
     # Split handling
     # ------------------------------------------------------------------
 
-    def _sync_target_children(self, splits: List[SplitInfo]) -> None:
-        """Snap target-Q child rows to match online-Q child rows so
-        post-split TD targets agree with online Q. Survivor rows keep the
-        target's slow-averaged values."""
+    def _sync_target_axis_children(self, axis: int,
+                                   splits: List[SplitInfo]) -> None:
         with torch.no_grad():
             for split in splits:
                 for new_idx in split.new_indices:
-                    self.q_target.head.weight.data[new_idx] = self.q.head.weight.data[new_idx]
-                    self.q_target.head.bias.data[new_idx] = self.q.head.bias.data[new_idx]
+                    self.q_target.heads[axis].weight.data[new_idx] = \
+                        self.q.heads[axis].weight.data[new_idx]
+                    self.q_target.heads[axis].bias.data[new_idx] = \
+                        self.q.heads[axis].bias.data[new_idx]
 
     def _rebuild_optimizer_preserving_state(self) -> None:
         """Rebuild Adam over current parameters, preserving state for
-        params whose tensor identity survived (i.e., the shared trunk —
-        only the replaced head's parameters lose their Adam state)."""
+        params whose tensor identity survived (the trunk + the heads we
+        didn't replace this round)."""
         old_state = dict(self.optimizer.state)
         self.optimizer = torch.optim.Adam(self.q.parameters(), lr=self.lr)
         for p in self.q.parameters():
@@ -291,14 +253,19 @@ class DQN:
                 self.optimizer.state[p] = old_state[p]
 
     def _check_splits(self) -> int:
-        splits = self.grid.try_split()
-        if not splits:
+        per_axis_splits = self.grid.try_split()
+        n_splits = sum(len(s) for s in per_axis_splits)
+        if n_splits == 0:
             return 0
-        self.q.rebuild_head(self.grid.n_actions, splits)
-        self.q_target.rebuild_head(self.grid.n_actions, splits)
-        self._sync_target_children(splits)
+        for i, splits_i in enumerate(per_axis_splits):
+            if not splits_i:
+                continue
+            new_n_i = self.grid.axes[i].n_actions
+            self.q.rebuild_head_axis(i, new_n_i, splits_i)
+            self.q_target.rebuild_head_axis(i, new_n_i, splits_i)
+            self._sync_target_axis_children(i, splits_i)
         self._rebuild_optimizer_preserving_state()
-        return len(splits)
+        return n_splits
 
     # ------------------------------------------------------------------
     # Training loop
@@ -311,13 +278,13 @@ class DQN:
 
         for step in range(1, total_timesteps + 1):
             obs_flat = obs.flatten().astype(np.float32)
-            local_idx, env_action = self.select_action(obs_flat, step)
+            idx_per_axis, env_action = self.select_action(obs_flat, step)
             next_obs, reward, done, truncated, _ = self.env.step(env_action)
             terminal = done or truncated
             next_obs_flat = next_obs.flatten().astype(np.float32)
 
-            self.buffer.add(obs_flat, local_idx, reward, next_obs_flat, terminal)
-            self.grid.register_play(local_idx)
+            self.buffer.add(obs_flat, idx_per_axis, reward, next_obs_flat, terminal)
+            self.grid.register_play(idx_per_axis)
             current += reward
 
             if terminal:
@@ -338,7 +305,7 @@ class DQN:
                 recent = episode_rewards[-50:]
                 print(f"[{step:>7d}/{total_timesteps}]  ep={len(episode_rewards):>4d}  "
                       f"reward(last50)={np.mean(recent):>7.2f}  "
-                      f"n_actions={self.grid.n_actions}  "
+                      f"n_per_axis={self.grid.n_per_axis()}  "
                       f"total_splits={self.total_splits}")
 
         return episode_rewards
@@ -351,12 +318,14 @@ class DQN:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
         torch.save({
             "q": self.q.state_dict(),
-            "n_actions": self.grid.n_actions,
+            "n_per_axis": self.grid.n_per_axis(),
             "episode_rewards": episode_rewards or [],
         }, path)
-        print(f"Saved DQN checkpoint to {path}")
+        print(f"Saved BranchingDQN checkpoint to {path}")
 
     def predict(self, obs: np.ndarray, deterministic: bool = True) -> np.ndarray:
-        _, env_action = self.select_action(obs.flatten().astype(np.float32),
-                                           step=10**9, deterministic=deterministic)
+        _, env_action = self.select_action(
+            obs.flatten().astype(np.float32),
+            step=10**9, deterministic=deterministic,
+        )
         return env_action

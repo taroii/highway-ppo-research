@@ -27,10 +27,12 @@
     DQN training timesteps for uniform + zooming. Default 150000.
 
 .PARAMETER NActions
-    Uniform grid size. Default 16.
+    Action budget per axis. Default 16. Uniform uses this as bins per
+    axis; zooming uses it as the total-cells budget (n_actions * da).
 
-.PARAMETER MaxDepth
-    Zooming max depth (2^MaxDepth = max cubes). Default 4.
+.PARAMETER InitDepth
+    Zooming starting depth (2^InitDepth bins per axis at start).
+    Default 3.
 
 .PARAMETER Python
     Python interpreter. Default "python".
@@ -56,7 +58,7 @@ param(
     [int]    $SacTimesteps = 150000,
     [int]    $DqnTimesteps = 150000,
     [int]    $NActions     = 16,
-    [int]    $MaxDepth     = 4,
+    [int]    $InitDepth    = 3,
     [string] $Python       = "python",
     [switch] $Force
 )
@@ -127,8 +129,8 @@ Write-Host "highway architectures pipeline"
 Write-Host "  seeds:          $($Seeds -join ' ')"
 Write-Host "  sac timesteps:  $SacTimesteps"
 Write-Host "  dqn timesteps:  $DqnTimesteps"
-Write-Host "  uniform N:      $NActions"
-Write-Host "  zooming depth:  $MaxDepth"
+Write-Host "  n_actions:      $NActions"
+Write-Host "  init_depth:     $InitDepth"
 Write-Host "  python:         $Python"
 Write-Host "  ckpts -> $CkptDir"
 Write-Host "  plot  -> $PlotOut"
@@ -136,7 +138,7 @@ Write-Host "  plot  -> $PlotOut"
 foreach ($seed in $Seeds) {
     $sacOut     = "$CkptDir/sac_seed$seed.pt"
     $uniformOut = "$CkptDir/uniform_n${NActions}_seed${seed}.pt"
-    $zoomingOut = "$CkptDir/zooming_d${MaxDepth}_seed${seed}.pt"
+    $zoomingOut = "$CkptDir/zooming_n${NActions}_seed${seed}.pt"
 
     Invoke-Run -Label "sac_seed$seed" -Output $sacOut -Exe $Python -Arguments @(
         "src/highway/run_sac.py",
@@ -153,10 +155,11 @@ foreach ($seed in $Seeds) {
         "--output",          $uniformOut
     )
 
-    Invoke-Run -Label "zooming_d${MaxDepth}_seed${seed}" -Output $zoomingOut -Exe $Python -Arguments @(
+    Invoke-Run -Label "zooming_n${NActions}_seed${seed}" -Output $zoomingOut -Exe $Python -Arguments @(
         "src/highway/run_zooming.py",
         "--seed",            "$seed",
-        "--max_depth",       "$MaxDepth",
+        "--init_depth",      "$InitDepth",
+        "--n_actions",       "$NActions",
         "--total_timesteps", "$DqnTimesteps",
         "--output",          $zoomingOut
     )

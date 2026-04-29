@@ -23,8 +23,8 @@ shorter run (no LR schedule depends on the total budget in our DQN).
 One long run per seed gives the entire timestep-sweep curve for free.
 
 Sweep dimensions:
-  - n = 64 (configurable via N_ACTIONS).  Zooming uses
-    ``max_depth = log2(n) = 6`` and ``init_depth = 3``.
+  - n = 64 (configurable via N_ACTIONS).  Zooming starts at
+    ``2^init_depth = 8`` bins (init_depth=3) and refines up to ``n``.
   - seed ∈ {42} by default; extend SEEDS for robustness.
   - total_timesteps default 600_000 (~ 4× the architectures pipeline).
 
@@ -64,7 +64,7 @@ PLOT_OUT = Path("plots/highway/timestep_sweep.png")
 def commands() -> List[Tuple[str, List[str]]]:
     """Yield (label, argv-list) for every (arm, seed) cell."""
     out: List[Tuple[str, List[str]]] = []
-    max_depth = int(math.log2(N_ACTIONS))
+    init_depth = min(3, int(math.log2(N_ACTIONS)))
     for seed in SEEDS:
         label_u = f"uniform_n{N_ACTIONS}_seed{seed}"
         out.append((
@@ -75,13 +75,13 @@ def commands() -> List[Tuple[str, List[str]]]:
              "--total_timesteps", str(TOTAL_TIMESTEPS),
              "--output", str(CKPT_DIR / f"{label_u}.pt")],
         ))
-        label_z = f"zooming_d{max_depth}_seed{seed}"
+        label_z = f"zooming_n{N_ACTIONS}_seed{seed}"
         out.append((
             label_z,
             [PYTHON, "src/highway/run_zooming.py",
              "--seed", str(seed),
-             "--init_depth", str(min(3, max_depth)),
-             "--max_depth", str(max_depth),
+             "--init_depth", str(init_depth),
+             "--n_actions", str(N_ACTIONS),
              "--total_timesteps", str(TOTAL_TIMESTEPS),
              "--output", str(CKPT_DIR / f"{label_z}.pt")],
         ))

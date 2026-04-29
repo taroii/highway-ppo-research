@@ -16,8 +16,11 @@
 #   SEEDS              space-separated list, default "42 43 44 45 46"
 #   SAC_TIMESTEPS      default 50000
 #   DQN_TIMESTEPS      default 150000   (uniform + zooming)
-#   N_ACTIONS          uniform grid size, default 16
-#   MAX_DEPTH          zooming max depth, default 4 (= 2^4 = 16 cubes max)
+#   N_ACTIONS          action budget per axis, default 16.  Uniform uses
+#                      this as bins per axis; zooming uses it as the
+#                      total-cells budget (n_actions * da).
+#   INIT_DEPTH         zooming starting depth (2^INIT_DEPTH bins per axis
+#                      at start), default 3.
 #   PYTHON             interpreter, default "python" — override on Windows:
 #                        PYTHON="/c/Users/Polar/miniconda3/envs/highway/python.exe" ./run_highway_pipeline.sh
 #
@@ -30,10 +33,11 @@ SEEDS="${SEEDS:-42 43 44 45 46}"
 SAC_TIMESTEPS="${SAC_TIMESTEPS:-150000}"
 DQN_TIMESTEPS="${DQN_TIMESTEPS:-150000}"
 N_ACTIONS="${N_ACTIONS:-16}"
-MAX_DEPTH="${MAX_DEPTH:-4}"
+INIT_DEPTH="${INIT_DEPTH:-3}"
 PYTHON="${PYTHON:-python}"
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(dirname "$SCRIPT_DIR")"
 cd "$ROOT"
 
 CKPT_DIR="checkpoints/highway/architectures"
@@ -66,8 +70,8 @@ echo "highway architectures pipeline"
 echo "  seeds:          $SEEDS"
 echo "  sac timesteps:  $SAC_TIMESTEPS"
 echo "  dqn timesteps:  $DQN_TIMESTEPS"
-echo "  uniform N:      $N_ACTIONS"
-echo "  zooming depth:  $MAX_DEPTH"
+echo "  n_actions:      $N_ACTIONS"
+echo "  init_depth:     $INIT_DEPTH"
 echo "  python:         $PYTHON"
 echo "  ckpts → $CKPT_DIR"
 echo "  plot  → $PLOT_OUT"
@@ -84,11 +88,12 @@ for seed in $SEEDS; do
             --total_timesteps "$DQN_TIMESTEPS" \
             --output "$CKPT_DIR/uniform_n${N_ACTIONS}_seed${seed}.pt"
 
-    run_one "zooming_d${MAX_DEPTH}_seed${seed}" \
+    run_one "zooming_n${N_ACTIONS}_seed${seed}" \
         "$PYTHON" src/highway/run_zooming.py \
-            --seed "$seed" --max_depth "$MAX_DEPTH" \
+            --seed "$seed" \
+            --init_depth "$INIT_DEPTH" --n_actions "$N_ACTIONS" \
             --total_timesteps "$DQN_TIMESTEPS" \
-            --output "$CKPT_DIR/zooming_d${MAX_DEPTH}_seed${seed}.pt"
+            --output "$CKPT_DIR/zooming_n${N_ACTIONS}_seed${seed}.pt"
 done
 
 echo
@@ -104,6 +109,11 @@ echo "=== running compare.py ==="
     --checkpoints-dir "$CKPT_DIR" \
     --output "$PLOT_OUT" \
     --title "Architectures — racetrack-v0"
+
+echo
+echo "=== running timestep sweep (uniform vs zooming, N=64, 600k steps) ==="
+echo "    config hardcoded in src/highway/run_timestep_sweep.py"
+"$PYTHON" src/highway/run_timestep_sweep.py --run
 
 echo
 echo "=== pipeline done ==="

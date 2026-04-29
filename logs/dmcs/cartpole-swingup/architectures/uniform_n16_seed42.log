@@ -1,0 +1,1 @@
+src/dmcs/run_uniform.py --task cartpole-swingup --seed 42 --n_actions 16 --total_timesteps 1 --output checkpoints/dmcs/cartpole-swingup/architectures/uniform_n16_seed42.pt

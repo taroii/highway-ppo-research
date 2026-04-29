@@ -1,0 +1,1 @@
+src/highway/run_zooming.py --seed 42 --init_depth 3 --n_actions 16 --total_timesteps 1 --output checkpoints/highway/architectures/zooming_n16_seed42.pt

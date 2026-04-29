@@ -1,0 +1,1 @@
+src/dmcs/run_sac.py --task cartpole-swingup --seed 42 --total_timesteps 1 --output checkpoints/dmcs/cartpole-swingup/architectures/sac_seed42.pt

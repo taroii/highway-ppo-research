@@ -14,8 +14,9 @@ companion ``run_timestep_sweep.py`` separates that confound by holding
 N=64 and varying training timesteps.
 
 Sweep dimensions:
-  - n ∈ {8, 16, 32, 64} — total action count.  For zooming we set
-    ``max_depth = log2(n)`` and keep ``init_depth = 3`` (start at 8).
+  - n ∈ {8, 16, 32, 64} — action budget (per axis; for racetrack
+    da=1 this is total cells).  Zooming starts at ``2^init_depth``
+    bins (init_depth = min(3, log2(n))) and refines up to ``n``.
   - seed ∈ {42} by default (extend SEEDS for robustness).
 
 Outputs:
@@ -70,14 +71,14 @@ def commands() -> List[Tuple[str, List[str]]]:
                  "--total_timesteps", str(TOTAL_TIMESTEPS),
                  "--output", str(CKPT_DIR / f"{label_u}.pt")],
             ))
-            max_depth = int(math.log2(n))
-            label_z = f"zooming_d{max_depth}_seed{seed}"
+            init_depth = min(3, int(math.log2(n)))
+            label_z = f"zooming_n{n}_seed{seed}"
             out.append((
                 label_z,
                 [PYTHON, "src/highway/run_zooming.py",
                  "--seed", str(seed),
-                 "--init_depth", str(min(3, max_depth)),
-                 "--max_depth", str(max_depth),
+                 "--init_depth", str(init_depth),
+                 "--n_actions", str(n),
                  "--total_timesteps", str(TOTAL_TIMESTEPS),
                  "--output", str(CKPT_DIR / f"{label_z}.pt")],
             ))

@@ -1,0 +1,1 @@
+src/dmcs/run_zooming.py --task cartpole-swingup --seed 42 --init_depth 1 --n_actions 64 --total_timesteps 1 --output checkpoints/dmcs/cartpole-swingup/timestep_sweep/zooming_n64_seed42.pt
