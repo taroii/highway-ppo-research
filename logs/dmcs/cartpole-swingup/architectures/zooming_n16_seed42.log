@@ -1,1 +1,40 @@
-src/dmcs/run_zooming.py --task cartpole-swingup --seed 42 --init_depth 1 --n_actions 16 --total_timesteps 1 --output checkpoints/dmcs/cartpole-swingup/architectures/zooming_n16_seed42.pt
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Zooming DQN on dm_control/cartpole-swingup  da=1  init_depth=1 (start=2 cells)  n=16 -> total_budget=16  seed=42  steps=300000
+[  10000/300000]  ep=  10  reward(last50)=  77.91  n_per_axis=[2]  total_splits=0
+[  20000/300000]  ep=  20  reward(last50)= 140.28  n_per_axis=[2]  total_splits=0
+[  30000/300000]  ep=  30  reward(last50)= 205.14  n_per_axis=[2]  total_splits=0
+[  40000/300000]  ep=  40  reward(last50)= 236.24  n_per_axis=[2]  total_splits=0
+[  50000/300000]  ep=  50  reward(last50)= 264.08  n_per_axis=[2]  total_splits=0
+[  60000/300000]  ep=  60  reward(last50)= 336.25  n_per_axis=[4]  total_splits=2
+[  70000/300000]  ep=  70  reward(last50)= 355.92  n_per_axis=[16]  total_splits=14
+[  80000/300000]  ep=  80  reward(last50)= 385.24  n_per_axis=[16]  total_splits=14
+[  90000/300000]  ep=  90  reward(last50)= 427.29  n_per_axis=[16]  total_splits=14
+[ 100000/300000]  ep= 100  reward(last50)= 478.29  n_per_axis=[16]  total_splits=14
+[ 110000/300000]  ep= 110  reward(last50)= 519.56  n_per_axis=[16]  total_splits=14
+[ 120000/300000]  ep= 120  reward(last50)= 600.54  n_per_axis=[16]  total_splits=14
+[ 130000/300000]  ep= 130  reward(last50)= 663.21  n_per_axis=[16]  total_splits=14
+[ 140000/300000]  ep= 140  reward(last50)= 716.86  n_per_axis=[16]  total_splits=14
+[ 150000/300000]  ep= 150  reward(last50)= 722.05  n_per_axis=[16]  total_splits=14
+[ 160000/300000]  ep= 160  reward(last50)= 734.52  n_per_axis=[16]  total_splits=14
+[ 170000/300000]  ep= 170  reward(last50)= 723.90  n_per_axis=[16]  total_splits=14
+[ 180000/300000]  ep= 180  reward(last50)= 721.72  n_per_axis=[16]  total_splits=14
+[ 190000/300000]  ep= 190  reward(last50)= 714.74  n_per_axis=[16]  total_splits=14
+[ 200000/300000]  ep= 200  reward(last50)= 741.23  n_per_axis=[16]  total_splits=14
+[ 210000/300000]  ep= 210  reward(last50)= 744.62  n_per_axis=[16]  total_splits=14
+[ 220000/300000]  ep= 220  reward(last50)= 761.28  n_per_axis=[16]  total_splits=14
+[ 230000/300000]  ep= 230  reward(last50)= 760.96  n_per_axis=[16]  total_splits=14
+[ 240000/300000]  ep= 240  reward(last50)= 755.88  n_per_axis=[16]  total_splits=14
+[ 250000/300000]  ep= 250  reward(last50)= 757.19  n_per_axis=[16]  total_splits=14
+[ 260000/300000]  ep= 260  reward(last50)= 777.14  n_per_axis=[16]  total_splits=14
+[ 270000/300000]  ep= 270  reward(last50)= 792.44  n_per_axis=[16]  total_splits=14
+[ 280000/300000]  ep= 280  reward(last50)= 793.68  n_per_axis=[16]  total_splits=14
+[ 290000/300000]  ep= 290  reward(last50)= 794.06  n_per_axis=[16]  total_splits=14
+[ 300000/300000]  ep= 300  reward(last50)= 790.10  n_per_axis=[16]  total_splits=14
+Saved BranchingDQN checkpoint to checkpoints/dmcs/cartpole-swingup/architectures/zooming_n16_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=558.59  std=169.36
+Final n_per_axis: [16]  total_cells: 16/16  total_splits: 14

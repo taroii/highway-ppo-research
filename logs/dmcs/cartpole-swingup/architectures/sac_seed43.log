@@ -1,0 +1,39 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+SAC on dm_control/cartpole-swingup  seed=43  steps=300000
+[  10000/300000]  ep=  10  reward(last50)=  30.20  alpha=0.1000
+[  20000/300000]  ep=  20  reward(last50)=  52.87  alpha=0.0293
+[  30000/300000]  ep=  30  reward(last50)= 118.03  alpha=0.0119
+[  40000/300000]  ep=  40  reward(last50)= 180.35  alpha=0.0077
+[  50000/300000]  ep=  50  reward(last50)= 230.18  alpha=0.0083
+[  60000/300000]  ep=  60  reward(last50)= 312.52  alpha=0.0101
+[  70000/300000]  ep=  70  reward(last50)= 399.24  alpha=0.0137
+[  80000/300000]  ep=  80  reward(last50)= 468.84  alpha=0.0170
+[  90000/300000]  ep=  90  reward(last50)= 529.50  alpha=0.0204
+[ 100000/300000]  ep= 100  reward(last50)= 580.52  alpha=0.0220
+[ 110000/300000]  ep= 110  reward(last50)= 640.11  alpha=0.0223
+[ 120000/300000]  ep= 120  reward(last50)= 691.68  alpha=0.0212
+[ 130000/300000]  ep= 130  reward(last50)= 735.31  alpha=0.0217
+[ 140000/300000]  ep= 140  reward(last50)= 764.86  alpha=0.0204
+[ 150000/300000]  ep= 150  reward(last50)= 793.48  alpha=0.0222
+[ 160000/300000]  ep= 160  reward(last50)= 810.37  alpha=0.0222
+[ 170000/300000]  ep= 170  reward(last50)= 815.86  alpha=0.0217
+[ 180000/300000]  ep= 180  reward(last50)= 811.41  alpha=0.0196
+[ 190000/300000]  ep= 190  reward(last50)= 809.57  alpha=0.0245
+[ 200000/300000]  ep= 200  reward(last50)= 809.67  alpha=0.0241
+[ 210000/300000]  ep= 210  reward(last50)= 812.23  alpha=0.0240
+[ 220000/300000]  ep= 220  reward(last50)= 819.90  alpha=0.0202
+[ 230000/300000]  ep= 230  reward(last50)= 828.86  alpha=0.0216
+[ 240000/300000]  ep= 240  reward(last50)= 833.91  alpha=0.0204
+[ 250000/300000]  ep= 250  reward(last50)= 834.07  alpha=0.0178
+[ 260000/300000]  ep= 260  reward(last50)= 832.33  alpha=0.0169
+[ 270000/300000]  ep= 270  reward(last50)= 827.39  alpha=0.0190
+[ 280000/300000]  ep= 280  reward(last50)= 825.02  alpha=0.0186
+[ 290000/300000]  ep= 290  reward(last50)= 819.63  alpha=0.0196
+[ 300000/300000]  ep= 300  reward(last50)= 818.54  alpha=0.0179
+Saved SAC checkpoint to checkpoints/dmcs/cartpole-swingup/architectures/sac_seed43.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=842.59  std=0.71
