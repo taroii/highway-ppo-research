@@ -1,0 +1,39 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Uniform DQN on dm_control/walker-walk  da=6  n=32 (per axis -> 192 total cells)  seed=42  steps=300000
+[  10000/300000]  ep=  10  reward(last50)=  32.19  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  20000/300000]  ep=  20  reward(last50)=  33.07  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  30000/300000]  ep=  30  reward(last50)=  35.73  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  40000/300000]  ep=  40  reward(last50)=  40.56  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  50000/300000]  ep=  50  reward(last50)=  45.35  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  60000/300000]  ep=  60  reward(last50)=  58.51  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  70000/300000]  ep=  70  reward(last50)=  70.89  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  80000/300000]  ep=  80  reward(last50)=  83.17  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[  90000/300000]  ep=  90  reward(last50)=  96.55  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 100000/300000]  ep= 100  reward(last50)= 108.25  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 110000/300000]  ep= 110  reward(last50)= 120.13  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 120000/300000]  ep= 120  reward(last50)= 143.18  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 130000/300000]  ep= 130  reward(last50)= 185.09  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 140000/300000]  ep= 140  reward(last50)= 243.79  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 150000/300000]  ep= 150  reward(last50)= 326.24  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 160000/300000]  ep= 160  reward(last50)= 415.35  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 170000/300000]  ep= 170  reward(last50)= 503.88  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 180000/300000]  ep= 180  reward(last50)= 577.65  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 190000/300000]  ep= 190  reward(last50)= 634.05  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 200000/300000]  ep= 200  reward(last50)= 668.50  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 210000/300000]  ep= 210  reward(last50)= 691.33  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 220000/300000]  ep= 220  reward(last50)= 711.31  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 230000/300000]  ep= 230  reward(last50)= 721.78  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 240000/300000]  ep= 240  reward(last50)= 736.75  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 250000/300000]  ep= 250  reward(last50)= 756.64  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 260000/300000]  ep= 260  reward(last50)= 775.47  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 270000/300000]  ep= 270  reward(last50)= 788.59  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 280000/300000]  ep= 280  reward(last50)= 804.71  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 290000/300000]  ep= 290  reward(last50)= 819.45  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+[ 300000/300000]  ep= 300  reward(last50)= 826.04  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=0
+Saved BranchingDQN checkpoint to checkpoints/dmcs/walker-walk/action_sweep/uniform_n32_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=886.52  std=25.98

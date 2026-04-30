@@ -1,0 +1,40 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Zooming DQN on dm_control/walker-walk  da=6  init_depth=1 (start=12 cells)  n=64 -> total_budget=384  seed=42  steps=300000
+[  10000/300000]  ep=  10  reward(last50)=  39.26  n_per_axis=[2, 2, 2, 2, 2, 2]  total_splits=0
+[  20000/300000]  ep=  20  reward(last50)=  39.40  n_per_axis=[2, 2, 2, 2, 2, 2]  total_splits=0
+[  30000/300000]  ep=  30  reward(last50)=  51.56  n_per_axis=[2, 2, 2, 2, 2, 2]  total_splits=0
+[  40000/300000]  ep=  40  reward(last50)=  65.67  n_per_axis=[2, 2, 2, 2, 2, 2]  total_splits=0
+[  50000/300000]  ep=  50  reward(last50)=  86.94  n_per_axis=[2, 2, 2, 2, 2, 2]  total_splits=0
+[  60000/300000]  ep=  60  reward(last50)= 109.37  n_per_axis=[4, 4, 4, 4, 4, 4]  total_splits=12
+[  70000/300000]  ep=  70  reward(last50)= 116.44  n_per_axis=[28, 27, 28, 28, 27, 28]  total_splits=154
+[  80000/300000]  ep=  80  reward(last50)= 111.65  n_per_axis=[32, 32, 32, 32, 32, 32]  total_splits=180
+[  90000/300000]  ep=  90  reward(last50)= 101.45  n_per_axis=[34, 33, 33, 32, 35, 33]  total_splits=188
+[ 100000/300000]  ep= 100  reward(last50)=  80.09  n_per_axis=[41, 39, 40, 42, 40, 40]  total_splits=230
+[ 110000/300000]  ep= 110  reward(last50)=  57.85  n_per_axis=[48, 50, 51, 50, 46, 49]  total_splits=282
+[ 120000/300000]  ep= 120  reward(last50)=  53.63  n_per_axis=[56, 57, 56, 54, 54, 58]  total_splits=323
+[ 130000/300000]  ep= 130  reward(last50)=  50.98  n_per_axis=[59, 60, 58, 60, 58, 62]  total_splits=345
+[ 140000/300000]  ep= 140  reward(last50)=  48.66  n_per_axis=[61, 63, 62, 62, 62, 63]  total_splits=361
+[ 150000/300000]  ep= 150  reward(last50)=  44.55  n_per_axis=[63, 64, 64, 62, 64, 64]  total_splits=369
+[ 160000/300000]  ep= 160  reward(last50)=  50.22  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 170000/300000]  ep= 170  reward(last50)=  56.88  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 180000/300000]  ep= 180  reward(last50)=  74.38  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 190000/300000]  ep= 190  reward(last50)=  95.65  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 200000/300000]  ep= 200  reward(last50)= 120.95  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 210000/300000]  ep= 210  reward(last50)= 146.07  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 220000/300000]  ep= 220  reward(last50)= 184.08  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 230000/300000]  ep= 230  reward(last50)= 221.53  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 240000/300000]  ep= 240  reward(last50)= 269.02  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 250000/300000]  ep= 250  reward(last50)= 331.47  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 260000/300000]  ep= 260  reward(last50)= 402.81  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 270000/300000]  ep= 270  reward(last50)= 466.96  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 280000/300000]  ep= 280  reward(last50)= 523.77  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 290000/300000]  ep= 290  reward(last50)= 569.14  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+[ 300000/300000]  ep= 300  reward(last50)= 608.56  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=372
+Saved BranchingDQN checkpoint to checkpoints/dmcs/walker-walk/action_sweep/zooming_n64_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=627.98  std=45.70
+Final n_per_axis: [64, 64, 64, 64, 64, 64]  total_cells: 384/384  total_splits: 372
