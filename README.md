@@ -28,8 +28,8 @@ TS_N_ACTIONS=64 ./scripts/run_highway_timestep_sweep.sh           # long-horizon
 ./scripts/run_dmcs_architectures.sh walker-walk
 ./scripts/run_dmcs_architectures.sh cheetah-run
 
-./scripts/run_dmcs_action_sweep.sh walker-walk
-TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh walker-walk
+./scripts/run_dmcs_action_sweep.sh walker-walk                    # Uniform vs Zooming, N \in {16,32,64,128}
+TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh walker-walk  # long-horizon at chosen N
 ```
 
 All scripts accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.
@@ -40,6 +40,14 @@ Default seed counts are tuned to give usable error bars without burning the GPU:
 - action sweeps -- 3 seeds, hardcoded in `src/{dmcs,highway}/run_action_sweep.py`
 
 For a quick smoke test, override with a single seed (e.g. `SEEDS=42 ./scripts/run_dmcs_architectures.sh` or `TS_SEEDS=42 ./scripts/run_highway_timestep_sweep.sh`); for the action sweeps, edit `SEEDS = [42, 43, 44]` in the corresponding `run_action_sweep.py`.
+
+Training-timestep defaults vary by experiment and (for DMCS) by task:
+- DMCS architectures -- 150k for cartpole-swingup, 300k for walker-walk, 500k for cheetah-run (override via `DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
+- DMCS timestep sweep -- 1M (`TS_TIMESTEPS`), long enough to read asymptotic behavior at large N.
+- DMCS action sweep -- 300k, hardcoded; intentionally compute-bounded so the uniform-vs-zooming gap at large N reflects the limited-budget regime.
+- Highway architectures -- 150k (`DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
+- Highway timestep sweep -- 600k (`TS_TIMESTEPS`).
+- Highway action sweep -- 150k, hardcoded.
 
 Outputs land under `checkpoints/<family>/<task>/<phase>/` and `plots/<family>/...`.
 

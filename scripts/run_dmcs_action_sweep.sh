@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # DMCS action-budget sweep: uniform vs zooming on a chosen task across
-# N \in {8, 16, 32, 64} at fixed training budget.  Thin wrapper around
+# N \in {16, 32, 64, 128} at fixed training budget.  Thin wrapper around
 # src/dmcs/run_action_sweep.py -- the sweep config (N values, seeds,
 # timesteps) is hardcoded there.
 #

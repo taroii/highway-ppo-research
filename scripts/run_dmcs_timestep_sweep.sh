@@ -23,7 +23,7 @@
 # Optional env vars:
 #   TS_SEEDS      space-separated, default "42 43 44" (cut to "42"
 #                 for a smoke test; extend for more error-bar power)
-#   TS_TIMESTEPS  default 600000
+#   TS_TIMESTEPS  default 1000000
 #   INIT_DEPTH    zooming starting depth, default 1
 #   PYTHON        default "python"
 #
@@ -41,7 +41,7 @@ if [ -z "${TS_N_ACTIONS:-}" ]; then
 fi
 
 TS_SEEDS="${TS_SEEDS:-42 43 44}"
-TS_TIMESTEPS="${TS_TIMESTEPS:-600000}"
+TS_TIMESTEPS="${TS_TIMESTEPS:-1000000}"
 INIT_DEPTH="${INIT_DEPTH:-1}"
 PYTHON="${PYTHON:-python}"
 

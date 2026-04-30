@@ -8,15 +8,15 @@ cost from step 1 while zooming bootstraps from a coarser grid (init=2
 bins per axis at ``init_depth=1``) and only refines where the policy
 concentrates plays.
 
-Caveat -- this sweep does *not* control for compute: a 64-arm bandit
-needs more samples to converge than an 8-arm bandit, so very large N
+Caveat -- this sweep does *not* control for compute: a 128-arm bandit
+needs more samples to converge than a 16-arm bandit, so very large N
 may look bad here purely because the training budget is fixed.  The
 companion timestep sweep (in ``run_dmcs_pipeline.sh``'s phase 2)
 separates that confound by holding N and varying training timesteps.
 
 Sweep dimensions:
-  - n \in {8, 16, 32, 64} -- bins per action axis.  Total cells per arm =
-    ``n * da``; for da=6 (walker, cheetah) N=64 means 384 total cells.
+  - n \in {16, 32, 64, 128} -- bins per action axis.  Total cells per arm
+    = ``n * da``; for da=6 (walker, cheetah) N=128 means 768 total cells.
   - seed \in {42, 43, 44} by default (extend SEEDS for robustness;
     cut to a single seed for a smoke test).
   - task: passed via --task, default ``cartpole-swingup``.
@@ -44,7 +44,7 @@ from typing import List, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
-N_VALUES = [8, 16, 32, 64]
+N_VALUES = [16, 32, 64, 128]
 SEEDS = [42, 43, 44]
 TOTAL_TIMESTEPS = 300_000
 INIT_DEPTH = 1

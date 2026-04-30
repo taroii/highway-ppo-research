@@ -15,8 +15,9 @@
 #
 # Knobs (env vars):
 #   SEEDS              space-separated list, default "42 43 44 45 46"
-#   SAC_TIMESTEPS      default 300000
-#   DQN_TIMESTEPS      default 300000   (uniform + zooming)
+#   SAC_TIMESTEPS      per-task default (cartpole-swingup: 150000,
+#                      walker-walk: 300000, cheetah-run: 500000)
+#   DQN_TIMESTEPS      same per-task default (uniform + zooming)
 #   N_ACTIONS          action budget per axis, default 32
 #   INIT_DEPTH         zooming starting depth, default 1
 #                      (= 2 bins per axis at start; max adaptive room)
@@ -29,9 +30,18 @@ set -uo pipefail
 
 TASK="${1:-cartpole-swingup}"
 
+# Per-task training budget. Cartpole saturates by ~150k; walker-walk
+# wants ~300k at N=32; cheetah-run is harder and benefits from 500k.
+case "$TASK" in
+    cartpole-swingup) DEFAULT_TIMESTEPS=150000 ;;
+    walker-walk)      DEFAULT_TIMESTEPS=300000 ;;
+    cheetah-run)      DEFAULT_TIMESTEPS=500000 ;;
+    *)                DEFAULT_TIMESTEPS=300000 ;;
+esac
+
 SEEDS="${SEEDS:-42 43 44 45 46}"
-SAC_TIMESTEPS="${SAC_TIMESTEPS:-300000}"
-DQN_TIMESTEPS="${DQN_TIMESTEPS:-300000}"
+SAC_TIMESTEPS="${SAC_TIMESTEPS:-$DEFAULT_TIMESTEPS}"
+DQN_TIMESTEPS="${DQN_TIMESTEPS:-$DEFAULT_TIMESTEPS}"
 N_ACTIONS="${N_ACTIONS:-32}"
 INIT_DEPTH="${INIT_DEPTH:-1}"
 PYTHON="${PYTHON:-python}"
