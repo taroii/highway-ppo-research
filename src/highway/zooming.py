@@ -104,17 +104,17 @@ class ActionZooming:
         # Process in reverse so indices remain valid during pops.
         for old_idx in reversed(to_split):
             cube = self.active_cubes.pop(old_idx)
-            parent_stats = self.stats.pop(old_idx)
+            self.stats.pop(old_idx)
             children = cube.split_children()
             new_start = len(self.active_cubes)
             new_indices = list(range(new_start, new_start + len(children)))
             for child in children:
                 self.active_cubes.append(child)
-                # Children inherit the parent's play count so UCB sees
-                # continuous bonus across splits (not a spike from N=0).
-                # Matches bandit-zooming theory: the parent's plays
-                # informed our estimate of this region; each child
-                # inherits that confidence.
-                self.stats.append(CubeStats(n_play=parent_stats.n_play))
+                # Children start fresh (n_play=0): bandit-zooming theory
+                # treats refined sub-cubes as new arms with no prior plays.
+                # Their Q-row is inherited from the parent (in dqn.py's
+                # rebuild_head); their *count* is not, so UCB still
+                # explores each child specifically.
+                self.stats.append(CubeStats())
             splits.append(SplitInfo(old_idx=old_idx, new_indices=new_indices))
         return splits

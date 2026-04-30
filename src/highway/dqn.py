@@ -61,9 +61,11 @@ class UCB:
     ``c`` anneals linearly from ``c_start`` to ``c_end`` over
     ``decay_steps``.  Set ``c_start == c_end`` for constant UCB (the
     bandit-theoretic default; the bonus self-decays via 1/sqrt(n(a))
-    as plays accumulate).  Annealing is only needed when fresh arms
-    appear with n=0 -- which is no longer the case in this codebase
-    since zooming children inherit their parent's play count.
+    as plays accumulate).  Annealing was originally added to dampen
+    the bonus on freshly-split zooming children (n=0 dominates argmax),
+    but it deviates from textbook bandit zooming.  If constant-c UCB
+    causes fresh-cell domination on a given task, lower ``c`` rather
+    than reintroducing annealing.
     """
 
     def __init__(self, c_start: float = 0.3, c_end: float = 0.03,
