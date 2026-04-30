@@ -19,11 +19,19 @@ Three independent scripts per task family under `scripts/`. GPU is auto-detected
 
 For each task, run the three phases in order. Phase 2 and Phase 3 each require an `N_ACTIONS` value picked from Phase 1's plot.
 
+**Env-var placement (Ubuntu / bash):** environment variables go *before* the `bash` command and apply only to that single invocation. The form is always:
+
+```bash
+VAR1=value1 VAR2=value2 bash scripts/<script>.sh <positional-args>
+```
+
+Anything to the right of `bash scripts/...` is read as a positional argument to the script (e.g. the task slug). All env vars must come before `bash`.
+
 ```bash
 # Phase 1 -- Action sweep: where does zooming beat uniform?
 #   24 runs (4 N values x 3 seeds x 2 arms) at fixed 300k timesteps.
 #   Output: plots/dmcs/<task>_action_sweep.png
-./scripts/run_dmcs_action_sweep.sh cartpole-swingup
+bash scripts/run_dmcs_action_sweep.sh cartpole-swingup
 
 # Inspect the plot, pick a target N (the one where zooming most clearly
 # wins over uniform, or where curves diverge most). Default if flat: 32.
@@ -31,24 +39,24 @@ For each task, run the three phases in order. Phase 2 and Phase 3 each require a
 # Phase 2 -- Architectures sweep at chosen N: SAC vs Uniform vs Zooming.
 #   15 runs (5 seeds x 3 arms) at the per-task DQN_TIMESTEPS default.
 #   Output: plots/dmcs/<task>_architectures.png  (the headline plot.)
-N_ACTIONS=32 ./scripts/run_dmcs_architectures.sh cartpole-swingup
+N_ACTIONS=32 bash scripts/run_dmcs_architectures.sh cartpole-swingup
 
 # Phase 3 -- Timestep sweep at chosen N: asymptotic behavior.
 #   6 runs (3 seeds x 2 arms) at TS_TIMESTEPS=1M each.
 #   Output: plots/dmcs/<task>_timestep_sweep.png
-TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh cartpole-swingup
+TS_N_ACTIONS=32 bash scripts/run_dmcs_timestep_sweep.sh cartpole-swingup
 ```
 
 Repeat for the remaining DMCS tasks; pick `N_ACTIONS` / `TS_N_ACTIONS` fresh for each based on its own action-sweep plot:
 
 ```bash
-./scripts/run_dmcs_action_sweep.sh cheetah-run
-N_ACTIONS=<chosen> ./scripts/run_dmcs_architectures.sh cheetah-run
-TS_N_ACTIONS=<chosen> ./scripts/run_dmcs_timestep_sweep.sh cheetah-run
+bash scripts/run_dmcs_action_sweep.sh cheetah-run
+N_ACTIONS=<chosen> bash scripts/run_dmcs_architectures.sh cheetah-run
+TS_N_ACTIONS=<chosen> bash scripts/run_dmcs_timestep_sweep.sh cheetah-run
 
-./scripts/run_dmcs_action_sweep.sh walker-walk
-N_ACTIONS=<chosen> ./scripts/run_dmcs_architectures.sh walker-walk
-TS_N_ACTIONS=<chosen> ./scripts/run_dmcs_timestep_sweep.sh walker-walk
+bash scripts/run_dmcs_action_sweep.sh walker-walk
+N_ACTIONS=<chosen> bash scripts/run_dmcs_architectures.sh walker-walk
+TS_N_ACTIONS=<chosen> bash scripts/run_dmcs_timestep_sweep.sh walker-walk
 ```
 
 ### Highway (racetrack-v0, 1-D action)
@@ -56,9 +64,9 @@ TS_N_ACTIONS=<chosen> ./scripts/run_dmcs_timestep_sweep.sh walker-walk
 Same three-phase structure; `racetrack-v0` is the only task so no positional arg.
 
 ```bash
-./scripts/run_highway_action_sweep.sh                              # Uniform vs Zooming, N \in {8,16,32,64}
-N_ACTIONS=<chosen> ./scripts/run_highway_architectures.sh          # SAC vs Uniform vs Zooming
-TS_N_ACTIONS=<chosen> ./scripts/run_highway_timestep_sweep.sh      # long-horizon at chosen N
+bash scripts/run_highway_action_sweep.sh                              # Uniform vs Zooming, N \in {8,16,32,64}
+N_ACTIONS=<chosen> bash scripts/run_highway_architectures.sh          # SAC vs Uniform vs Zooming
+TS_N_ACTIONS=<chosen> bash scripts/run_highway_timestep_sweep.sh      # long-horizon at chosen N
 ```
 
 All scripts accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.
@@ -68,7 +76,7 @@ Default seed counts are tuned to give usable error bars without burning the GPU:
 - timestep sweeps -- 3 seeds (`TS_SEEDS="42 43 44"`)
 - action sweeps -- 3 seeds, hardcoded in `src/{dmcs,highway}/run_action_sweep.py`
 
-For a quick smoke test, override with a single seed (e.g. `SEEDS=42 ./scripts/run_dmcs_architectures.sh` or `TS_SEEDS=42 ./scripts/run_highway_timestep_sweep.sh`); for the action sweeps, edit `SEEDS = [42, 43, 44]` in the corresponding `run_action_sweep.py`.
+For a quick smoke test, override with a single seed (e.g. `SEEDS=42 bash scripts/run_dmcs_architectures.sh cartpole-swingup` or `TS_SEEDS=42 bash scripts/run_highway_timestep_sweep.sh`); for the action sweeps, edit `SEEDS = [42, 43, 44]` in the corresponding `run_action_sweep.py`.
 
 Training-timestep defaults vary by experiment and (for DMCS) by task:
 - DMCS architectures -- 150k for cartpole-swingup, 300k for walker-walk, 500k for cheetah-run (override via `DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
