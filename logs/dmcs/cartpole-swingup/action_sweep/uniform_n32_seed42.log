@@ -1,0 +1,39 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Uniform DQN on dm_control/cartpole-swingup  da=1  n=32 (per axis -> 32 total cells)  seed=42  steps=300000
+[  10000/300000]  ep=  10  reward(last50)=  34.30  n_per_axis=[32]  total_splits=0
+[  20000/300000]  ep=  20  reward(last50)=  66.02  n_per_axis=[32]  total_splits=0
+[  30000/300000]  ep=  30  reward(last50)= 104.90  n_per_axis=[32]  total_splits=0
+[  40000/300000]  ep=  40  reward(last50)= 137.00  n_per_axis=[32]  total_splits=0
+[  50000/300000]  ep=  50  reward(last50)= 167.07  n_per_axis=[32]  total_splits=0
+[  60000/300000]  ep=  60  reward(last50)= 232.39  n_per_axis=[32]  total_splits=0
+[  70000/300000]  ep=  70  reward(last50)= 289.40  n_per_axis=[32]  total_splits=0
+[  80000/300000]  ep=  80  reward(last50)= 327.74  n_per_axis=[32]  total_splits=0
+[  90000/300000]  ep=  90  reward(last50)= 384.81  n_per_axis=[32]  total_splits=0
+[ 100000/300000]  ep= 100  reward(last50)= 438.40  n_per_axis=[32]  total_splits=0
+[ 110000/300000]  ep= 110  reward(last50)= 516.74  n_per_axis=[32]  total_splits=0
+[ 120000/300000]  ep= 120  reward(last50)= 582.08  n_per_axis=[32]  total_splits=0
+[ 130000/300000]  ep= 130  reward(last50)= 602.86  n_per_axis=[32]  total_splits=0
+[ 140000/300000]  ep= 140  reward(last50)= 532.90  n_per_axis=[32]  total_splits=0
+[ 150000/300000]  ep= 150  reward(last50)= 453.63  n_per_axis=[32]  total_splits=0
+[ 160000/300000]  ep= 160  reward(last50)= 396.17  n_per_axis=[32]  total_splits=0
+[ 170000/300000]  ep= 170  reward(last50)= 274.03  n_per_axis=[32]  total_splits=0
+[ 180000/300000]  ep= 180  reward(last50)= 245.59  n_per_axis=[32]  total_splits=0
+[ 190000/300000]  ep= 190  reward(last50)= 309.64  n_per_axis=[32]  total_splits=0
+[ 200000/300000]  ep= 200  reward(last50)= 395.56  n_per_axis=[32]  total_splits=0
+[ 210000/300000]  ep= 210  reward(last50)= 432.38  n_per_axis=[32]  total_splits=0
+[ 220000/300000]  ep= 220  reward(last50)= 550.25  n_per_axis=[32]  total_splits=0
+[ 230000/300000]  ep= 230  reward(last50)= 580.71  n_per_axis=[32]  total_splits=0
+[ 240000/300000]  ep= 240  reward(last50)= 554.01  n_per_axis=[32]  total_splits=0
+[ 250000/300000]  ep= 250  reward(last50)= 526.98  n_per_axis=[32]  total_splits=0
+[ 260000/300000]  ep= 260  reward(last50)= 445.74  n_per_axis=[32]  total_splits=0
+[ 270000/300000]  ep= 270  reward(last50)= 357.23  n_per_axis=[32]  total_splits=0
+[ 280000/300000]  ep= 280  reward(last50)= 348.39  n_per_axis=[32]  total_splits=0
+[ 290000/300000]  ep= 290  reward(last50)= 333.07  n_per_axis=[32]  total_splits=0
+[ 300000/300000]  ep= 300  reward(last50)= 317.24  n_per_axis=[32]  total_splits=0
+Saved BranchingDQN checkpoint to checkpoints/dmcs/cartpole-swingup/action_sweep/uniform_n32_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=234.20  std=47.39

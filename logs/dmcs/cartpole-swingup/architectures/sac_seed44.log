@@ -3,37 +3,37 @@
 /home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import resource_stream, resource_exists
 SAC on dm_control/cartpole-swingup  seed=44  steps=300000
-[  10000/300000]  ep=  10  reward(last50)=  29.88  alpha=0.1000
-[  20000/300000]  ep=  20  reward(last50)=  57.45  alpha=0.0293
-[  30000/300000]  ep=  30  reward(last50)= 105.34  alpha=0.0124
-[  40000/300000]  ep=  40  reward(last50)= 129.91  alpha=0.0103
-[  50000/300000]  ep=  50  reward(last50)= 145.88  alpha=0.0081
-[  60000/300000]  ep=  60  reward(last50)= 214.27  alpha=0.0089
-[  70000/300000]  ep=  70  reward(last50)= 303.04  alpha=0.0117
-[  80000/300000]  ep=  80  reward(last50)= 396.29  alpha=0.0129
-[  90000/300000]  ep=  90  reward(last50)= 502.62  alpha=0.0147
-[ 100000/300000]  ep= 100  reward(last50)= 608.19  alpha=0.0175
-[ 110000/300000]  ep= 110  reward(last50)= 674.16  alpha=0.0183
-[ 120000/300000]  ep= 120  reward(last50)= 718.32  alpha=0.0193
-[ 130000/300000]  ep= 130  reward(last50)= 738.71  alpha=0.0210
-[ 140000/300000]  ep= 140  reward(last50)= 745.63  alpha=0.0203
-[ 150000/300000]  ep= 150  reward(last50)= 757.26  alpha=0.0213
-[ 160000/300000]  ep= 160  reward(last50)= 773.09  alpha=0.0215
-[ 170000/300000]  ep= 170  reward(last50)= 773.59  alpha=0.0225
-[ 180000/300000]  ep= 180  reward(last50)= 767.39  alpha=0.0225
-[ 190000/300000]  ep= 190  reward(last50)= 766.56  alpha=0.0207
-[ 200000/300000]  ep= 200  reward(last50)= 759.48  alpha=0.0210
-[ 210000/300000]  ep= 210  reward(last50)= 755.08  alpha=0.0206
-[ 220000/300000]  ep= 220  reward(last50)= 754.89  alpha=0.0220
-[ 230000/300000]  ep= 230  reward(last50)= 757.67  alpha=0.0222
-[ 240000/300000]  ep= 240  reward(last50)= 754.83  alpha=0.0201
-[ 250000/300000]  ep= 250  reward(last50)= 758.55  alpha=0.0196
-[ 260000/300000]  ep= 260  reward(last50)= 763.15  alpha=0.0197
-[ 270000/300000]  ep= 270  reward(last50)= 764.42  alpha=0.0195
-[ 280000/300000]  ep= 280  reward(last50)= 767.30  alpha=0.0183
-[ 290000/300000]  ep= 290  reward(last50)= 769.32  alpha=0.0179
-[ 300000/300000]  ep= 300  reward(last50)= 768.41  alpha=0.0187
+[  10000/300000]  ep=  10  reward(last50)=  27.28  alpha=0.1000
+[  20000/300000]  ep=  20  reward(last50)=  48.57  alpha=0.0293
+[  30000/300000]  ep=  30  reward(last50)= 106.95  alpha=0.0122
+[  40000/300000]  ep=  40  reward(last50)= 148.27  alpha=0.0079
+[  50000/300000]  ep=  50  reward(last50)= 190.69  alpha=0.0086
+[  60000/300000]  ep=  60  reward(last50)= 269.51  alpha=0.0117
+[  70000/300000]  ep=  70  reward(last50)= 382.56  alpha=0.0153
+[  80000/300000]  ep=  80  reward(last50)= 466.75  alpha=0.0182
+[  90000/300000]  ep=  90  reward(last50)= 543.40  alpha=0.0220
+[ 100000/300000]  ep= 100  reward(last50)= 617.73  alpha=0.0226
+[ 110000/300000]  ep= 110  reward(last50)= 687.70  alpha=0.0226
+[ 120000/300000]  ep= 120  reward(last50)= 716.49  alpha=0.0230
+[ 130000/300000]  ep= 130  reward(last50)= 740.45  alpha=0.0236
+[ 140000/300000]  ep= 140  reward(last50)= 764.75  alpha=0.0254
+[ 150000/300000]  ep= 150  reward(last50)= 780.07  alpha=0.0234
+[ 160000/300000]  ep= 160  reward(last50)= 782.44  alpha=0.0226
+[ 170000/300000]  ep= 170  reward(last50)= 779.74  alpha=0.0223
+[ 180000/300000]  ep= 180  reward(last50)= 784.48  alpha=0.0227
+[ 190000/300000]  ep= 190  reward(last50)= 789.37  alpha=0.0227
+[ 200000/300000]  ep= 200  reward(last50)= 785.22  alpha=0.0240
+[ 210000/300000]  ep= 210  reward(last50)= 790.36  alpha=0.0223
+[ 220000/300000]  ep= 220  reward(last50)= 794.51  alpha=0.0220
+[ 230000/300000]  ep= 230  reward(last50)= 794.88  alpha=0.0216
+[ 240000/300000]  ep= 240  reward(last50)= 798.68  alpha=0.0220
+[ 250000/300000]  ep= 250  reward(last50)= 800.66  alpha=0.0201
+[ 260000/300000]  ep= 260  reward(last50)= 805.87  alpha=0.0214
+[ 270000/300000]  ep= 270  reward(last50)= 816.94  alpha=0.0219
+[ 280000/300000]  ep= 280  reward(last50)= 828.39  alpha=0.0203
+[ 290000/300000]  ep= 290  reward(last50)= 833.70  alpha=0.0205
+[ 300000/300000]  ep= 300  reward(last50)= 841.53  alpha=0.0205
 Saved SAC checkpoint to checkpoints/dmcs/cartpole-swingup/architectures/sac_seed44.pt
 
 Evaluating (deterministic)...
-Eval(10): mean=798.35  std=11.40
+Eval(10): mean=786.76  std=0.76
