@@ -59,9 +59,11 @@ class UCB:
     """Q(s, a) + c(step) * sqrt(log(total) / n(a)).
 
     ``c`` anneals linearly from ``c_start`` to ``c_end`` over
-    ``decay_steps``.  Without annealing, UCB keeps exploring forever --
-    every freshly-split cube has n=0 and dominates argmax, which on
-    racetrack means forced steering extremes that crash the car.
+    ``decay_steps``.  Set ``c_start == c_end`` for constant UCB (the
+    bandit-theoretic default; the bonus self-decays via 1/sqrt(n(a))
+    as plays accumulate).  Annealing is only needed when fresh arms
+    appear with n=0 -- which is no longer the case in this codebase
+    since zooming children inherit their parent's play count.
     """
 
     def __init__(self, c_start: float = 0.3, c_end: float = 0.03,

@@ -53,21 +53,26 @@ def main(task: str = "walker-walk", seed: int = 42,
         init_depth=init_depth,
         total_budget=total_budget,
     )
+    learning_starts = 10_000
     agent = BranchingDQN(
         env=env,
         grid=grid,
-        selection_policy=UCB(c_start=0.3, c_end=0.03,
-                             decay_steps=int(0.4 * total_timesteps)),
+        # Constant-c UCB: matches bandit-zooming theory (no time-based
+        # annealing; the bonus self-decays via 1/sqrt(n(a)) as plays
+        # accumulate). With visit-count inheritance on splits, fresh
+        # children no longer spike the bonus.
+        selection_policy=UCB(c_start=0.3, c_end=0.3, decay_steps=1),
         hidden_dim=256,
         gamma=0.99,
         tau=0.005,
         lr=3e-4,
         batch_size=256,
         buffer_capacity=1_000_000,
-        learning_starts=10_000,
+        learning_starts=learning_starts,
         target_update_freq=2,
         split_check_freq=2000,
-        split_delay=int(0.2 * total_timesteps),
+        # Splits begin as soon as data is available -- no extra delay.
+        split_delay=learning_starts,
         seed=seed,
     )
 
@@ -93,12 +98,18 @@ def main(task: str = "walker-walk", seed: int = 42,
     print(f"Final n_per_axis: {grid.n_per_axis()}  "
           f"total_cells: {grid.total_cells}/{total_budget}  "
           f"total_splits: {agent.total_splits}")
+    if agent.split_history:
+        first_step, _, _ = agent.split_history[0]
+        last_step, _, _ = agent.split_history[-1]
+        print(f"Split history: {len(agent.split_history)} events, "
+              f"steps {first_step} to {last_step}")
     env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
             "n_per_axis_final": grid.n_per_axis(),
             "total_cells_final": grid.total_cells,
             "total_budget": total_budget,
             "total_splits": agent.total_splits,
+            "split_history": agent.split_history,
             "episode_rewards": rewards}
 
 

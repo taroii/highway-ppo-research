@@ -35,7 +35,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np
 
 from src.dmcs.env import make_dmcs_env
-from src.highway.dqn import EpsGreedy
+from src.highway.dqn import UCB
 from src.highway.dqn_factored import BranchingDQN
 from src.highway.uniform_grid_factored import FactoredUniformActionGrid
 
@@ -52,8 +52,9 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
     agent = BranchingDQN(
         env=env,
         grid=grid,
-        selection_policy=EpsGreedy(eps_start=1.0, eps_end=0.05,
-                                   decay_steps=int(0.4 * total_timesteps)),
+        # Constant-c UCB matches zooming's exploration policy exactly --
+        # the only difference between arms is the grid structure.
+        selection_policy=UCB(c_start=0.3, c_end=0.3, decay_steps=1),
         hidden_dim=256,
         gamma=0.99,
         tau=0.005,
@@ -85,9 +86,12 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
         eval_rewards.append(ep)
     eval_mean, eval_std = float(np.mean(eval_rewards)), float(np.std(eval_rewards))
     print(f"Eval(10): mean={eval_mean:.2f}  std={eval_std:.2f}")
+    print(f"Final n_per_axis: {grid.n_per_axis()}  "
+          f"total_cells: {grid.total_cells}  (uniform; no splits)")
     env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
             "n_actions": n_actions, "n_per_axis": grid.n_per_axis(),
+            "total_cells_final": grid.total_cells,
             "episode_rewards": rewards}
 
 

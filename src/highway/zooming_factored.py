@@ -161,7 +161,7 @@ class FactoredActionZooming:
             # Reverse so pops don't shift indices that haven't been processed yet.
             for old_idx in reversed(idxs_sorted):
                 cube = ax.active_cubes.pop(old_idx)
-                ax.stats.pop(old_idx)
+                parent_stats = ax.stats.pop(old_idx)
                 children = cube.split_children()
                 n_children = len(children)  # always 2 for a 1-D axis
                 new_indices = list(range(
@@ -171,7 +171,9 @@ class FactoredActionZooming:
                 child_offset += n_children
                 for child in children:
                     ax.active_cubes.append(child)
-                    ax.stats.append(CubeStats())
+                    # Children inherit the parent's play count so UCB
+                    # sees continuous bonus across splits (no N=0 spike).
+                    ax.stats.append(CubeStats(n_play=parent_stats.n_play))
                 results[axis_idx].append(
                     SplitInfo(old_idx=old_idx, new_indices=new_indices)
                 )

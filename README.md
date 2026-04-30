@@ -15,21 +15,50 @@ git clone https://github.com/eleurent/highway-env.git HighwayEnv
 
 Three independent scripts per task family under `scripts/`. GPU is auto-detected if available.
 
-**Highway** (racetrack-v0, 1-D action):
+### Per-task pipeline (recommended)
+
+For each task, run the three phases in order. Phase 2 and Phase 3 each require an `N_ACTIONS` value picked from Phase 1's plot.
+
 ```bash
-./scripts/run_highway_architectures.sh                            # SAC vs Uniform vs Zooming
-./scripts/run_highway_action_sweep.sh                             # Uniform vs Zooming, N \in {8,16,32,64}
-TS_N_ACTIONS=64 ./scripts/run_highway_timestep_sweep.sh           # long-horizon at chosen N
+# Phase 1 -- Action sweep: where does zooming beat uniform?
+#   24 runs (4 N values x 3 seeds x 2 arms) at fixed 300k timesteps.
+#   Output: plots/dmcs/<task>_action_sweep.png
+./scripts/run_dmcs_action_sweep.sh cartpole-swingup
+
+# Inspect the plot, pick a target N (the one where zooming most clearly
+# wins over uniform, or where curves diverge most). Default if flat: 32.
+
+# Phase 2 -- Architectures sweep at chosen N: SAC vs Uniform vs Zooming.
+#   15 runs (5 seeds x 3 arms) at the per-task DQN_TIMESTEPS default.
+#   Output: plots/dmcs/<task>_architectures.png  (the headline plot.)
+N_ACTIONS=32 ./scripts/run_dmcs_architectures.sh cartpole-swingup
+
+# Phase 3 -- Timestep sweep at chosen N: asymptotic behavior.
+#   6 runs (3 seeds x 2 arms) at TS_TIMESTEPS=1M each.
+#   Output: plots/dmcs/<task>_timestep_sweep.png
+TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh cartpole-swingup
 ```
 
-**DMCS** -- pass the task slug as a positional arg:
-```bash
-./scripts/run_dmcs_architectures.sh                               # cartpole-swingup (default)
-./scripts/run_dmcs_architectures.sh walker-walk
-./scripts/run_dmcs_architectures.sh cheetah-run
+Repeat for the remaining DMCS tasks; pick `N_ACTIONS` / `TS_N_ACTIONS` fresh for each based on its own action-sweep plot:
 
-./scripts/run_dmcs_action_sweep.sh walker-walk                    # Uniform vs Zooming, N \in {16,32,64,128}
-TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh walker-walk  # long-horizon at chosen N
+```bash
+./scripts/run_dmcs_action_sweep.sh cheetah-run
+N_ACTIONS=<chosen> ./scripts/run_dmcs_architectures.sh cheetah-run
+TS_N_ACTIONS=<chosen> ./scripts/run_dmcs_timestep_sweep.sh cheetah-run
+
+./scripts/run_dmcs_action_sweep.sh walker-walk
+N_ACTIONS=<chosen> ./scripts/run_dmcs_architectures.sh walker-walk
+TS_N_ACTIONS=<chosen> ./scripts/run_dmcs_timestep_sweep.sh walker-walk
+```
+
+### Highway (racetrack-v0, 1-D action)
+
+Same three-phase structure; `racetrack-v0` is the only task so no positional arg.
+
+```bash
+./scripts/run_highway_action_sweep.sh                              # Uniform vs Zooming, N \in {8,16,32,64}
+N_ACTIONS=<chosen> ./scripts/run_highway_architectures.sh          # SAC vs Uniform vs Zooming
+TS_N_ACTIONS=<chosen> ./scripts/run_highway_timestep_sweep.sh      # long-horizon at chosen N
 ```
 
 All scripts accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.

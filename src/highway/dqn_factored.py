@@ -180,6 +180,8 @@ class BranchingDQN:
         self.buffer = BranchingReplayBuffer(self.obs_dim, self.da, buffer_capacity,
                                             self.device)
         self.total_splits = 0
+        # (timestep, axis_idx, n_splits_on_axis) for each split event.
+        self.split_history: List[Tuple[int, int, int]] = []
 
     # ------------------------------------------------------------------
     # Action selection
@@ -252,7 +254,7 @@ class BranchingDQN:
             if p in old_state:
                 self.optimizer.state[p] = old_state[p]
 
-    def _check_splits(self) -> int:
+    def _check_splits(self, step: int) -> int:
         per_axis_splits = self.grid.try_split()
         n_splits = sum(len(s) for s in per_axis_splits)
         if n_splits == 0:
@@ -264,6 +266,7 @@ class BranchingDQN:
             self.q.rebuild_head_axis(i, new_n_i, splits_i)
             self.q_target.rebuild_head_axis(i, new_n_i, splits_i)
             self._sync_target_axis_children(i, splits_i)
+            self.split_history.append((step, i, len(splits_i)))
         self._rebuild_optimizer_preserving_state()
         return n_splits
 
@@ -299,7 +302,7 @@ class BranchingDQN:
                     soft_update(self.q, self.q_target, self.tau)
 
             if step >= self.split_delay and step % self.split_check_freq == 0:
-                self.total_splits += self._check_splits()
+                self.total_splits += self._check_splits(step)
 
             if episode_rewards and step % print_every == 0:
                 recent = episode_rewards[-50:]
@@ -320,6 +323,10 @@ class BranchingDQN:
             "q": self.q.state_dict(),
             "n_per_axis": self.grid.n_per_axis(),
             "episode_rewards": episode_rewards or [],
+            "split_history": self.split_history,
+            "total_splits": self.total_splits,
+            "total_cells": self.grid.total_cells,
+            "total_budget": getattr(self.grid, "total_budget", None),
         }, path)
         print(f"Saved BranchingDQN checkpoint to {path}")
 
