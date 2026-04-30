@@ -46,5 +46,5 @@ class UniformActionGrid:
     def play_counts(self) -> np.ndarray:
         return np.array([s.n_play for s in self.stats], dtype=np.int64)
 
-    def try_split(self) -> List[SplitInfo]:  # no-op — uniform never splits
+    def try_split(self) -> List[SplitInfo]:  # no-op -- uniform never splits
         return []

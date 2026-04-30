@@ -55,10 +55,10 @@ class ActionZooming:
     def __init__(self, da: int = 1, init_depth: int = 3, max_depth: int = 4):
         """Pre-split the root ``init_depth`` times so every arm starts at
         resolution (1/2)^init_depth.  ``init_depth=3`` with ``da=1`` yields
-        8 cubes of side 1/8 — the same resolution as UniformActionGrid(n=8),
+        8 cubes of side 1/8 -- the same resolution as UniformActionGrid(n=8),
         so zooming and uniform share an initial operating point and
         zooming can only *refine* from there.  ``max_depth`` caps further
-        refinement — cubes at side length (1/2)^max_depth or finer won't
+        refinement -- cubes at side length (1/2)^max_depth or finer won't
         be split even if they hit the play-count threshold."""
         self.da = da
         self.max_depth = max_depth

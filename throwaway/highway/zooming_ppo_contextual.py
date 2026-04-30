@@ -50,7 +50,7 @@ from throwaway.highway.ppo import CustomRewardWrapper
 
 
 # ---------------------------------------------------------------------------
-# ContextualActorCritic — shared backbone + per-leaf policy heads
+# ContextualActorCritic -- shared backbone + per-leaf policy heads
 # ---------------------------------------------------------------------------
 
 class ContextualActorCritic(nn.Module):
@@ -265,7 +265,7 @@ class ContextualRolloutBuffer:
 
 
 # ---------------------------------------------------------------------------
-# ContextualZoomingPPO — main algorithm
+# ContextualZoomingPPO -- main algorithm
 # ---------------------------------------------------------------------------
 
 class ContextualZoomingPPO:

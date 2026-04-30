@@ -2,7 +2,7 @@
 Plot the timestep sweep: learning curves for uniform vs zooming at a
 fixed (large) action budget, aggregated across seeds.
 
-Each long run *is* the timestep sweep — the curve at episode k is the
+Each long run *is* the timestep sweep -- the curve at episode k is the
 final reward of an equivalent run that ended at episode k, since no
 hyperparameters depend on the total budget.  The interesting question
 is which arm pulls ahead first, and whether the gap closes, holds, or
@@ -26,7 +26,7 @@ import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -36,11 +36,18 @@ import torch
 
 
 SEED_RE = re.compile(r"_seed(\d+)\.pt$")
+LABEL_N_RE = re.compile(r"_n(\d+)(?:_|$)")
 
 
 def _group_key(stem: str) -> str:
-    """`uniform_n64_seed42` → `uniform_n64`."""
+    """`uniform_n64_seed42` -> `uniform_n64`."""
     return re.sub(r"_seed\d+$", "", stem)
+
+
+def _label_n(label: str) -> Optional[int]:
+    """`uniform_n64` -> 64; labels without a `_n<N>` token return None."""
+    m = LABEL_N_RE.search(label)
+    return int(m.group(1)) if m else None
 
 
 def discover(checkpoints_dir: Path) -> Dict[str, List[Path]]:
@@ -50,6 +57,18 @@ def discover(checkpoints_dir: Path) -> Dict[str, List[Path]]:
             continue
         groups[_group_key(p.stem)].append(p)
     return groups
+
+
+def filter_by_n(groups: Dict[str, List[Path]],
+                n_actions: Optional[int]) -> Dict[str, List[Path]]:
+    """Drop groups whose `_n<N>` token disagrees with ``n_actions``.
+
+    Groups without an `_n<N>` token are always kept.
+    """
+    if n_actions is None:
+        return groups
+    return {label: paths for label, paths in groups.items()
+            if _label_n(label) in (None, n_actions)}
 
 
 def rolling_mean(x: np.ndarray, window: int) -> np.ndarray:
@@ -98,10 +117,13 @@ def main() -> None:
     p.add_argument("--checkpoints-dir", type=Path,
                    default=Path("checkpoints/highway/timestep_sweep"))
     p.add_argument("--window", type=int, default=100)
+    p.add_argument("--n_actions", type=int, default=None,
+                   help="If set, only plot groups whose `_n<N>` token equals "
+                        "this value. Groups without an `_n<N>` token are kept.")
     p.add_argument("--output", type=Path,
                    default=Path("plots/highway/timestep_sweep.png"))
     p.add_argument("--title", type=str,
-                   default="Timestep sweep — racetrack-v0")
+                   default="Timestep sweep -- racetrack-v0")
     args = p.parse_args()
 
     groups = discover(args.checkpoints_dir)
@@ -109,6 +131,17 @@ def main() -> None:
         print(f"No checkpoints found under {args.checkpoints_dir}. "
               f"Run src/highway/run_timestep_sweep.py --run first.")
         return
+
+    if args.n_actions is not None:
+        before = set(groups)
+        groups = filter_by_n(groups, args.n_actions)
+        dropped = sorted(before - set(groups))
+        if dropped:
+            print(f"Filtering to n_actions={args.n_actions}; "
+                  f"dropped {len(dropped)} group(s): {', '.join(dropped)}")
+        if not groups:
+            print(f"No groups remain after filtering to n_actions={args.n_actions}.")
+            return
 
     fig, ax = plt.subplots(figsize=(10, 5))
     summary: List[str] = []

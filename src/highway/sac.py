@@ -2,7 +2,7 @@
 From-scratch SAC (continuous actions).
 
 Used as (a) the continuous upper-bound baseline and (b) the feature source
-for the clustered arms — we pretrain SAC, freeze it, and pull state
+for the clustered arms -- we pretrain SAC, freeze it, and pull state
 embeddings from its actor trunk to fit k-means clusters.
 """
 
@@ -117,7 +117,7 @@ class ReplayBuffer:
         )
 
     def sample_obs(self, n: int) -> np.ndarray:
-        """Return up to n raw obs from the buffer — used for cluster fitting."""
+        """Return up to n raw obs from the buffer -- used for cluster fitting."""
         limit = self.capacity if self.full else self.idx
         n = min(n, limit)
         idxs = np.random.choice(limit, size=n, replace=False)

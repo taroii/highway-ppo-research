@@ -74,8 +74,8 @@ echo "  dqn timesteps:  $DQN_TIMESTEPS"
 echo "  n_actions:      $N_ACTIONS"
 echo "  init_depth:     $INIT_DEPTH"
 echo "  python:         $PYTHON"
-echo "  ckpts → $CKPT_DIR"
-echo "  plot  → $PLOT_OUT"
+echo "  ckpts -> $CKPT_DIR"
+echo "  plot  -> $PLOT_OUT"
 
 for seed in $SEEDS; do
     run_one "sac_seed${seed}" \
@@ -103,8 +103,9 @@ echo "=== running compare.py ==="
 "$PYTHON" src/dmcs/compare.py \
     --task "$TASK" \
     --checkpoints-dir "$CKPT_DIR" \
+    --n_actions "$N_ACTIONS" \
     --output "$PLOT_OUT" \
-    --title "Architectures — dm_control/${TASK}"
+    --title "Architectures -- dm_control/${TASK}  (N=${N_ACTIONS})"
 
 echo
 echo "=== runs complete: ${ok}/${total} succeeded ==="

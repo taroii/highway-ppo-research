@@ -5,14 +5,14 @@ Integrates two adaptive mechanisms into PPO:
 1. **State-space partition tree**: A binary tree that adaptively splits the
    observation space along dimensions where advantage variance is highest,
    performing implicit feature selection over all 26 dimensions (5 vehicles
-   × 5 features + 1 ego).  Splits are driven by variance-reduction of GAE
+   x 5 features + 1 ego).  Splits are driven by variance-reduction of GAE
    advantages, mirroring CART regression-tree splitting.
 2. **Per-leaf zooming (UCB-style action selection)**: Each leaf of the
    partition tree maintains its own action-value estimates with confidence
    bounds.  Actions are chosen via UCB within the leaf, and the estimates
    are updated with the observed advantages.
 
-The neural-net policy/value heads are kept as a *warm prior* — the tree
+The neural-net policy/value heads are kept as a *warm prior* -- the tree
 refines action selection on top of the network's suggestions, and the
 value network still provides the GAE baseline.
 """
@@ -736,9 +736,9 @@ if __name__ == "__main__":
 
     obs_shape = env.observation_space.shape
     obs_dim = int(np.prod(obs_shape))
-    print(f"Obs shape: {obs_shape} → flat dim: {obs_dim}")
+    print(f"Obs shape: {obs_shape} -> flat dim: {obs_dim}")
     print(f"Action space: {env.action_space}")
-    print(f"Features: 5 vehicles × 5 features (presence, x, y, vx, vy) = 25 dims")
+    print(f"Features: 5 vehicles x 5 features (presence, x, y, vx, vy) = 25 dims")
     print()
 
     agent = ZoomingTreePPO(

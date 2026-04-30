@@ -156,7 +156,7 @@ class ZoomingPPOFixed:
         for H >= 2 and one ball of diameter 1 covers all of [0,1]^d.
 
         For more faithful initialization, we could tile with balls of
-        diameter dmax/H, but the single root suffices—splitting will
+        diameter dmax/H, but the single root suffices--splitting will
         refine it.
         """
         root = Ball(lower=np.zeros(self.d), s=self.dmax, d=self.d)
@@ -201,7 +201,7 @@ class ZoomingPPOFixed:
         """
         Check if state x is fully covered by smaller active balls for
         ALL possible actions within the parent. This is a conservative
-        check — we check if there exists any action direction not covered
+        check -- we check if there exists any action direction not covered
         by a smaller ball.
 
         For tractability, we use state-only relevance: a ball's domain

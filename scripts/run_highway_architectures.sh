@@ -17,7 +17,7 @@
 #   DQN_TIMESTEPS      default 150000   (uniform + zooming)
 #   N_ACTIONS          action budget per axis, default 16
 #   INIT_DEPTH         zooming starting depth, default 3
-#   PYTHON             interpreter, default "python" — override on Windows:
+#   PYTHON             interpreter, default "python" -- override on Windows:
 #                        PYTHON="/c/Users/Polar/miniconda3/envs/highway/python.exe" \
 #                          ./scripts/run_highway_architectures.sh
 #
@@ -70,8 +70,8 @@ echo "  dqn timesteps:  $DQN_TIMESTEPS"
 echo "  n_actions:      $N_ACTIONS"
 echo "  init_depth:     $INIT_DEPTH"
 echo "  python:         $PYTHON"
-echo "  ckpts → $CKPT_DIR"
-echo "  plot  → $PLOT_OUT"
+echo "  ckpts -> $CKPT_DIR"
+echo "  plot  -> $PLOT_OUT"
 
 for seed in $SEEDS; do
     run_one "sac_seed${seed}" \
@@ -97,8 +97,9 @@ echo
 echo "=== running compare.py ==="
 "$PYTHON" src/highway/compare.py \
     --checkpoints-dir "$CKPT_DIR" \
+    --n_actions "$N_ACTIONS" \
     --output "$PLOT_OUT" \
-    --title "Architectures — racetrack-v0"
+    --title "Architectures -- racetrack-v0  (N=${N_ACTIONS})"
 
 echo
 echo "=== runs complete: ${ok}/${total} succeeded ==="

@@ -1,5 +1,5 @@
 """
-Gradient-Aware Zooming-Tree PPO for HighwayEnv — Continuous Actions.
+Gradient-Aware Zooming-Tree PPO for HighwayEnv -- Continuous Actions.
 
 Key improvement over previous versions: the action-cell selection logits
 are torch Parameters that receive gradients through the PPO surrogate
@@ -21,7 +21,7 @@ Policy:
     logits = [cell_0.logit, cell_1.logit, ..., cell_k.logit]
     P(cell_i) = softmax(logits)[i]
     action = center(cell_i)
-    log_prob = log_softmax(logits)[i]      ← differentiable w.r.t. logits
+    log_prob = log_softmax(logits)[i]      <- differentiable w.r.t. logits
 
 The PPO surrogate loss backpropagates through log_softmax to update the
 cell logits, giving us genuine policy gradient optimization with adaptive
@@ -134,7 +134,7 @@ class ActionZoomingTree:
         self.root = ActionCell(action_low, action_high, depth=0)
         self.root.logit_idx = 0
 
-        # Differentiable logits — one per leaf cell
+        # Differentiable logits -- one per leaf cell
         # Initialized to 0 (uniform distribution)
         self.logits = torch.zeros(1, requires_grad=True)
 
@@ -623,8 +623,8 @@ class ZoomingTreePPO:
     are torch tensors that receive gradients through the PPO surrogate loss.
 
     Training step:
-      1. Collect rollouts: state → state-tree leaf → sample cell from
-         softmax → play cell center
+      1. Collect rollouts: state -> state-tree leaf -> sample cell from
+         softmax -> play cell center
       2. Compute GAE advantages using value network
       3. PPO update: backprop through log_softmax(cell_logits) to update
          cell logits + update value network
@@ -725,7 +725,7 @@ class ZoomingTreePPO:
             max_depth=state_max_depth,
         )
 
-        # Policy optimizer — will be rebuilt when tree structure changes
+        # Policy optimizer -- will be rebuilt when tree structure changes
         self._rebuild_policy_optimizer()
 
         self.buffer = RolloutBuffer()
@@ -791,7 +791,7 @@ class ZoomingTreePPO:
             with torch.no_grad():
                 value = self.value_net(obs_t).item()
 
-            # Policy: state tree → action tree → softmax sample
+            # Policy: state tree -> action tree -> softmax sample
             state_leaf = self.state_tree.find_leaf(obs_flat)
             action, cell_pos, action_cell = state_leaf.action_tree.sample()
             action = np.clip(action, self.action_low, self.action_high)
@@ -840,7 +840,7 @@ class ZoomingTreePPO:
         if len(adv_t) > 1:
             adv_t = (adv_t - adv_t.mean()) / (adv_t.std() + 1e-8)
 
-        # Build map from state_leaf_id → state_leaf for log_prob recomputation
+        # Build map from state_leaf_id -> state_leaf for log_prob recomputation
         leaf_map = self._get_state_leaf_map()
 
         n = len(self.buffer)
@@ -868,7 +868,7 @@ class ZoomingTreePPO:
                         lp = state_leaf.action_tree.log_prob_for_action(action)
                         ent = state_leaf.action_tree.entropy()
                     else:
-                        # State leaf was split — find new leaf for this obs
+                        # State leaf was split -- find new leaf for this obs
                         state_leaf = self.state_tree.find_leaf(
                             self.buffer.obs[i]
                         )
@@ -952,7 +952,7 @@ class ZoomingTreePPO:
         new_leaves = self.state_tree.n_leaves
 
         if new_leaves > old_leaves:
-            print(f"  [State Tree] {old_leaves} → {new_leaves} leaves")
+            print(f"  [State Tree] {old_leaves} -> {new_leaves} leaves")
             dim_usage = self.state_tree.dimension_usage()
             if dim_usage:
                 print(f"  [State Tree] Dim splits: {dim_usage}")

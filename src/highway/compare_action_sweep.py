@@ -7,7 +7,7 @@ uniform grows with N** because uniform pays the full N-output Q-learning
 cost from step 1 while zooming bootstraps from a coarser grid (init=8
 cubes) and only refines where UCB-driven plays concentrate.
 
-Caveat — at fixed training budget, large N may look bad here purely
+Caveat -- at fixed training budget, large N may look bad here purely
 because a bigger bandit needs more samples; the companion
 ``compare_timestep_sweep.py`` separates that confound.
 
@@ -80,7 +80,7 @@ def main() -> None:
     p.add_argument("--output", type=Path,
                    default=Path("plots/highway/action_sweep.png"))
     p.add_argument("--title", type=str,
-                   default="Action-budget sweep — racetrack-v0")
+                   default="Action-budget sweep -- racetrack-v0")
     args = p.parse_args()
 
     finals = _discover(args.checkpoints_dir, args.window)
@@ -103,10 +103,10 @@ def main() -> None:
         seed_counts = [len(finals[arm][n]) for n in ns]
         ax.errorbar(ns, means, yerr=stderrs,
                     color=color, marker=marker, linewidth=2, capsize=4,
-                    label=f"{arm} (seeds: {min(seed_counts)}–{max(seed_counts)})")
+                    label=f"{arm} (seeds: {min(seed_counts)}-{max(seed_counts)})")
         for n, m, s, k in zip(ns, means, stderrs, seed_counts):
             summary.append(f"  {arm:<8}  N={n:>3}  seeds={k}  "
-                           f"final-{args.window} mean={m:>7.2f} ± {s:>5.2f}")
+                           f"final-{args.window} mean={m:>7.2f} +/- {s:>5.2f}")
 
     ax.set_xscale("log", base=2)
     ax.set_xticks(sorted({n for arm in finals for n in finals[arm]}))
@@ -119,7 +119,7 @@ def main() -> None:
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(args.output, dpi=150, bbox_inches="tight")
-    print("\nFinal reward by arm × N (mean ± stderr across seeds):")
+    print("\nFinal reward by arm x N (mean +/- stderr across seeds):")
     for line in summary:
         print(line)
     print(f"\nPlot saved to {args.output}")

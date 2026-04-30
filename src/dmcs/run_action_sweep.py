@@ -1,4 +1,4 @@
-"""
+r"""
 Action-budget sweep on a DMCS task: matched A/B between uniform and
 zooming across increasing action counts, at fixed training budget.
 
@@ -8,16 +8,16 @@ cost from step 1 while zooming bootstraps from a coarser grid (init=2
 bins per axis at ``init_depth=1``) and only refines where the policy
 concentrates plays.
 
-Caveat — this sweep does *not* control for compute: a 64-arm bandit
+Caveat -- this sweep does *not* control for compute: a 64-arm bandit
 needs more samples to converge than an 8-arm bandit, so very large N
 may look bad here purely because the training budget is fixed.  The
 companion timestep sweep (in ``run_dmcs_pipeline.sh``'s phase 2)
 separates that confound by holding N and varying training timesteps.
 
 Sweep dimensions:
-  - n ∈ {8, 16, 32, 64} — bins per action axis.  Total cells per arm =
+  - n \in {8, 16, 32, 64} -- bins per action axis.  Total cells per arm =
     ``n * da``; for da=6 (walker, cheetah) N=64 means 384 total cells.
-  - seed ∈ {42} by default (extend SEEDS for robustness).
+  - seed \in {42} by default (extend SEEDS for robustness).
   - task: passed via --task, default ``cartpole-swingup``.
 
 Outputs (per task):
@@ -152,9 +152,9 @@ def main() -> int:
     plot_out = Path(f"plots/dmcs/{args.task}_action_sweep.png")
 
     cmds = commands(args.task, ckpt_dir)
-    print(f"# Action-budget sweep on dm_control/{args.task} — "
+    print(f"# Action-budget sweep on dm_control/{args.task} -- "
           f"{len(cmds)} runs total "
-          f"({len(N_VALUES)} action counts × {len(SEEDS)} seeds × 2 arms)")
+          f"({len(N_VALUES)} action counts x {len(SEEDS)} seeds x 2 arms)")
     print(f"# Total timesteps per run: {TOTAL_TIMESTEPS}")
     print(f"# Outputs: {ckpt_dir}/, plot: {plot_out}")
 

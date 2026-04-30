@@ -11,7 +11,7 @@ the same minimal interface used by ``DQN``:
   - ``play_counts() -> np.ndarray``
   - ``try_split() -> List[SplitInfo]``  (no-op for uniform)
 
-DQN consumes the grid directly; there is no per-cluster routing here —
+DQN consumes the grid directly; there is no per-cluster routing here --
 the legacy ``ClusteredActionManager`` lives under ``old/clustering/`` for
 reference.
 """

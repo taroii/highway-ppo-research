@@ -28,7 +28,7 @@ from throwaway.highway.zooming import Cube, CubeStats
 
 
 # ---------------------------------------------------------------------------
-# ActionZooming — per-leaf action space manager (unchanged from original)
+# ActionZooming -- per-leaf action space manager (unchanged from original)
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -106,7 +106,7 @@ class ActionZooming:
 
 
 # ---------------------------------------------------------------------------
-# StatePartitionTree — binary tree over observation space
+# StatePartitionTree -- binary tree over observation space
 # ---------------------------------------------------------------------------
 
 class StateLeaf:
@@ -333,7 +333,7 @@ class StatePartitionTree:
         """
         splits_done: List[Tuple[int, int, int]] = []
 
-        # Collect (node_id, leaf) pairs — snapshot before mutating
+        # Collect (node_id, leaf) pairs -- snapshot before mutating
         leaf_nodes: List[Tuple[int, StateLeaf]] = []
         for node_id, lf in enumerate(self._leaves):
             if lf is not None and self._depth[node_id] < self.max_depth:

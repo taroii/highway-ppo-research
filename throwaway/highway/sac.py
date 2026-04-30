@@ -6,7 +6,7 @@ Standard Soft Actor-Critic with:
   - Twin Q-functions + targets with soft updates
   - Auto-tuned entropy temperature
 
-No encoder or representation learning — operates directly on flat
+No encoder or representation learning -- operates directly on flat
 kinematic observations.  Serves as a baseline for comparing against
 BisimSAC (which adds bisimulation representation learning on top of
 the same SAC core).

@@ -1,8 +1,8 @@
-"""
+r"""
 Timestep sweep: at a fixed (large) action budget, run uniform and
 zooming for a long training horizon and plot the full learning curves.
 
-Why this experiment exists — the action-budget sweep
+Why this experiment exists -- the action-budget sweep
 (``run_action_sweep.py``) holds training timesteps fixed and shows
 both arms degrading at large N.  That confounds two effects:
 
@@ -25,8 +25,8 @@ One long run per seed gives the entire timestep-sweep curve for free.
 Sweep dimensions:
   - n = 64 (configurable via N_ACTIONS).  Zooming starts at
     ``2^init_depth = 8`` bins (init_depth=3) and refines up to ``n``.
-  - seed ∈ {42} by default; extend SEEDS for robustness.
-  - total_timesteps default 600_000 (~ 4× the architectures pipeline).
+  - seed \in {42} by default; extend SEEDS for robustness.
+  - total_timesteps default 600_000 (~ 4x the architectures pipeline).
 
 Outputs:
   - checkpoints/highway/timestep_sweep/<arm>_<config>_seed<S>.pt
@@ -137,7 +137,7 @@ def _execute_with_logs(cmds: List[Tuple[str, List[str]]]) -> int:
         [PYTHON, "src/highway/compare_timestep_sweep.py",
          "--checkpoints-dir", str(CKPT_DIR),
          "--output", str(PLOT_OUT),
-         "--title", f"Timestep sweep — racetrack-v0 (N={N_ACTIONS})"],
+         "--title", f"Timestep sweep -- racetrack-v0 (N={N_ACTIONS})"],
     ).returncode
 
     print("\n=== sweep done ===")
@@ -151,8 +151,8 @@ def main() -> int:
     args = p.parse_args()
 
     cmds = commands()
-    print(f"# Timestep sweep — {len(cmds)} runs total "
-          f"(N={N_ACTIONS}, {len(SEEDS)} seeds × 2 arms)")
+    print(f"# Timestep sweep -- {len(cmds)} runs total "
+          f"(N={N_ACTIONS}, {len(SEEDS)} seeds x 2 arms)")
     print(f"# Total timesteps per run: {TOTAL_TIMESTEPS}")
     print(f"# Outputs: {CKPT_DIR}/, plot: {PLOT_OUT}")
 

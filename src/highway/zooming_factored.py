@@ -4,7 +4,7 @@ Factored adaptive action-space zooming with a global cell budget.
 Wraps ``da`` independent 1-D ``ActionZooming`` trees, one per action
 axis.  Total cells are additive in ``da`` (sidesteps the joint
 ``2^da`` blowup), and a single ``total_budget`` caps the *sum* across
-axes — so the algorithm can spend more cells on important axes (the
+axes -- so the algorithm can spend more cells on important axes (the
 ones the policy visits often) and less on quiet ones, instead of
 forcing each axis into the same per-axis ceiling.
 
@@ -53,7 +53,7 @@ class FactoredActionZooming:
             init_depth: starting refinement depth per axis.  Each axis
                 begins with ``2 ** init_depth`` bins.  Default ``1`` means
                 "go left vs go right" on each axis at start, then grow
-                via splits — leaves the algorithm maximum room to make
+                via splits -- leaves the algorithm maximum room to make
                 adaptive decisions.
             total_budget: maximum total cells across all axes.  ``None``
                 means unlimited (each axis grows independently up to
@@ -93,7 +93,7 @@ class FactoredActionZooming:
 
     def get_env_action(self, idx_per_axis: Sequence[int]) -> np.ndarray:
         # float64 to match the joint ``ActionZooming.get_env_action`` and the
-        # gym Box action_space dtype — float32 would compound precision drift
+        # gym Box action_space dtype -- float32 would compound precision drift
         # in mujoco over long training horizons and break equivalence to joint.
         return np.array(
             [self.axes[i].get_env_action(int(idx_per_axis[i]))[0]

@@ -32,7 +32,7 @@ from throwaway.highway.ppo import CustomRewardWrapper
 
 
 # ---------------------------------------------------------------------------
-# ActionZooming — adaptive action space manager
+# ActionZooming -- adaptive action space manager
 # ---------------------------------------------------------------------------
 
 @dataclass
@@ -47,7 +47,7 @@ class ActionZooming:
 
     def __init__(self, da: int = 2):
         self.da = da
-        # Start with root cube and immediately split once → 2^da children (2x2 = 4)
+        # Start with root cube and immediately split once -> 2^da children (2x2 = 4)
         root = Cube(lower=np.zeros(da), s=1.0, d=da)
         self.active_cubes: List[Cube] = root.split_children()
         self.stats: List[CubeStats] = [
@@ -109,7 +109,7 @@ class ActionZooming:
 
 
 # ---------------------------------------------------------------------------
-# ZoomingActorCritic — policy with swappable output head
+# ZoomingActorCritic -- policy with swappable output head
 # ---------------------------------------------------------------------------
 
 class ZoomingActorCritic(nn.Module):
@@ -235,7 +235,7 @@ class RolloutBuffer:
 
 
 # ---------------------------------------------------------------------------
-# ZoomingPPO — main algorithm
+# ZoomingPPO -- main algorithm
 # ---------------------------------------------------------------------------
 
 class ZoomingPPO:
@@ -327,7 +327,7 @@ class ZoomingPPO:
             lp = log_prob.item()
             v = value.item()
 
-            # Map discrete action index → continuous env action via zooming
+            # Map discrete action index -> continuous env action via zooming
             env_action = self.zooming.get_env_action(a_idx)
 
             next_obs, reward, done, truncated, info = self.env.step(env_action)

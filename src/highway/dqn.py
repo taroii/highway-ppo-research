@@ -59,7 +59,7 @@ class UCB:
     """Q(s, a) + c(step) * sqrt(log(total) / n(a)).
 
     ``c`` anneals linearly from ``c_start`` to ``c_end`` over
-    ``decay_steps``.  Without annealing, UCB keeps exploring forever —
+    ``decay_steps``.  Without annealing, UCB keeps exploring forever --
     every freshly-split cube has n=0 and dominates argmax, which on
     racetrack means forced steering extremes that crash the car.
     """
@@ -282,7 +282,7 @@ class DQN:
 
     def _rebuild_optimizer_preserving_state(self) -> None:
         """Rebuild Adam over current parameters, preserving state for
-        params whose tensor identity survived (i.e., the shared trunk —
+        params whose tensor identity survived (i.e., the shared trunk --
         only the replaced head's parameters lose their Adam state)."""
         old_state = dict(self.optimizer.state)
         self.optimizer = torch.optim.Adam(self.q.parameters(), lr=self.lr)

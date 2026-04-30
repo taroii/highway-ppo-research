@@ -1,19 +1,19 @@
-"""
+r"""
 Bisimulation-guided Clustered Zooming Pipeline.
 
 Three-phase approach:
-  Phase 1: Train BisimSAC to learn encoder φ (bisimulation metric
+  Phase 1: Train BisimSAC to learn encoder \phi (bisimulation metric
            representation) on the continuous-action HighwayEnv.
-  Phase 2: Embed replay buffer observations through φ, cluster the
+  Phase 2: Embed replay buffer observations through \phi, cluster the
            latent space with k-means.
-  Phase 3: Train k independent Zooming SAC instances—one per state
-           cluster—each operating on the latent z produced by the
+  Phase 3: Train k independent Zooming SAC instances--one per state
+           cluster--each operating on the latent z produced by the
            frozen encoder.  Uses UCB optimism bonus in the actor
            objective to drive exploration of under-visited cubes,
            while keeping critic updates pessimistic for stability.
 
 Motivation: The bisimulation encoder learns a compact, task-relevant
-state representation (25-dim kinematic → 10-dim latent).  K-means
+state representation (25-dim kinematic -> 10-dim latent).  K-means
 clustering in this latent space groups behaviourally similar states.
 Each cluster gets its own Zooming SAC with independent adaptive action
 discretization, enabling fine-grained control within each behavioural
@@ -148,11 +148,11 @@ def analyze_feature_dim(all_z: np.ndarray, feature_dim: int):
 
     if dims_95 < feature_dim * 0.5:
         print(f"  WARNING: Only {dims_95} dims needed for 95% variance. "
-              f"feature_dim={feature_dim} may be too large — "
+              f"feature_dim={feature_dim} may be too large -- "
               f"consider reducing to ~{max(dims_99, dims_95 + 1)}.")
     elif dims_95 == feature_dim:
         print(f"  WARNING: All {feature_dim} dims are needed for 95% variance. "
-              f"feature_dim may be too small — consider increasing it.")
+              f"feature_dim may be too small -- consider increasing it.")
     else:
         print(f"  feature_dim={feature_dim} looks reasonable.")
 
@@ -303,7 +303,7 @@ def find_cube_index(zooming: ActionZooming, env_action: float) -> int:
 # ---------------------------------------------------------------------------
 
 class ClusteredZoomingSAC:
-    """K independent discrete-action SAC policies with zooming, one per
+    r"""K independent discrete-action SAC policies with zooming, one per
     latent-space cluster.
 
     Each cluster has its own:
@@ -311,7 +311,7 @@ class ClusteredZoomingSAC:
       - Twin Q-networks + targets (output Q-values for all cubes)
       - Categorical actor (with UCB bonus in its objective)
       - Replay buffer (stores continuous actions for split-safety)
-      - Auto-tuned entropy temperature α
+      - Auto-tuned entropy temperature \alpha
 
     Design: Critic updates are pessimistic (min of twin Q for stability).
     Actor updates are optimistic (UCB bonus added to Q-values to drive
@@ -432,14 +432,14 @@ class ClusteredZoomingSAC:
     # ------------------------------------------------------------------
 
     def _encode(self, obs: np.ndarray) -> torch.Tensor:
-        """obs → z tensor of shape (1, feature_dim)."""
+        """obs -> z tensor of shape (1, feature_dim)."""
         obs_flat = obs.flatten().astype(np.float32)
         obs_t = torch.from_numpy(obs_flat).unsqueeze(0)
         with torch.no_grad():
             return self.encoder(obs_t)
 
     def _assign_cluster(self, z: torch.Tensor) -> int:
-        """z tensor of shape (feature_dim,) → cluster id."""
+        """z tensor of shape (feature_dim,) -> cluster id."""
         dists = torch.norm(self.cluster_centers - z, dim=1)
         return dists.argmin().item()
 
@@ -463,7 +463,7 @@ class ClusteredZoomingSAC:
         return bonus
 
     # ------------------------------------------------------------------
-    # Map continuous action → current cube index (batch)
+    # Map continuous action -> current cube index (batch)
     # ------------------------------------------------------------------
 
     def _actions_to_indices(self, c: int,
@@ -558,7 +558,7 @@ class ClusteredZoomingSAC:
         bonus = self._ucb_bonus(c).unsqueeze(0)  # (1, n_actions)
         q_optimistic = q_min + bonus
 
-        # Actor loss: E_a~π [α log π(a|z) - Q_optimistic(z, a)]
+        # Actor loss: E_a~\pi [\alpha log \pi(a|z) - Q_optimistic(z, a)]
         actor_loss = (
             probs * (alpha.detach() * log_probs - q_optimistic)
         ).sum(dim=-1).mean()

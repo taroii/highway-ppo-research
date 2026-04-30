@@ -8,7 +8,7 @@ axes, so the algorithm can spend more cells on important axes (the
 ones the policy visits often) and less on quiet ones.
 
 For ``da == 1`` (cartpole-swingup), the factored grid reduces to a
-single 1-D zooming tree — equivalent to the joint formulation but with
+single 1-D zooming tree -- equivalent to the joint formulation but with
 a corrected multi-split warm-start.
 
 Matched-budget contract with ``run_uniform.py``:

@@ -1,5 +1,5 @@
 """
-Arm 5 — DQN with per-cluster adaptive zooming grids.
+Arm 5 -- DQN with per-cluster adaptive zooming grids.
 
 The proposed method: SAC feature clustering + per-cluster zooming +
 UCB action selection.  Each cluster refines its action resolution

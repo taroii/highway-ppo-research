@@ -1,5 +1,5 @@
 """
-Arm 4 — DQN with per-cluster uniform action grids.
+Arm 4 -- DQN with per-cluster uniform action grids.
 
 State-aware but NOT adaptively refining.  Isolates the effect of
 clustering alone from the effect of adaptive action refinement.

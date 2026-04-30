@@ -7,7 +7,7 @@ Each axis has ``n_actions`` bins independently; total cells = ``n * da``
 of ``n`` cells.
 
 Apples-to-apples partner for src/dmcs/run_zooming.py: same
-``BranchingDQN`` core, same Q-net topology, same TD target — only the
+``BranchingDQN`` core, same Q-net topology, same TD target -- only the
 grid is non-adaptive (fixed bins, no splits).
 
 Matched-budget contract with ``run_zooming.py``:

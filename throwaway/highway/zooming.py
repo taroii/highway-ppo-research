@@ -34,9 +34,9 @@ class Cube:
         return bool(np.all(x >= lower_s - eps) and np.all(x <= upper_s + eps))
 
     def split_children(self) -> List["Cube"]:
-        """
+        r"""
         Split into 2^d cubes of half side length.
-        Children lower corners are lower + offset*(s/2), offset ∈ {0,1}^d.
+        Children lower corners are lower + offset*(s/2), offset \in {0,1}^d.
         """
         half = self.s / 2.0
         children: List[Cube] = []

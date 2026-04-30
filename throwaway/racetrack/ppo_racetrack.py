@@ -46,7 +46,7 @@ def make_racetrack_env():
             },
         },
     )
-    return env  # built-in reward — no wrapper needed
+    return env  # built-in reward -- no wrapper needed
 
 
 # ---------------------------------------------------------------------------

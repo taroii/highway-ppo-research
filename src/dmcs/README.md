@@ -6,7 +6,7 @@ to the DeepMind Control Suite (DMCS).
 ## Goal
 
 Same as `src/mujoco/`: reproduce the matched-action-budget A/B
-(SAC reference, Uniform DQN, Zooming DQN) and sweep action counts × seeds.
+(SAC reference, Uniform DQN, Zooming DQN) and sweep action counts x seeds.
 
 ## DMCS specifics
 
@@ -26,14 +26,14 @@ env = gym.make("dm_control/cartpole-swingup-v0")  # or via shimmy
 ## Environment caveats
 
 Same as MuJoCo: multi-dim actions mean `2^da` cubes per split.  See
-`src/mujoco/README.md` § Environment caveats for the factored vs joint
+`src/mujoco/README.md` section Environment caveats for the factored vs joint
 zooming discussion.
 
 ## Suggested files (mirror `src/highway/`)
 
 ```
 src/dmcs/
-  env.py              # task factories (cartpole-swingup, cheetah-run, …)
+  env.py              # task factories (cartpole-swingup, cheetah-run, ...)
   run_sac.py
   run_uniform.py
   run_zooming.py

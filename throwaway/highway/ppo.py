@@ -70,7 +70,7 @@ class CustomRewardWrapper(gym.Wrapper):
         neighbours = road.network.all_side_lanes(vehicle.lane_index)
         right_lane = vehicle.lane_index[2] / max(len(neighbours) - 1, 1)
 
-        # Unclipped progress — negative delta_x now hurts
+        # Unclipped progress -- negative delta_x now hurts
         delta_x = vehicle.position[0] - self._last_x
         self._last_x = vehicle.position[0]
         progress = delta_x / 30

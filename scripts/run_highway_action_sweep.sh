@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 # Highway action-budget sweep: uniform vs zooming on racetrack-v0
-# across N ∈ {8, 16, 32, 64} at fixed training budget.  Thin wrapper
-# around src/highway/run_action_sweep.py — the sweep config (N values,
+# across N \in {8, 16, 32, 64} at fixed training budget.  Thin wrapper
+# around src/highway/run_action_sweep.py -- the sweep config (N values,
 # seeds, timesteps) is hardcoded there.
 #
 # Outputs:

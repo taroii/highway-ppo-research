@@ -4,7 +4,7 @@
 # zooming at a chosen action budget.
 #
 # Pick TS_N_ACTIONS by inspecting plots/dmcs/<task>_action_sweep.png
-# (from scripts/run_dmcs_pipeline.sh) — typically the largest N at
+# (from scripts/run_dmcs_pipeline.sh) -- typically the largest N at
 # which both arms still train, where the uniform-vs-zooming gap is
 # expected to widen with more compute.
 #
@@ -17,7 +17,7 @@
 #   TS_N_ACTIONS=64 TS_TIMESTEPS=1000000 ./scripts/run_dmcs_timestep_sweep.sh cheetah-run
 #
 # Required env var:
-#   TS_N_ACTIONS  bins per axis for both arms (no default — must pick from
+#   TS_N_ACTIONS  bins per axis for both arms (no default -- must pick from
 #                 the action sweep plot).
 #
 # Optional env vars:
@@ -81,8 +81,8 @@ echo "  ts n_actions:   $TS_N_ACTIONS"
 echo "  ts timesteps:   $TS_TIMESTEPS"
 echo "  init_depth:     $INIT_DEPTH"
 echo "  python:         $PYTHON"
-echo "  ckpts → $TS_CKPT_DIR"
-echo "  plot  → $TS_PLOT_OUT"
+echo "  ckpts -> $TS_CKPT_DIR"
+echo "  plot  -> $TS_PLOT_OUT"
 
 for seed in $TS_SEEDS; do
     run_one "uniform_n${TS_N_ACTIONS}_seed${seed}" \
@@ -104,8 +104,9 @@ echo "=== running compare.py ==="
 "$PYTHON" src/dmcs/compare.py \
     --task "$TASK" \
     --checkpoints-dir "$TS_CKPT_DIR" \
+    --n_actions "$TS_N_ACTIONS" \
     --output "$TS_PLOT_OUT" \
-    --title "Timestep sweep — dm_control/${TASK}  (N=${TS_N_ACTIONS})"
+    --title "Timestep sweep -- dm_control/${TASK}  (N=${TS_N_ACTIONS})"
 
 echo
 echo "=== runs complete: ${ok}/${total} succeeded ==="

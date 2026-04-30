@@ -2,8 +2,8 @@
 DQN with an adaptive zooming action grid.
 
 Per-axis 1-D zooming trees + branching Q-net (factored grid).  For
-racetrack (``da == 1``) this is equivalent to the joint formulation —
-one tree, one Q-head — but uses the same agent core as DMCS so the
+racetrack (``da == 1``) this is equivalent to the joint formulation --
+one tree, one Q-head -- but uses the same agent core as DMCS so the
 two task families share code.  See ``src/highway/zooming_factored.py``
 for the budget-aware split logic.
 

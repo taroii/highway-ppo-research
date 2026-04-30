@@ -30,7 +30,7 @@ try:
 except ImportError:
     pass
 
-from throwaway.highway.ppo import CustomRewardWrapper  # noqa: F401 — single source of truth
+from throwaway.highway.ppo import CustomRewardWrapper  # noqa: F401 -- single source of truth
 
 
 # ---------------------------------------------------------------------------

@@ -13,7 +13,7 @@ Reproduce the matched-action-budget A/B from `src/highway/`:
 - **Zooming DQN** with adaptive refinement up to `N` cubes (matched
   budget so any difference is about *placement*, not resolution).
 
-Then sweep `N ∈ {8, 16, 32, 64, …}` × seeds to confirm or refute the
+Then sweep `N \in {8, 16, 32, 64, ...}` x seeds to confirm or refute the
 finding from the highway results: zooming's advantage grows with `N`
 because uniform pays the full `N`-output Q-learning cost upfront while
 zooming bootstraps from a coarser starting grid.
@@ -22,11 +22,11 @@ zooming bootstraps from a coarser starting grid.
 
 Most MuJoCo tasks have **multi-dimensional continuous actions** (e.g.,
 HalfCheetah is 6-D). The zooming primitives in `src/highway/zooming.py`
-already support `da > 1` — a cube of side `s` in `[0, 1]^da` splits
+already support `da > 1` -- a cube of side `s` in `[0, 1]^da` splits
 into `2^da` children. But action-set sizes grow exponentially:
 
-  - `da=6`, `init_depth=1` → 64 starting cubes.
-  - `da=6`, `max_depth=2` → 4096 cubes max — too many.
+  - `da=6`, `init_depth=1` -> 64 starting cubes.
+  - `da=6`, `max_depth=2` -> 4096 cubes max -- too many.
 
 Practical options:
   1. Use `init_depth=0` (start from one cube, the centroid) and let
@@ -62,10 +62,10 @@ Output checkpoints to `checkpoints/mujoco/`, plots to `plots/mujoco/`.
 ## Open questions for collaborators
 
 - Which subset of MuJoCo tasks to evaluate? Suggested starting point:
-  HalfCheetah (smooth, dense reward), Hopper (sparser, easier to crash —
+  HalfCheetah (smooth, dense reward), Hopper (sparser, easier to crash --
   may show the largest zooming benefit), Walker2d. 
   TARO's ANSWSER: Use Ant or Humanoid. We only need one to show benefit on high dimensional action space.
 - Hyperparameters: SAC ones from `src/highway/sac.py` are tuned for
   racetrack (gamma=0.9, short episodes). MuJoCo typically wants
   gamma=0.99 and longer training (~1M steps).
-- Action factoring vs joint zooming — see "Environment caveats" above.
+- Action factoring vs joint zooming -- see "Environment caveats" above.

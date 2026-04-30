@@ -1,4 +1,4 @@
-"""
+r"""
 Action-budget sweep: matched A/B between uniform and zooming across
 increasing action counts at a fixed training budget.
 
@@ -7,17 +7,17 @@ budget grows, because uniform pays the full ``N``-output Q-learning cost
 from step 1 while zooming bootstraps from a coarser grid (init=8) and
 only refines to N where the policy concentrates plays.
 
-Caveat — this sweep does *not* control for compute: a 64-arm bandit
+Caveat -- this sweep does *not* control for compute: a 64-arm bandit
 needs more samples to converge than an 8-arm bandit, so very large N
 may look bad here purely because the training budget is fixed. The
 companion ``run_timestep_sweep.py`` separates that confound by holding
 N=64 and varying training timesteps.
 
 Sweep dimensions:
-  - n ∈ {8, 16, 32, 64} — action budget (per axis; for racetrack
+  - n \in {8, 16, 32, 64} -- action budget (per axis; for racetrack
     da=1 this is total cells).  Zooming starts at ``2^init_depth``
     bins (init_depth = min(3, log2(n))) and refines up to ``n``.
-  - seed ∈ {42} by default (extend SEEDS for robustness).
+  - seed \in {42} by default (extend SEEDS for robustness).
 
 Outputs:
   - checkpoints/highway/action_sweep/<arm>_<config>_seed<S>.pt
@@ -147,8 +147,8 @@ def main() -> int:
     args = p.parse_args()
 
     cmds = commands()
-    print(f"# Action-budget sweep — {len(cmds)} runs total "
-          f"({len(N_VALUES)} action counts × {len(SEEDS)} seeds × 2 arms)")
+    print(f"# Action-budget sweep -- {len(cmds)} runs total "
+          f"({len(N_VALUES)} action counts x {len(SEEDS)} seeds x 2 arms)")
     print(f"# Total timesteps per run: {TOTAL_TIMESTEPS}")
     print(f"# Outputs: {CKPT_DIR}/, plot: {PLOT_OUT}")
 

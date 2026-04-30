@@ -18,11 +18,11 @@ Three independent scripts per task family under `scripts/`. GPU is auto-detected
 **Highway** (racetrack-v0, 1-D action):
 ```bash
 ./scripts/run_highway_architectures.sh                            # SAC vs Uniform vs Zooming
-./scripts/run_highway_action_sweep.sh                             # Uniform vs Zooming, N ∈ {8,16,32,64}
+./scripts/run_highway_action_sweep.sh                             # Uniform vs Zooming, N \in {8,16,32,64}
 TS_N_ACTIONS=64 ./scripts/run_highway_timestep_sweep.sh           # long-horizon at chosen N
 ```
 
-**DMCS** — pass the task slug as a positional arg:
+**DMCS** -- pass the task slug as a positional arg:
 ```bash
 ./scripts/run_dmcs_architectures.sh                               # cartpole-swingup (default)
 ./scripts/run_dmcs_architectures.sh walker-walk

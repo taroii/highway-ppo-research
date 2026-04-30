@@ -163,7 +163,7 @@ class ActionZoomingTree:
         # Play the center of the cell (standard zooming)
         action = cell.get_action()
 
-        # log_prob is just log P(cell) — no volume term needed
+        # log_prob is just log P(cell) -- no volume term needed
         log_prob = float(np.log(probs[cell_idx] + 1e-10))
 
         return action, log_prob, cell
@@ -504,12 +504,12 @@ class ZoomingTreePPO:
     """
     PPO where the POLICY is defined by the zooming tree, not a neural net.
 
-    Policy: state → state-tree leaf → softmax over action cells → sample
+    Policy: state -> state-tree leaf -> softmax over action cells -> sample
     Value baseline: neural net V(s) for GAE
 
     PPO surrogate loss is used to update the value network.  The policy
     (tree cell weights) is updated via exponential moving average (EMA)
-    of advantages — recent experience dominates over stale early estimates,
+    of advantages -- recent experience dominates over stale early estimates,
     handling the nonstationarity of advantages as the value baseline improves.
 
     The PPO clipping mechanism is still applied: we compute importance
@@ -781,7 +781,7 @@ class ZoomingTreePPO:
         new_leaves = self.state_tree.n_leaves
 
         if new_leaves > old_leaves:
-            print(f"  [State Tree] {old_leaves} → {new_leaves} leaves")
+            print(f"  [State Tree] {old_leaves} -> {new_leaves} leaves")
             dim_usage = self.state_tree.dimension_usage()
             if dim_usage:
                 print(f"  [State Tree] Dim splits: {dim_usage}")

@@ -8,7 +8,7 @@ Q-learning cost from step 1 while zooming bootstraps from a coarser
 grid (init=2 bins per axis at ``init_depth=1``) and only refines where
 UCB-driven plays concentrate.
 
-Caveat — at fixed training budget, large N may look bad here purely
+Caveat -- at fixed training budget, large N may look bad here purely
 because a bigger bandit needs more samples; the timestep-sweep phase
 of ``run_dmcs_pipeline.sh`` separates that confound.
 
@@ -82,12 +82,12 @@ def main() -> None:
     p.add_argument("--output", type=Path, default=None,
                    help="Defaults to plots/dmcs/<task>_action_sweep.png.")
     p.add_argument("--title", type=str, default=None,
-                   help="Defaults to 'Action-budget sweep — dm_control/<task>'.")
+                   help="Defaults to 'Action-budget sweep -- dm_control/<task>'.")
     args = p.parse_args()
 
     ckpt_dir = args.checkpoints_dir or Path(f"checkpoints/dmcs/{args.task}/action_sweep")
     out_path = args.output or Path(f"plots/dmcs/{args.task}_action_sweep.png")
-    title = args.title or f"Action-budget sweep — dm_control/{args.task}"
+    title = args.title or f"Action-budget sweep -- dm_control/{args.task}"
 
     finals = _discover(ckpt_dir, args.window)
     if not finals["uniform"] and not finals["zooming"]:
@@ -109,10 +109,10 @@ def main() -> None:
         seed_counts = [len(finals[arm][n]) for n in ns]
         ax.errorbar(ns, means, yerr=stderrs,
                     color=color, marker=marker, linewidth=2, capsize=4,
-                    label=f"{arm} (seeds: {min(seed_counts)}–{max(seed_counts)})")
+                    label=f"{arm} (seeds: {min(seed_counts)}-{max(seed_counts)})")
         for n, m, s, k in zip(ns, means, stderrs, seed_counts):
             summary.append(f"  {arm:<8}  N={n:>3}  seeds={k}  "
-                           f"final-{args.window} mean={m:>7.2f} ± {s:>5.2f}")
+                           f"final-{args.window} mean={m:>7.2f} +/- {s:>5.2f}")
 
     ax.set_xscale("log", base=2)
     ax.set_xticks(sorted({n for arm in finals for n in finals[arm]}))
@@ -125,7 +125,7 @@ def main() -> None:
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_path, dpi=150, bbox_inches="tight")
-    print("\nFinal reward by arm × N (mean ± stderr across seeds):")
+    print("\nFinal reward by arm x N (mean +/- stderr across seeds):")
     for line in summary:
         print(line)
     print(f"\nPlot saved to {out_path}")
