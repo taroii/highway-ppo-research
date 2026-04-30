@@ -17,7 +17,8 @@ separates that confound by holding N and varying training timesteps.
 Sweep dimensions:
   - n \in {8, 16, 32, 64} -- bins per action axis.  Total cells per arm =
     ``n * da``; for da=6 (walker, cheetah) N=64 means 384 total cells.
-  - seed \in {42} by default (extend SEEDS for robustness).
+  - seed \in {42, 43, 44} by default (extend SEEDS for robustness;
+    cut to a single seed for a smoke test).
   - task: passed via --task, default ``cartpole-swingup``.
 
 Outputs (per task):
@@ -44,7 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
 N_VALUES = [8, 16, 32, 64]
-SEEDS = [42]
+SEEDS = [42, 43, 44]
 TOTAL_TIMESTEPS = 300_000
 INIT_DEPTH = 1
 PYTHON = sys.executable

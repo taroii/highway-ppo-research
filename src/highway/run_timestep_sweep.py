@@ -25,7 +25,8 @@ One long run per seed gives the entire timestep-sweep curve for free.
 Sweep dimensions:
   - n = 64 (configurable via N_ACTIONS).  Zooming starts at
     ``2^init_depth = 8`` bins (init_depth=3) and refines up to ``n``.
-  - seed \in {42} by default; extend SEEDS for robustness.
+  - seed \in {42, 43, 44} by default; extend SEEDS for robustness,
+    or cut to a single seed for a smoke test.
   - total_timesteps default 600_000 (~ 4x the architectures pipeline).
 
 Outputs:
@@ -52,7 +53,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
 N_ACTIONS = 64
-SEEDS = [42]#, 43, 44]
+SEEDS = [42, 43, 44]
 TOTAL_TIMESTEPS = 600_000
 PYTHON = sys.executable
 

@@ -21,7 +21,8 @@
 #                 the action sweep plot).
 #
 # Optional env vars:
-#   TS_SEEDS      space-separated, default "42"
+#   TS_SEEDS      space-separated, default "42 43 44" (cut to "42"
+#                 for a smoke test; extend for more error-bar power)
 #   TS_TIMESTEPS  default 600000
 #   INIT_DEPTH    zooming starting depth, default 3
 #   PYTHON        default "python"
@@ -37,7 +38,7 @@ if [ -z "${TS_N_ACTIONS:-}" ]; then
     exit 1
 fi
 
-TS_SEEDS="${TS_SEEDS:-42}"
+TS_SEEDS="${TS_SEEDS:-42 43 44}"
 TS_TIMESTEPS="${TS_TIMESTEPS:-600000}"
 INIT_DEPTH="${INIT_DEPTH:-3}"
 PYTHON="${PYTHON:-python}"

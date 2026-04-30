@@ -34,6 +34,13 @@ TS_N_ACTIONS=32 ./scripts/run_dmcs_timestep_sweep.sh walker-walk
 
 All scripts accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.
 
+Default seed counts are tuned to give usable error bars without burning the GPU:
+- architectures sweeps -- 5 seeds (`SEEDS="42 43 44 45 46"`)
+- timestep sweeps -- 3 seeds (`TS_SEEDS="42 43 44"`)
+- action sweeps -- 3 seeds, hardcoded in `src/{dmcs,highway}/run_action_sweep.py`
+
+For a quick smoke test, override with a single seed (e.g. `SEEDS=42 ./scripts/run_dmcs_architectures.sh` or `TS_SEEDS=42 ./scripts/run_highway_timestep_sweep.sh`); for the action sweeps, edit `SEEDS = [42, 43, 44]` in the corresponding `run_action_sweep.py`.
+
 Outputs land under `checkpoints/<family>/<task>/<phase>/` and `plots/<family>/...`.
 
 ## Single-arm runs

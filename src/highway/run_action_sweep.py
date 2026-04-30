@@ -17,7 +17,8 @@ Sweep dimensions:
   - n \in {8, 16, 32, 64} -- action budget (per axis; for racetrack
     da=1 this is total cells).  Zooming starts at ``2^init_depth``
     bins (init_depth = min(3, log2(n))) and refines up to ``n``.
-  - seed \in {42} by default (extend SEEDS for robustness).
+  - seed \in {42, 43, 44} by default (extend SEEDS for robustness;
+    cut to a single seed for a smoke test).
 
 Outputs:
   - checkpoints/highway/action_sweep/<arm>_<config>_seed<S>.pt
@@ -48,7 +49,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 
 N_VALUES = [8, 16, 32, 64]
-SEEDS = [42]#, 43, 44]
+SEEDS = [42, 43, 44]
 TOTAL_TIMESTEPS = 150_000
 PYTHON = sys.executable
 
