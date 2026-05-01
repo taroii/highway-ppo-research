@@ -3,38 +3,38 @@
 /home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
   from pkg_resources import resource_stream, resource_exists
 Uniform DQN on dm_control/cartpole-swingup  da=1  n=16 (per axis -> 16 total cells)  seed=42  steps=300000
-[  10000/300000]  ep=  10  reward(last50)= 173.69  n_per_axis=[16]  total_splits=0
-[  20000/300000]  ep=  20  reward(last50)= 192.24  n_per_axis=[16]  total_splits=0
-[  30000/300000]  ep=  30  reward(last50)= 200.07  n_per_axis=[16]  total_splits=0
-[  40000/300000]  ep=  40  reward(last50)= 211.33  n_per_axis=[16]  total_splits=0
-[  50000/300000]  ep=  50  reward(last50)= 241.88  n_per_axis=[16]  total_splits=0
-[  60000/300000]  ep=  60  reward(last50)= 320.71  n_per_axis=[16]  total_splits=0
-[  70000/300000]  ep=  70  reward(last50)= 385.79  n_per_axis=[16]  total_splits=0
-[  80000/300000]  ep=  80  reward(last50)= 449.76  n_per_axis=[16]  total_splits=0
-[  90000/300000]  ep=  90  reward(last50)= 520.42  n_per_axis=[16]  total_splits=0
-[ 100000/300000]  ep= 100  reward(last50)= 587.07  n_per_axis=[16]  total_splits=0
-[ 110000/300000]  ep= 110  reward(last50)= 622.37  n_per_axis=[16]  total_splits=0
-[ 120000/300000]  ep= 120  reward(last50)= 661.28  n_per_axis=[16]  total_splits=0
-[ 130000/300000]  ep= 130  reward(last50)= 688.07  n_per_axis=[16]  total_splits=0
-[ 140000/300000]  ep= 140  reward(last50)= 710.32  n_per_axis=[16]  total_splits=0
-[ 150000/300000]  ep= 150  reward(last50)= 723.05  n_per_axis=[16]  total_splits=0
-[ 160000/300000]  ep= 160  reward(last50)= 691.45  n_per_axis=[16]  total_splits=0
-[ 170000/300000]  ep= 170  reward(last50)= 689.01  n_per_axis=[16]  total_splits=0
-[ 180000/300000]  ep= 180  reward(last50)= 698.79  n_per_axis=[16]  total_splits=0
-[ 190000/300000]  ep= 190  reward(last50)= 695.62  n_per_axis=[16]  total_splits=0
-[ 200000/300000]  ep= 200  reward(last50)= 689.50  n_per_axis=[16]  total_splits=0
-[ 210000/300000]  ep= 210  reward(last50)= 723.38  n_per_axis=[16]  total_splits=0
-[ 220000/300000]  ep= 220  reward(last50)= 740.30  n_per_axis=[16]  total_splits=0
-[ 230000/300000]  ep= 230  reward(last50)= 761.83  n_per_axis=[16]  total_splits=0
-[ 240000/300000]  ep= 240  reward(last50)= 753.90  n_per_axis=[16]  total_splits=0
-[ 250000/300000]  ep= 250  reward(last50)= 725.27  n_per_axis=[16]  total_splits=0
-[ 260000/300000]  ep= 260  reward(last50)= 680.38  n_per_axis=[16]  total_splits=0
-[ 270000/300000]  ep= 270  reward(last50)= 646.69  n_per_axis=[16]  total_splits=0
-[ 280000/300000]  ep= 280  reward(last50)= 618.87  n_per_axis=[16]  total_splits=0
-[ 290000/300000]  ep= 290  reward(last50)= 636.39  n_per_axis=[16]  total_splits=0
-[ 300000/300000]  ep= 300  reward(last50)= 645.02  n_per_axis=[16]  total_splits=0
+[  10000/300000]  ep=  10  reward(last50)= 206.53  n_per_axis=[16]  total_splits=0
+[  20000/300000]  ep=  20  reward(last50)= 194.22  n_per_axis=[16]  total_splits=0
+[  30000/300000]  ep=  30  reward(last50)= 207.75  n_per_axis=[16]  total_splits=0
+[  40000/300000]  ep=  40  reward(last50)= 232.52  n_per_axis=[16]  total_splits=0
+[  50000/300000]  ep=  50  reward(last50)= 281.78  n_per_axis=[16]  total_splits=0
+[  60000/300000]  ep=  60  reward(last50)= 348.95  n_per_axis=[16]  total_splits=0
+[  70000/300000]  ep=  70  reward(last50)= 427.31  n_per_axis=[16]  total_splits=0
+[  80000/300000]  ep=  80  reward(last50)= 484.41  n_per_axis=[16]  total_splits=0
+[  90000/300000]  ep=  90  reward(last50)= 533.46  n_per_axis=[16]  total_splits=0
+[ 100000/300000]  ep= 100  reward(last50)= 560.63  n_per_axis=[16]  total_splits=0
+[ 110000/300000]  ep= 110  reward(last50)= 598.77  n_per_axis=[16]  total_splits=0
+[ 120000/300000]  ep= 120  reward(last50)= 622.76  n_per_axis=[16]  total_splits=0
+[ 130000/300000]  ep= 130  reward(last50)= 652.66  n_per_axis=[16]  total_splits=0
+[ 140000/300000]  ep= 140  reward(last50)= 614.85  n_per_axis=[16]  total_splits=0
+[ 150000/300000]  ep= 150  reward(last50)= 636.29  n_per_axis=[16]  total_splits=0
+[ 160000/300000]  ep= 160  reward(last50)= 609.88  n_per_axis=[16]  total_splits=0
+[ 170000/300000]  ep= 170  reward(last50)= 590.06  n_per_axis=[16]  total_splits=0
+[ 180000/300000]  ep= 180  reward(last50)= 595.32  n_per_axis=[16]  total_splits=0
+[ 190000/300000]  ep= 190  reward(last50)= 682.70  n_per_axis=[16]  total_splits=0
+[ 200000/300000]  ep= 200  reward(last50)= 685.53  n_per_axis=[16]  total_splits=0
+[ 210000/300000]  ep= 210  reward(last50)= 726.96  n_per_axis=[16]  total_splits=0
+[ 220000/300000]  ep= 220  reward(last50)= 765.26  n_per_axis=[16]  total_splits=0
+[ 230000/300000]  ep= 230  reward(last50)= 764.42  n_per_axis=[16]  total_splits=0
+[ 240000/300000]  ep= 240  reward(last50)= 695.32  n_per_axis=[16]  total_splits=0
+[ 250000/300000]  ep= 250  reward(last50)= 697.47  n_per_axis=[16]  total_splits=0
+[ 260000/300000]  ep= 260  reward(last50)= 666.59  n_per_axis=[16]  total_splits=0
+[ 270000/300000]  ep= 270  reward(last50)= 668.34  n_per_axis=[16]  total_splits=0
+[ 280000/300000]  ep= 280  reward(last50)= 691.08  n_per_axis=[16]  total_splits=0
+[ 290000/300000]  ep= 290  reward(last50)= 760.10  n_per_axis=[16]  total_splits=0
+[ 300000/300000]  ep= 300  reward(last50)= 773.43  n_per_axis=[16]  total_splits=0
 Saved BranchingDQN checkpoint to checkpoints/dmcs/cartpole-swingup/action_sweep/uniform_n16_seed42.pt
 
 Evaluating (deterministic)...
-Eval(10): mean=824.61  std=7.47
+Eval(10): mean=815.38  std=6.32
 Final n_per_axis: [16]  total_cells: 16  (uniform; no splits)
