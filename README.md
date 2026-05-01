@@ -29,7 +29,7 @@ Anything to the right of `bash scripts/...` is read as a positional argument to 
 
 ```bash
 # Phase 1 -- Action sweep: where does zooming beat uniform?
-#   24 runs (4 N values x 3 seeds x 2 arms) at fixed 300k timesteps.
+#   24 runs (4 N values x 3 seeds x 2 arms) at the per-task DQN_TIMESTEPS default.
 #   Output: plots/dmcs/<task>_action_sweep.png
 bash scripts/run_dmcs_action_sweep.sh cartpole-swingup
 
@@ -81,7 +81,7 @@ For a quick smoke test, override with a single seed (e.g. `SEEDS=42 bash scripts
 Training-timestep defaults vary by experiment and (for DMCS) by task:
 - DMCS architectures -- 150k for cartpole-swingup, 300k for walker-walk, 500k for cheetah-run (override via `DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
 - DMCS timestep sweep -- 1M (`TS_TIMESTEPS`), long enough to read asymptotic behavior at large N.
-- DMCS action sweep -- 300k, hardcoded; intentionally compute-bounded so the uniform-vs-zooming gap at large N reflects the limited-budget regime.
+- DMCS action sweep -- same per-task defaults as architectures (override via `DQN_TIMESTEPS`); intentionally compute-bounded so the uniform-vs-zooming gap at large N reflects the limited-budget regime.
 - Highway architectures -- 150k (`DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
 - Highway timestep sweep -- 600k (`TS_TIMESTEPS`).
 - Highway action sweep -- 150k, hardcoded.

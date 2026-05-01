@@ -46,12 +46,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 N_VALUES = [16, 32, 64, 128]
 SEEDS = [42, 43, 44]
-TOTAL_TIMESTEPS = 300_000
+DEFAULT_TIMESTEPS = 300_000
 INIT_DEPTH = 1
 PYTHON = sys.executable
 
 
-def commands(task: str, ckpt_dir: Path) -> List[Tuple[str, List[str]]]:
+def commands(task: str,
+             ckpt_dir: Path,
+             total_timesteps: int) -> List[Tuple[str, List[str]]]:
     """Yield (label, argv-list) for every (arm, n, seed) cell in the sweep."""
     out: List[Tuple[str, List[str]]] = []
     for seed in SEEDS:
@@ -63,7 +65,7 @@ def commands(task: str, ckpt_dir: Path) -> List[Tuple[str, List[str]]]:
                  "--task", task,
                  "--seed", str(seed),
                  "--n_actions", str(n),
-                 "--total_timesteps", str(TOTAL_TIMESTEPS),
+                 "--total_timesteps", str(total_timesteps),
                  "--output", str(ckpt_dir / f"{label_u}.pt")],
             ))
             label_z = f"zooming_n{n}_seed{seed}"
@@ -74,7 +76,7 @@ def commands(task: str, ckpt_dir: Path) -> List[Tuple[str, List[str]]]:
                  "--seed", str(seed),
                  "--init_depth", str(INIT_DEPTH),
                  "--n_actions", str(n),
-                 "--total_timesteps", str(TOTAL_TIMESTEPS),
+                 "--total_timesteps", str(total_timesteps),
                  "--output", str(ckpt_dir / f"{label_z}.pt")],
             ))
     return out
@@ -144,6 +146,9 @@ def main() -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--task", type=str, default="cartpole-swingup",
                    help="DMCS task slug.")
+    p.add_argument("--total_timesteps", type=int, default=DEFAULT_TIMESTEPS,
+                   help=f"Per-run training budget. Default {DEFAULT_TIMESTEPS}; "
+                        "the bash wrapper overrides per task.")
     p.add_argument("--run", action="store_true",
                    help="Execute each command sequentially. Default: print only.")
     args = p.parse_args()
@@ -152,11 +157,11 @@ def main() -> int:
     log_dir = Path(f"logs/dmcs/{args.task}/action_sweep")
     plot_out = Path(f"plots/dmcs/{args.task}_action_sweep.png")
 
-    cmds = commands(args.task, ckpt_dir)
+    cmds = commands(args.task, ckpt_dir, args.total_timesteps)
     print(f"# Action-budget sweep on dm_control/{args.task} -- "
           f"{len(cmds)} runs total "
           f"({len(N_VALUES)} action counts x {len(SEEDS)} seeds x 2 arms)")
-    print(f"# Total timesteps per run: {TOTAL_TIMESTEPS}")
+    print(f"# Total timesteps per run: {args.total_timesteps}")
     print(f"# Outputs: {ckpt_dir}/, plot: {plot_out}")
 
     if not args.run:
