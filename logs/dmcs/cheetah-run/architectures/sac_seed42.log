@@ -1,0 +1,59 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+SAC on dm_control/cheetah-run  seed=42  steps=500000
+[  10000/500000]  ep=  10  reward(last50)=   4.39  alpha=0.1000
+[  20000/500000]  ep=  20  reward(last50)=   6.03  alpha=0.0291
+[  30000/500000]  ep=  30  reward(last50)=  23.30  alpha=0.0100
+[  40000/500000]  ep=  40  reward(last50)=  39.89  alpha=0.0041
+[  50000/500000]  ep=  50  reward(last50)=  43.03  alpha=0.0029
+[  60000/500000]  ep=  60  reward(last50)=  53.05  alpha=0.0028
+[  70000/500000]  ep=  70  reward(last50)=  73.29  alpha=0.0030
+[  80000/500000]  ep=  80  reward(last50)=  92.38  alpha=0.0029
+[  90000/500000]  ep=  90  reward(last50)= 109.13  alpha=0.0031
+[ 100000/500000]  ep= 100  reward(last50)= 119.96  alpha=0.0033
+[ 110000/500000]  ep= 110  reward(last50)= 147.24  alpha=0.0034
+[ 120000/500000]  ep= 120  reward(last50)= 167.69  alpha=0.0036
+[ 130000/500000]  ep= 130  reward(last50)= 174.80  alpha=0.0041
+[ 140000/500000]  ep= 140  reward(last50)= 185.67  alpha=0.0043
+[ 150000/500000]  ep= 150  reward(last50)= 215.22  alpha=0.0043
+[ 160000/500000]  ep= 160  reward(last50)= 230.41  alpha=0.0046
+[ 170000/500000]  ep= 170  reward(last50)= 252.92  alpha=0.0048
+[ 180000/500000]  ep= 180  reward(last50)= 278.07  alpha=0.0053
+[ 190000/500000]  ep= 190  reward(last50)= 283.18  alpha=0.0053
+[ 200000/500000]  ep= 200  reward(last50)= 297.14  alpha=0.0054
+[ 210000/500000]  ep= 210  reward(last50)= 326.32  alpha=0.0056
+[ 220000/500000]  ep= 220  reward(last50)= 338.77  alpha=0.0056
+[ 230000/500000]  ep= 230  reward(last50)= 367.18  alpha=0.0060
+[ 240000/500000]  ep= 240  reward(last50)= 400.95  alpha=0.0063
+[ 250000/500000]  ep= 250  reward(last50)= 423.81  alpha=0.0068
+[ 260000/500000]  ep= 260  reward(last50)= 433.58  alpha=0.0070
+[ 270000/500000]  ep= 270  reward(last50)= 453.44  alpha=0.0071
+[ 280000/500000]  ep= 280  reward(last50)= 460.50  alpha=0.0075
+[ 290000/500000]  ep= 290  reward(last50)= 476.74  alpha=0.0078
+[ 300000/500000]  ep= 300  reward(last50)= 492.53  alpha=0.0078
+[ 310000/500000]  ep= 310  reward(last50)= 506.63  alpha=0.0087
+[ 320000/500000]  ep= 320  reward(last50)= 516.29  alpha=0.0093
+[ 330000/500000]  ep= 330  reward(last50)= 524.22  alpha=0.0098
+[ 340000/500000]  ep= 340  reward(last50)= 530.94  alpha=0.0100
+[ 350000/500000]  ep= 350  reward(last50)= 539.69  alpha=0.0103
+[ 360000/500000]  ep= 360  reward(last50)= 548.36  alpha=0.0105
+[ 370000/500000]  ep= 370  reward(last50)= 553.64  alpha=0.0105
+[ 380000/500000]  ep= 380  reward(last50)= 562.48  alpha=0.0105
+[ 390000/500000]  ep= 390  reward(last50)= 566.04  alpha=0.0107
+[ 400000/500000]  ep= 400  reward(last50)= 567.74  alpha=0.0103
+[ 410000/500000]  ep= 410  reward(last50)= 566.05  alpha=0.0103
+[ 420000/500000]  ep= 420  reward(last50)= 568.30  alpha=0.0104
+[ 430000/500000]  ep= 430  reward(last50)= 569.15  alpha=0.0105
+[ 440000/500000]  ep= 440  reward(last50)= 571.44  alpha=0.0105
+[ 450000/500000]  ep= 450  reward(last50)= 572.69  alpha=0.0106
+[ 460000/500000]  ep= 460  reward(last50)= 578.27  alpha=0.0110
+[ 470000/500000]  ep= 470  reward(last50)= 579.93  alpha=0.0107
+[ 480000/500000]  ep= 480  reward(last50)= 582.12  alpha=0.0111
+[ 490000/500000]  ep= 490  reward(last50)= 584.15  alpha=0.0113
+[ 500000/500000]  ep= 500  reward(last50)= 578.22  alpha=0.0113
+Saved SAC checkpoint to checkpoints/dmcs/cheetah-run/architectures/sac_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=609.03  std=5.28

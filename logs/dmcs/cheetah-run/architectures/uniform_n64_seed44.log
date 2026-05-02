@@ -1,0 +1,60 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+Uniform DQN on dm_control/cheetah-run  da=6  n=64 (per axis -> 384 total cells)  seed=44  steps=500000
+[  10000/500000]  ep=  10  reward(last50)=   9.58  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  20000/500000]  ep=  20  reward(last50)=  18.56  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  30000/500000]  ep=  30  reward(last50)=  33.27  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  40000/500000]  ep=  40  reward(last50)=  48.62  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  50000/500000]  ep=  50  reward(last50)=  56.86  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  60000/500000]  ep=  60  reward(last50)=  80.70  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  70000/500000]  ep=  70  reward(last50)=  98.93  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  80000/500000]  ep=  80  reward(last50)= 109.46  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[  90000/500000]  ep=  90  reward(last50)= 119.26  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 100000/500000]  ep= 100  reward(last50)= 134.22  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 110000/500000]  ep= 110  reward(last50)= 144.64  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 120000/500000]  ep= 120  reward(last50)= 158.65  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 130000/500000]  ep= 130  reward(last50)= 172.02  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 140000/500000]  ep= 140  reward(last50)= 180.35  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 150000/500000]  ep= 150  reward(last50)= 188.54  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 160000/500000]  ep= 160  reward(last50)= 198.36  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 170000/500000]  ep= 170  reward(last50)= 201.95  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 180000/500000]  ep= 180  reward(last50)= 213.74  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 190000/500000]  ep= 190  reward(last50)= 212.61  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 200000/500000]  ep= 200  reward(last50)= 198.02  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 210000/500000]  ep= 210  reward(last50)= 168.95  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 220000/500000]  ep= 220  reward(last50)= 136.09  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 230000/500000]  ep= 230  reward(last50)=  92.97  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 240000/500000]  ep= 240  reward(last50)=  63.93  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 250000/500000]  ep= 250  reward(last50)=  43.41  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 260000/500000]  ep= 260  reward(last50)=  32.52  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 270000/500000]  ep= 270  reward(last50)=  31.70  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 280000/500000]  ep= 280  reward(last50)=  34.85  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 290000/500000]  ep= 290  reward(last50)=  35.25  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 300000/500000]  ep= 300  reward(last50)=  35.85  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 310000/500000]  ep= 310  reward(last50)=  36.84  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 320000/500000]  ep= 320  reward(last50)=  35.55  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 330000/500000]  ep= 330  reward(last50)=  31.79  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 340000/500000]  ep= 340  reward(last50)=  29.64  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 350000/500000]  ep= 350  reward(last50)=  28.30  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 360000/500000]  ep= 360  reward(last50)=  27.71  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 370000/500000]  ep= 370  reward(last50)=  27.12  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 380000/500000]  ep= 380  reward(last50)=  27.37  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 390000/500000]  ep= 390  reward(last50)=  27.32  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 400000/500000]  ep= 400  reward(last50)=  28.30  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 410000/500000]  ep= 410  reward(last50)=  29.85  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 420000/500000]  ep= 420  reward(last50)=  32.99  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 430000/500000]  ep= 430  reward(last50)=  38.35  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 440000/500000]  ep= 440  reward(last50)=  44.52  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 450000/500000]  ep= 450  reward(last50)=  54.48  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 460000/500000]  ep= 460  reward(last50)=  68.17  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 470000/500000]  ep= 470  reward(last50)=  79.69  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 480000/500000]  ep= 480  reward(last50)= 110.66  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 490000/500000]  ep= 490  reward(last50)= 128.86  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+[ 500000/500000]  ep= 500  reward(last50)= 143.44  n_per_axis=[64, 64, 64, 64, 64, 64]  total_splits=0
+Saved BranchingDQN checkpoint to checkpoints/dmcs/cheetah-run/architectures/uniform_n64_seed44.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=100.86  std=50.12
+Final n_per_axis: [64, 64, 64, 64, 64, 64]  total_cells: 384  (uniform; no splits)
