@@ -46,6 +46,7 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
         output = f"checkpoints/dmcs/{task}/uniform_n{n_actions}_seed{seed}.pt"
 
     env = make_dmcs_env(task)
+    eval_env = make_dmcs_env(task)  # dedicated eval env; never touches training rollout
     action_dim = int(np.prod(env.action_space.shape))
 
     grid = FactoredUniformActionGrid(da=action_dim, n=n_actions)
@@ -71,24 +72,19 @@ def main(task: str = "walker-walk", seed: int = 42, n_actions: int = 16,
     print(f"Uniform DQN on dm_control/{task}  da={action_dim}  "
           f"n={n_actions} (per axis -> {n_actions * action_dim} total cells)  "
           f"seed={seed}  steps={total_timesteps}")
-    rewards = agent.learn(total_timesteps=total_timesteps, print_every=10_000)
+    rewards = agent.learn(total_timesteps=total_timesteps, print_every=10_000,
+                          eval_env=eval_env, eval_every=20_000, eval_episodes=5)
     agent.save(output, rewards)
 
     print("\nEvaluating (deterministic)...")
-    eval_rewards = []
-    for _ in range(10):
-        obs, _ = env.reset()
-        ep = 0.0
-        done = truncated = False
-        while not (done or truncated):
-            obs, r, done, truncated, _ = env.step(agent.predict(obs, deterministic=True))
-            ep += r
-        eval_rewards.append(ep)
-    eval_mean, eval_std = float(np.mean(eval_rewards)), float(np.std(eval_rewards))
+    from src.highway.eval_utils import evaluate_policy
+    eval_mean, eval_std = evaluate_policy(
+        lambda o: agent.predict(o, deterministic=True), eval_env, 10)
     print(f"Eval(10): mean={eval_mean:.2f}  std={eval_std:.2f}")
     print(f"Final n_per_axis: {grid.n_per_axis()}  "
           f"total_cells: {grid.total_cells}  (uniform; no splits)")
     env.close()
+    eval_env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
             "n_actions": n_actions, "n_per_axis": grid.n_per_axis(),
             "total_cells_final": grid.total_cells,

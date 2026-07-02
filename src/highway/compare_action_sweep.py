@@ -38,18 +38,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
+from src.highway.eval_utils import final_eval
+
 
 UNIFORM_RE = re.compile(r"uniform_n(\d+)_seed(\d+)\.pt$")
 ZOOMING_RE = re.compile(r"zooming_n(\d+)_seed(\d+)\.pt$")
 
 
 def _load_finals(path: Path, window: int) -> float:
-    data = torch.load(path, weights_only=False)
-    rewards = np.asarray(data.get("episode_rewards", []), dtype=np.float32)
-    if len(rewards) == 0:
-        return float("nan")
-    w = min(window, len(rewards))
-    return float(rewards[-w:].mean())
+    """Summary reward for one run: mean of the last few deterministic-eval
+    points (falls back to last-``window`` online episodes for legacy
+    checkpoints).  ``window`` is retained for the legacy fallback."""
+    return final_eval(path)
 
 
 def _discover(checkpoints_dir: Path, window: int) -> Dict[str, Dict[int, List[float]]]:
@@ -112,7 +112,7 @@ def main() -> None:
     ax.set_xticks(sorted({n for arm in finals for n in finals[arm]}))
     ax.get_xaxis().set_major_formatter(plt.ScalarFormatter())
     ax.set_xlabel("Action budget N (log scale)")
-    ax.set_ylabel(f"Final reward (mean of last {args.window} episodes)")
+    ax.set_ylabel("Final deterministic-eval reward")
     ax.set_title(args.title)
     ax.legend(loc="best")
     ax.grid(True, alpha=0.3)

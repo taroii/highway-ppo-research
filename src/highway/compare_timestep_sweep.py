@@ -34,6 +34,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
+from src.highway.eval_utils import final_eval, load_eval_curve
+
 
 SEED_RE = re.compile(r"_seed(\d+)\.pt$")
 LABEL_N_RE = re.compile(r"_n(\d+)(?:_|$)")
@@ -89,16 +91,30 @@ def load_rewards(path: Path) -> np.ndarray:
     return np.asarray(data.get("episode_rewards", []), dtype=np.float32)
 
 
-def aggregate(group_paths: List[Path], window: int) -> Tuple[np.ndarray, np.ndarray, int]:
+def aggregate(group_paths: List[Path], window: int
+              ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, int, str]:
+    """Return (x, mean, stderr, n_points, kind).  Prefers the
+    deterministic-eval curve (x = env step); falls back to the online
+    per-episode trace (x = episode index) for legacy checkpoints."""
+    evals = [load_eval_curve(p) for p in group_paths]
+    have_eval = [e for e in evals if e is not None]
+    if have_eval and len(have_eval) == len(group_paths):
+        n_min = min(len(m) for _, m, _ in have_eval)
+        x = have_eval[0][0][:n_min]
+        stack = np.stack([m[:n_min] for _, m, _ in have_eval])
+        mean = stack.mean(axis=0)
+        stderr = stack.std(axis=0, ddof=0) / np.sqrt(max(1, len(have_eval)))
+        return x, mean, stderr, n_min, "eval"
+
     smooths = [rolling_mean(load_rewards(p), window) for p in group_paths]
     smooths = [s for s in smooths if len(s) > 0]
     if not smooths:
-        return np.array([]), np.array([]), 0
+        return np.array([]), np.array([]), np.array([]), 0, "online"
     n_min = min(len(s) for s in smooths)
     stack = np.stack([s[:n_min] for s in smooths])
     mean = stack.mean(axis=0)
     stderr = stack.std(axis=0, ddof=0) / np.sqrt(max(1, len(smooths)))
-    return mean, stderr, n_min
+    return np.arange(n_min), mean, stderr, n_min, "online"
 
 
 PALETTE = {"uniform": "tab:blue", "zooming": "tab:orange"}
@@ -146,34 +162,31 @@ def main() -> None:
     fig, ax = plt.subplots(figsize=(10, 5))
     summary: List[str] = []
 
+    kinds = set()
     for label, paths in sorted(groups.items()):
-        mean, stderr, n_min = aggregate(paths, args.window)
+        x, mean, stderr, n_min, kind = aggregate(paths, args.window)
         if n_min == 0:
             continue
+        kinds.add(kind)
         color = PALETTE.get(_arm_for_label(label), "tab:gray")
-        x = np.arange(n_min)
         ax.plot(x, mean, label=f"{label} (seeds={len(paths)})",
                 color=color, linewidth=2)
         if len(paths) >= 2:
             ax.fill_between(x, mean - stderr, mean + stderr,
                             color=color, alpha=0.18)
 
-        finals = []
-        for path in paths:
-            r = load_rewards(path)
-            tail = args.window
-            finals.append(np.mean(r[-tail:]) if len(r) >= tail
-                          else np.mean(r) if len(r) else np.nan)
-        finals = np.asarray(finals, dtype=np.float32)
+        finals = np.asarray([final_eval(path) for path in paths], dtype=np.float32)
         summary.append(
             f"  {label:<28}  seeds={len(paths)}  "
-            f"final-{args.window} mean={np.nanmean(finals):>7.2f}  "
+            f"final mean={np.nanmean(finals):>7.2f}  "
             f"stddev_across_seeds={np.nanstd(finals):>6.2f}"
         )
 
-    ax.set_xlabel("Episode")
-    ax.set_ylabel(f"Episode reward (rolling mean, window={args.window})")
-    ax.set_title(args.title)
+    eval_only = kinds == {"eval"}
+    ax.set_xlabel("Env step" if eval_only else "Episode")
+    ax.set_ylabel("Deterministic-eval reward" if eval_only
+                  else f"Episode reward (rolling mean, window={args.window})")
+    ax.set_title(args.title + ("  [deterministic eval]" if eval_only else ""))
     ax.legend(loc="best", fontsize=8)
     ax.grid(True, alpha=0.3)
 

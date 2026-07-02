@@ -31,7 +31,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from src.highway.dqn import SelectionPolicy, soft_update, weight_init
-from src.highway.zooming import SplitInfo
+from src.highway.eval_utils import evaluate_policy
 from src.highway.zooming_factored import FactoredActionZooming
 
 
@@ -62,26 +62,35 @@ class BranchingQNetwork(nn.Module):
         h = self.trunk(obs)
         return [head(h) for head in self.heads]
 
-    def rebuild_head_axis(self, axis: int, new_n: int,
-                          splits: List[SplitInfo]) -> None:
-        """Resize axis ``axis``'s head to ``new_n``; transfer surviving
-        rows; init children from parent rows + small noise."""
+    def grow_head_axis(self, axis: int, add_n: int) -> None:
+        """Append ``add_n`` rows to axis ``axis``'s head for freshly-created
+        buffering children.  Existing rows keep their exact positions (pure
+        append -- no survivor reindexing); the new rows are freshly
+        initialized (NO parent inheritance, per the paper's erratum: a
+        buffering child must accrue its own evidence and is unselectable
+        until it graduates, so its arbitrary starting Q can never be
+        exploited)."""
         old = self.heads[axis]
-        old_w, old_b = old.weight.data, old.bias.data
-        new = nn.Linear(old.in_features, new_n).to(old.weight.device)
-        removed = {s.old_idx for s in splits}
-        surviving_old = [i for i in range(old.out_features) if i not in removed]
+        new = nn.Linear(old.in_features, old.out_features + add_n).to(old.weight.device)
         with torch.no_grad():
             nn.init.orthogonal_(new.weight.data)
             new.bias.data.fill_(0.0)
-            for new_idx, old_idx in enumerate(surviving_old):
-                new.weight.data[new_idx] = old_w[old_idx]
-                new.bias.data[new_idx] = old_b[old_idx]
-            for split in splits:
-                pw, pb = old_w[split.old_idx], old_b[split.old_idx]
-                for new_idx in split.new_indices:
-                    new.weight.data[new_idx] = pw + torch.randn_like(pw) * 0.01
-                    new.bias.data[new_idx] = pb + torch.randn_like(pb) * 0.01
+            new.weight.data[:old.out_features] = old.weight.data
+            new.bias.data[:old.out_features] = old.bias.data
+        self.heads[axis] = new
+
+    def shrink_head_axis(self, axis: int, removed_indices: List[int]) -> None:
+        """Drop the rows at ``removed_indices`` (retired parent cubes) and
+        compact the survivors, preserving order.  Mirrors the grid's
+        ``_retire`` so head row k continues to correspond to cube k."""
+        old = self.heads[axis]
+        removed = set(removed_indices)
+        survivors = [k for k in range(old.out_features) if k not in removed]
+        new = nn.Linear(old.in_features, len(survivors)).to(old.weight.device)
+        with torch.no_grad():
+            for new_i, old_i in enumerate(survivors):
+                new.weight.data[new_i] = old.weight.data[old_i]
+                new.bias.data[new_i] = old.bias.data[old_i]
         self.heads[axis] = new
 
 
@@ -112,6 +121,15 @@ class BranchingReplayBuffer:
         self.not_dones[i] = 0.0 if done else 1.0
         self.idx = (self.idx + 1) % self.capacity
         self.full = self.full or self.idx == 0
+
+    def remap_axis(self, axis: int, remap: np.ndarray) -> None:
+        """Rewrite stored action indices on ``axis`` through ``remap`` (old
+        index -> new index) after the grid retired/compacted cubes on that
+        axis, so buffered transitions never point at a stale row."""
+        limit = self.capacity if self.full else self.idx
+        if limit == 0:
+            return
+        self.actions[:limit, axis] = remap[self.actions[:limit, axis]]
 
     def sample(self, batch_size: int):
         limit = self.capacity if self.full else self.idx
@@ -148,6 +166,7 @@ class BranchingDQN:
         target_update_freq: int = 2,
         split_check_freq: int = 2000,
         split_delay: int = 60_000,
+        buffer_period: int = 16,
         seed: int = 0,
     ):
         self.env = env
@@ -161,6 +180,11 @@ class BranchingDQN:
         self.target_update_freq = target_update_freq
         self.split_check_freq = split_check_freq
         self.split_delay = split_delay
+        # Buffering service period: every ``buffer_period``-th play of a
+        # parent with buffering children, the sample is redirected to a
+        # child (relabel-by-containment).  Adapts the paper's ``H+1`` (which
+        # came from its tabular alpha_t=(H+1)/(H+t) rule, unused here).
+        self.buffer_period = buffer_period
         self.hidden_dim = hidden_dim
         self.da = grid.da
 
@@ -182,6 +206,8 @@ class BranchingDQN:
         self.total_splits = 0
         # (timestep, axis_idx, n_splits_on_axis) for each split event.
         self.split_history: List[Tuple[int, int, int]] = []
+        # (step, deterministic-eval mean, std) sampled during learn().
+        self.eval_curve: List[Tuple[int, float, float]] = []
 
     # ------------------------------------------------------------------
     # Action selection
@@ -194,13 +220,16 @@ class BranchingDQN:
         with torch.no_grad():
             q_lists = self.q(obs_t)
         play_counts = self.grid.play_counts_per_axis()
+        masks = self.grid.active_mask_per_axis()   # buffering cubes excluded
         idx_per_axis = np.empty(self.da, dtype=np.int64)
         for i, q in enumerate(q_lists):
             q_np = q.squeeze(0).cpu().numpy()
+            mask = masks[i]
             if deterministic:
-                idx_per_axis[i] = int(q_np.argmax())
+                scores = np.where(mask, q_np, -np.inf)
+                idx_per_axis[i] = int(scores.argmax())
             else:
-                idx_per_axis[i] = self.policy.select(q_np, step, play_counts[i])
+                idx_per_axis[i] = self.policy.select(q_np, step, play_counts[i], mask)
         return idx_per_axis, self.grid.get_env_action(idx_per_axis)
 
     # ------------------------------------------------------------------
@@ -213,11 +242,18 @@ class BranchingDQN:
 
         with torch.no_grad():
             next_q_list = self.q_target(next_obs)               # list of (B, n_i)
-            next_max_per_axis = torch.stack(
-                [q.max(dim=1).values for q in next_q_list], dim=1
-            )                                                   # (B, da)
-            next_v = next_max_per_axis.mean(dim=1)              # (B,)
-            target = rewards + not_dones * self.gamma * next_v  # (B,)
+            masks = self.grid.active_mask_per_axis()
+            per_axis_max = []
+            for i, q in enumerate(next_q_list):
+                m = torch.as_tensor(masks[i], dtype=torch.bool, device=q.device)
+                if bool(m.any()):
+                    # exclude buffering rows from the bootstrap max: their
+                    # Q is arbitrary until they graduate
+                    q = q.masked_fill(~m.unsqueeze(0), float("-inf"))
+                per_axis_max.append(q.max(dim=1).values)
+            next_max_per_axis = torch.stack(per_axis_max, dim=1)  # (B, da)
+            next_v = next_max_per_axis.mean(dim=1)                # (B,)
+            target = rewards + not_dones * self.gamma * next_v    # (B,)
 
         q_list = self.q(obs)                                    # list of (B, n_i)
         loss = torch.zeros((), dtype=q_list[0].dtype, device=q_list[0].device)
@@ -234,15 +270,17 @@ class BranchingDQN:
     # Split handling
     # ------------------------------------------------------------------
 
-    def _sync_target_axis_children(self, axis: int,
-                                   splits: List[SplitInfo]) -> None:
+    def _sync_target_new_rows(self, axis: int, add_n: int) -> None:
+        """Snap the target head's freshly-appended rows to match the online
+        head so post-split TD targets agree (survivor rows keep the target's
+        slow-averaged values)."""
         with torch.no_grad():
-            for split in splits:
-                for new_idx in split.new_indices:
-                    self.q_target.heads[axis].weight.data[new_idx] = \
-                        self.q.heads[axis].weight.data[new_idx]
-                    self.q_target.heads[axis].bias.data[new_idx] = \
-                        self.q.heads[axis].bias.data[new_idx]
+            n = self.q.heads[axis].out_features
+            for r in range(n - add_n, n):
+                self.q_target.heads[axis].weight.data[r] = \
+                    self.q.heads[axis].weight.data[r]
+                self.q_target.heads[axis].bias.data[r] = \
+                    self.q.heads[axis].bias.data[r]
 
     def _rebuild_optimizer_preserving_state(self) -> None:
         """Rebuild Adam over current parameters, preserving state for
@@ -254,40 +292,66 @@ class BranchingDQN:
             if p in old_state:
                 self.optimizer.state[p] = old_state[p]
 
-    def _check_splits(self, step: int) -> int:
-        per_axis_splits = self.grid.try_split()
-        n_splits = sum(len(s) for s in per_axis_splits)
-        if n_splits == 0:
-            return 0
-        for i, splits_i in enumerate(per_axis_splits):
-            if not splits_i:
-                continue
-            new_n_i = self.grid.axes[i].n_actions
-            self.q.rebuild_head_axis(i, new_n_i, splits_i)
-            self.q_target.rebuild_head_axis(i, new_n_i, splits_i)
-            self._sync_target_axis_children(i, splits_i)
-            self.split_history.append((step, i, len(splits_i)))
-        self._rebuild_optimizer_preserving_state()
+    def _maintain(self, step: int) -> int:
+        """Advance the buffering lifecycle and apply the resulting Q-head
+        edits.  Per axis: retire rows (shrink) first, then append new
+        buffering child rows (grow) -- the same order the grid mutates its
+        cube lists, so head row k stays aligned with cube k.  Returns the
+        number of splits (child groups created) this round."""
+        removals, appends, remaps = self.grid.maintain()
+        changed = False
+        n_splits = 0
+        for i in range(self.da):
+            if removals[i]:
+                # remap buffered action indices BEFORE the head shrinks, so a
+                # retired parent's transitions follow onto its child rows
+                self.buffer.remap_axis(i, remaps[i])
+                self.q.shrink_head_axis(i, removals[i])
+                self.q_target.shrink_head_axis(i, removals[i])
+                changed = True
+            if appends[i]:
+                self.q.grow_head_axis(i, appends[i])
+                self.q_target.grow_head_axis(i, appends[i])
+                self._sync_target_new_rows(i, appends[i])
+                # 1-D children come in pairs -> appends[i] // 2 split events
+                n_splits += appends[i] // 2
+                self.split_history.append((step, i, appends[i] // 2))
+                changed = True
+        if changed:
+            self._rebuild_optimizer_preserving_state()
         return n_splits
 
     # ------------------------------------------------------------------
     # Training loop
     # ------------------------------------------------------------------
 
-    def learn(self, total_timesteps: int, print_every: int = 10_000) -> List[float]:
+    def _run_eval(self, eval_env, eval_episodes: int, step: int) -> None:
+        mean, std = evaluate_policy(
+            lambda o: self.predict(o, deterministic=True),
+            eval_env, eval_episodes,
+        )
+        self.eval_curve.append((step, mean, std))
+
+    def learn(self, total_timesteps: int, print_every: int = 10_000,
+              eval_env: Optional[gym.Env] = None,
+              eval_every: int = 10_000, eval_episodes: int = 10) -> List[float]:
         obs, _ = self.env.reset()
         episode_rewards: List[float] = []
+        self.eval_curve = []
         current = 0.0
 
         for step in range(1, total_timesteps + 1):
             obs_flat = obs.flatten().astype(np.float32)
-            idx_per_axis, env_action = self.select_action(obs_flat, step)
+            # Select over ACTIVE cubes only; on_step registers the play and,
+            # on a buffering-service step, redirects to a child (returning the
+            # child's action + the index to store the transition under).
+            idx_per_axis, _ = self.select_action(obs_flat, step)
+            env_action, store_idx = self.grid.on_step(idx_per_axis, self.buffer_period)
             next_obs, reward, done, truncated, _ = self.env.step(env_action)
             terminal = done or truncated
             next_obs_flat = next_obs.flatten().astype(np.float32)
 
-            self.buffer.add(obs_flat, idx_per_axis, reward, next_obs_flat, terminal)
-            self.grid.register_play(idx_per_axis)
+            self.buffer.add(obs_flat, store_idx, reward, next_obs_flat, terminal)
             current += reward
 
             if terminal:
@@ -302,7 +366,15 @@ class BranchingDQN:
                     soft_update(self.q, self.q_target, self.tau)
 
             if step >= self.split_delay and step % self.split_check_freq == 0:
-                self.total_splits += self._check_splits(step)
+                self.total_splits += self._maintain(step)
+
+            if eval_env is not None and (step % eval_every == 0
+                                         or step == total_timesteps):
+                self._run_eval(eval_env, eval_episodes, step)
+                e_step, e_mean, e_std = self.eval_curve[-1]
+                print(f"[{step:>7d}/{total_timesteps}]  "
+                      f"eval({eval_episodes})={e_mean:>7.2f} +/- {e_std:<6.2f}  "
+                      f"n_per_axis={self.grid.n_per_axis()}")
 
             if episode_rewards and step % print_every == 0:
                 recent = episode_rewards[-50:]
@@ -323,6 +395,7 @@ class BranchingDQN:
             "q": self.q.state_dict(),
             "n_per_axis": self.grid.n_per_axis(),
             "episode_rewards": episode_rewards or [],
+            "eval_curve": self.eval_curve,
             "split_history": self.split_history,
             "total_splits": self.total_splits,
             "total_cells": self.grid.total_cells,

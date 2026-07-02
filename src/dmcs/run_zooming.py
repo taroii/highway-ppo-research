@@ -40,11 +40,13 @@ from src.highway.zooming_factored import FactoredActionZooming
 
 def main(task: str = "walker-walk", seed: int = 42,
          init_depth: int = 1, n_actions: int = 16,
-         total_timesteps: int = 300_000, output: str | None = None) -> dict:
+         total_timesteps: int = 300_000, buffer_period: int = 16,
+         output: str | None = None) -> dict:
     if output is None:
         output = f"checkpoints/dmcs/{task}/zooming_n{n_actions}_seed{seed}.pt"
 
     env = make_dmcs_env(task)
+    eval_env = make_dmcs_env(task)  # dedicated eval env; never touches training rollout
     action_dim = int(np.prod(env.action_space.shape))
     total_budget = n_actions * action_dim
 
@@ -73,6 +75,7 @@ def main(task: str = "walker-walk", seed: int = 42,
         split_check_freq=2000,
         # Splits begin as soon as data is available -- no extra delay.
         split_delay=learning_starts,
+        buffer_period=buffer_period,
         seed=seed,
     )
 
@@ -80,20 +83,14 @@ def main(task: str = "walker-walk", seed: int = 42,
           f"init_depth={init_depth} (start={grid.total_cells} cells)  "
           f"n={n_actions} -> total_budget={total_budget}  "
           f"seed={seed}  steps={total_timesteps}")
-    rewards = agent.learn(total_timesteps=total_timesteps, print_every=10_000)
+    rewards = agent.learn(total_timesteps=total_timesteps, print_every=10_000,
+                          eval_env=eval_env, eval_every=20_000, eval_episodes=5)
     agent.save(output, rewards)
 
     print("\nEvaluating (deterministic)...")
-    eval_rewards = []
-    for _ in range(10):
-        obs, _ = env.reset()
-        ep = 0.0
-        done = truncated = False
-        while not (done or truncated):
-            obs, r, done, truncated, _ = env.step(agent.predict(obs, deterministic=True))
-            ep += r
-        eval_rewards.append(ep)
-    eval_mean, eval_std = float(np.mean(eval_rewards)), float(np.std(eval_rewards))
+    from src.highway.eval_utils import evaluate_policy
+    eval_mean, eval_std = evaluate_policy(
+        lambda o: agent.predict(o, deterministic=True), eval_env, 10)
     print(f"Eval(10): mean={eval_mean:.2f}  std={eval_std:.2f}")
     print(f"Final n_per_axis: {grid.n_per_axis()}  "
           f"total_cells: {grid.total_cells}/{total_budget}  "
@@ -104,6 +101,7 @@ def main(task: str = "walker-walk", seed: int = 42,
         print(f"Split history: {len(agent.split_history)} events, "
               f"steps {first_step} to {last_step}")
     env.close()
+    eval_env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
             "n_per_axis_final": grid.n_per_axis(),
             "total_cells_final": grid.total_cells,
@@ -128,8 +126,14 @@ if __name__ == "__main__":
                    help="Matched-budget partner for run_uniform.py: "
                         "total_budget = n_actions * da.  Default 16.")
     p.add_argument("--total_timesteps", type=int, default=300_000)
+    p.add_argument("--buffer_period", type=int, default=16,
+                   help="Buffering service period: every k-th play of a "
+                        "parent with buffering children redirects that sample "
+                        "to a child (relabel-by-containment).  Adapts the "
+                        "paper's H+1 (its tabular alpha rule is unused here); "
+                        "smaller = children graduate faster.")
     p.add_argument("--output", type=str, default=None)
     args = p.parse_args()
     main(task=args.task, seed=args.seed, init_depth=args.init_depth,
          n_actions=args.n_actions, total_timesteps=args.total_timesteps,
-         output=args.output)
+         buffer_period=args.buffer_period, output=args.output)

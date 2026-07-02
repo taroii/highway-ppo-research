@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import numpy as np
 
 from src.highway.env import make_racetrack_env
+from src.highway.eval_utils import evaluate_policy
 from src.highway.sac import SAC
 
 
@@ -29,10 +30,11 @@ def main(seed: int = 42, total_timesteps: int = 50_000,
         output = f"checkpoints/highway/sac_seed{seed}.pt"
 
     env = make_racetrack_env()
+    eval_env = make_racetrack_env()  # dedicated eval env; never touches training rollout
     agent = SAC(
         env,
         hidden_dim=256,
-        gamma=0.9,
+        gamma=0.99,   # racetrack episodes are long-horizon (duration=300); 0.9 was myopic
         tau=0.005,
         actor_lr=5e-4,
         critic_lr=5e-4,
@@ -47,22 +49,16 @@ def main(seed: int = 42, total_timesteps: int = 50_000,
     )
 
     print(f"SAC on racetrack-v0  seed={seed}  steps={total_timesteps}")
-    rewards = agent.learn(total_timesteps=total_timesteps, print_every=5_000)
+    rewards = agent.learn(total_timesteps=total_timesteps, print_every=5_000,
+                          eval_env=eval_env, eval_every=10_000, eval_episodes=10)
     agent.save(output, rewards)
 
     print("\nEvaluating (deterministic)...")
-    eval_rewards = []
-    for _ in range(20):
-        obs, _ = env.reset()
-        ep = 0.0
-        done = truncated = False
-        while not (done or truncated):
-            obs, r, done, truncated, _ = env.step(agent.predict(obs, deterministic=True))
-            ep += r
-        eval_rewards.append(ep)
-    eval_mean, eval_std = float(np.mean(eval_rewards)), float(np.std(eval_rewards))
+    eval_mean, eval_std = evaluate_policy(
+        lambda o: agent.predict(o, deterministic=True), eval_env, 20)
     print(f"Eval(20): mean={eval_mean:.2f}  std={eval_std:.2f}")
     env.close()
+    eval_env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
             "episode_rewards": rewards}
 

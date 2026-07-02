@@ -18,6 +18,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from src.highway.eval_utils import evaluate_policy
+
 
 LOG_STD_MIN = -5
 LOG_STD_MAX = 2
@@ -189,6 +191,8 @@ class SAC:
         self.alpha_optimizer = torch.optim.Adam([self.log_alpha], lr=alpha_lr)
 
         self.buffer = ReplayBuffer(self.obs_dim, self.action_dim, buffer_capacity, self.device)
+        # (step, deterministic-eval mean, std) sampled during learn().
+        self.eval_curve: List[tuple] = []
 
     @property
     def alpha(self):
@@ -237,9 +241,12 @@ class SAC:
             soft_update_params(self.q1, self.q1_target, self.tau)
             soft_update_params(self.q2, self.q2_target, self.tau)
 
-    def learn(self, total_timesteps: int, print_every: int = 10_000) -> List[float]:
+    def learn(self, total_timesteps: int, print_every: int = 10_000,
+              eval_env: gym.Env | None = None,
+              eval_every: int = 10_000, eval_episodes: int = 10) -> List[float]:
         obs, _ = self.env.reset()
         episode_rewards: List[float] = []
+        self.eval_curve = []
         current = 0.0
 
         for step in range(1, total_timesteps + 1):
@@ -266,6 +273,17 @@ class SAC:
             if step >= self.learning_starts:
                 self._update(step)
 
+            if eval_env is not None and (step % eval_every == 0
+                                         or step == total_timesteps):
+                mean, std = evaluate_policy(
+                    lambda o: self.predict(o, deterministic=True),
+                    eval_env, eval_episodes,
+                )
+                self.eval_curve.append((step, mean, std))
+                print(f"[{step:>7d}/{total_timesteps}]  "
+                      f"eval({eval_episodes})={mean:>7.2f} +/- {std:<6.2f}  "
+                      f"alpha={self.alpha.item():.4f}")
+
             if episode_rewards and step % print_every == 0:
                 recent = episode_rewards[-50:]
                 print(f"[{step:>7d}/{total_timesteps}]  ep={len(episode_rewards):>4d}  "
@@ -284,6 +302,7 @@ class SAC:
             "action_dim": self.action_dim,
             "hidden_dim": self.hidden_dim,
             "episode_rewards": episode_rewards or [],
+            "eval_curve": self.eval_curve,
         }, path)
         print(f"Saved SAC checkpoint to {path}")
 

@@ -21,9 +21,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import numpy as np
 
-from src.highway.dqn import EpsGreedy
+from src.highway.dqn import UCB
 from src.highway.dqn_factored import BranchingDQN
 from src.highway.env import make_racetrack_env
+from src.highway.eval_utils import evaluate_policy
 from src.highway.uniform_grid_factored import FactoredUniformActionGrid
 
 
@@ -33,16 +34,20 @@ def main(seed: int = 42, n_actions: int = 16, total_timesteps: int = 150_000,
         output = f"checkpoints/highway/uniform_n{n_actions}_seed{seed}.pt"
 
     env = make_racetrack_env()
+    eval_env = make_racetrack_env()  # dedicated eval env; never touches training rollout
     action_dim = int(np.prod(env.action_space.shape))
 
     grid = FactoredUniformActionGrid(da=action_dim, n=n_actions)
     agent = BranchingDQN(
         env=env,
         grid=grid,
-        selection_policy=EpsGreedy(eps_start=1.0, eps_end=0.05,
-                                   decay_steps=int(0.4 * total_timesteps)),
+        # Constant-c UCB matches the zooming arm's exploration policy exactly,
+        # so the only difference between arms is the grid structure (previously
+        # this arm used eps-greedy while zooming used UCB -- an exploration
+        # confound on the highway A/B).
+        selection_policy=UCB(c_start=0.3, c_end=0.3, decay_steps=1),
         hidden_dim=256,
-        gamma=0.9,
+        gamma=0.99,   # racetrack episodes are long-horizon (duration=300); 0.9 was myopic
         tau=0.01,
         lr=5e-4,
         batch_size=128,
@@ -57,22 +62,16 @@ def main(seed: int = 42, n_actions: int = 16, total_timesteps: int = 150_000,
     print(f"Uniform DQN on racetrack-v0  da={action_dim}  "
           f"n={n_actions} (per axis -> {n_actions * action_dim} total cells)  "
           f"seed={seed}  steps={total_timesteps}")
-    rewards = agent.learn(total_timesteps=total_timesteps, print_every=5_000)
+    rewards = agent.learn(total_timesteps=total_timesteps, print_every=5_000,
+                          eval_env=eval_env, eval_every=10_000, eval_episodes=10)
     agent.save(output, rewards)
 
     print("\nEvaluating (deterministic)...")
-    eval_rewards = []
-    for _ in range(20):
-        obs, _ = env.reset()
-        ep = 0.0
-        done = truncated = False
-        while not (done or truncated):
-            obs, r, done, truncated, _ = env.step(agent.predict(obs, deterministic=True))
-            ep += r
-        eval_rewards.append(ep)
-    eval_mean, eval_std = float(np.mean(eval_rewards)), float(np.std(eval_rewards))
+    eval_mean, eval_std = evaluate_policy(
+        lambda o: agent.predict(o, deterministic=True), eval_env, 20)
     print(f"Eval(20): mean={eval_mean:.2f}  std={eval_std:.2f}")
     env.close()
+    eval_env.close()
     return {"output": output, "eval_mean": eval_mean, "eval_std": eval_std,
             "n_actions": n_actions, "n_per_axis": grid.n_per_axis(),
             "episode_rewards": rewards}

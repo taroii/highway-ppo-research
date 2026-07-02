@@ -21,7 +21,7 @@ hence the same total cell count ``n * da``.
 
 from __future__ import annotations
 
-from typing import List, Sequence
+from typing import List, Sequence, Tuple
 
 import numpy as np
 
@@ -63,3 +63,22 @@ class FactoredUniformActionGrid:
 
     def try_split(self) -> List[List[SplitInfo]]:
         return [[] for _ in range(self.da)]
+
+    # ------------------------------------------------------------------
+    # Lifecycle API parity with FactoredActionZooming (all no-ops here:
+    # every cell is always active, nothing ever splits or buffers).
+    # ------------------------------------------------------------------
+
+    def active_mask_per_axis(self) -> List[np.ndarray]:
+        return [np.ones(ax.n_actions, dtype=bool) for ax in self.axes]
+
+    def on_step(self, idx_per_axis: Sequence[int], buffer_period: int
+                ) -> Tuple[np.ndarray, np.ndarray]:
+        self.register_play(idx_per_axis)
+        return (self.get_env_action(idx_per_axis),
+                np.asarray(idx_per_axis, dtype=np.int64))
+
+    def maintain(self) -> Tuple[List[List[int]], List[int], List[np.ndarray]]:
+        return ([[] for _ in range(self.da)],
+                [0 for _ in range(self.da)],
+                [np.arange(ax.n_actions, dtype=np.int64) for ax in self.axes])

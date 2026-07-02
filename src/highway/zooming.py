@@ -39,7 +39,39 @@ class Cube:
 
 @dataclass
 class CubeStats:
+    """Per-cube lifecycle state for the paper's buffering scheme.
+
+    Fields mirror Algorithm 1 of Cao & Krishnamurthy (2021):
+      - ``n_play``  == n~ (tilde): times this *active* cube was selected.
+        Drives the split trigger (>= N_split) and is the UCB denominator.
+      - ``n_update`` == n: samples *credited* to this cube.  For a buffering
+        child it is the number of redirected parent-plays it has received;
+        it graduates once ``n_update >= N_min(child)``.
+      - ``buffering``: True while the cube is a child that has not yet
+        accumulated enough of its own evidence to be selectable.
+      - ``parent_group``/``child_group``/``n_pending``: lineage so a parent
+        can be retired once *all* its children graduate (its domain is then
+        covered by the children, so it is no longer selectable).
+    """
     n_play: int = 0
+    n_update: int = 0
+    buffering: bool = False
+    parent_group: int = -1   # buffering child -> its parent's group id
+    child_group: int = -1    # active parent -> group id of its buffering children (-1 if none)
+    n_pending: int = 0       # active parent -> children not yet graduated
+    retire: bool = False     # active parent -> flagged for removal this maintain()
+
+
+def n_split_threshold(s: float) -> int:
+    """N_split(B) = (d_max / r(B))^2 with d_max = 1 (cube in [0,1]^d).
+    A cube splits once its *play* count reaches this."""
+    return math.ceil((1.0 / s) ** 2)
+
+
+def n_min_threshold(s: float) -> int:
+    """N_min(B) = N_split(B) / 4.  A buffering child graduates once its
+    *update* (redirected-sample) count reaches this."""
+    return math.ceil((1.0 / s) ** 2 / 4.0)
 
 
 @dataclass
@@ -87,34 +119,7 @@ class ActionZooming:
         return np.array([s.n_play for s in self.stats], dtype=np.int64)
 
     def split_threshold(self, cube: Cube) -> int:
-        return math.ceil((1.0 / cube.s) ** 2)
-
-    def try_split(self) -> List[SplitInfo]:
-        """Split every cube whose play count has reached its threshold,
-        skipping cubes already at ``max_depth`` (i.e., side length at or
-        below ``self.min_side``)."""
-        to_split = [
-            i for i, (c, s) in enumerate(zip(self.active_cubes, self.stats))
-            if s.n_play >= self.split_threshold(c) and c.s > self.min_side + 1e-9
-        ]
-        if not to_split:
-            return []
-
-        splits: List[SplitInfo] = []
-        # Process in reverse so indices remain valid during pops.
-        for old_idx in reversed(to_split):
-            cube = self.active_cubes.pop(old_idx)
-            self.stats.pop(old_idx)
-            children = cube.split_children()
-            new_start = len(self.active_cubes)
-            new_indices = list(range(new_start, new_start + len(children)))
-            for child in children:
-                self.active_cubes.append(child)
-                # Children start fresh (n_play=0): bandit-zooming theory
-                # treats refined sub-cubes as new arms with no prior plays.
-                # Their Q-row is inherited from the parent (in dqn.py's
-                # rebuild_head); their *count* is not, so UCB still
-                # explores each child specifically.
-                self.stats.append(CubeStats())
-            splits.append(SplitInfo(old_idx=old_idx, new_indices=new_indices))
-        return splits
+        """N_split(B) = (1/s)^2 (d_max = 1).  Kept for callers that want the
+        per-cube split trigger directly; see ``n_split_threshold`` for the
+        free function used by the factored lifecycle."""
+        return n_split_threshold(cube.s)
