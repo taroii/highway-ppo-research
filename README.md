@@ -13,78 +13,41 @@ git clone https://github.com/eleurent/highway-env.git HighwayEnv
 
 ## Running experiments
 
-Three independent scripts per task family under `scripts/`. GPU is auto-detected if available.
-
-### Per-task pipeline (recommended)
-
-For each task, run the three phases in order. Phase 2 and Phase 3 each require an `N_ACTIONS` value picked from Phase 1's plot.
-
-**Env-var placement (Ubuntu / bash):** environment variables go *before* the `bash` command and apply only to that single invocation. The form is always:
+**One script per family** under `scripts/`, with a *phase* selector. GPU is auto-detected. All plots read the **deterministic-eval curve** persisted in each checkpoint (the online training reward understates the greedy policy by up to ~3x, so it is never the headline metric).
 
 ```bash
-VAR1=value1 VAR2=value2 bash scripts/<script>.sh <positional-args>
+scripts/run_dmcs.sh <task> [phase]      # task: cartpole-swingup | walker-walk | cheetah-run
+scripts/run_highway.sh [phase]          # racetrack-v0 (da=1); no task arg
 ```
 
-Anything to the right of `bash scripts/...` is read as a positional argument to the script (e.g. the task slug). All env vars must come before `bash`.
+### The three phases
+
+- **`efficiency`** (default, the headline figure) — uniform + zooming across `N`, with SAC as a flat ceiling band. This is the performance-vs-`N` curve: read it matched at each `N`, as the `N` where zooming reaches uniform's best plateau, and as each arm's best-over-`N` envelope vs the SAC ceiling. Merges the old *action-sweep* + *architectures* phases. → `plots/<family>/<task>_efficiency.png`
+- **`robustness`** — adjudicates the auto-tuning claim ("you don't have to pick `N`"). Adds zooming knob variants (`buffer_period`, `init_depth`) at `REF_N` and compares the **spread** of zooming-across-knobs to uniform-across-`N` (reusing the efficiency checkpoints). Prints a quantitative verdict (range ratio). → `plots/<family>/<task>_robustness.png`
+- **`sample-efficiency`** — the repurposed timestep sweep: long (1M-step) runs at 1–2 diagnostic `N` for uniform + zooming + SAC, plotted as **reward vs env-steps** for the "cheaper than SAC" thread. → `plots/<family>/<task>_sample_efficiency.png`
+- **`all`** — the three in order.
+
+### Recommended workflow
+
+Run **one task's `efficiency` end-to-end first**, eyeball the curve, *then* fan out — don't launch every task × phase on faith right after a refactor.
 
 ```bash
-# Phase 1 -- Action sweep: where does zooming beat uniform?
-#   24 runs (4 N values x 3 seeds x 2 arms) at the per-task DQN_TIMESTEPS default.
-#   Output: plots/dmcs/<task>_action_sweep.png
-bash scripts/run_dmcs_action_sweep.sh cartpole-swingup
-
-# Inspect the plot, pick a target N (the one where zooming most clearly
-# wins over uniform, or where curves diverge most). Default if flat: 32.
-
-# Phase 2 -- Architectures sweep at chosen N: SAC vs Uniform vs Zooming.
-#   15 runs (5 seeds x 3 arms) at the per-task DQN_TIMESTEPS default.
-#   Output: plots/dmcs/<task>_architectures.png  (the headline plot.)
-N_ACTIONS=32 bash scripts/run_dmcs_architectures.sh cartpole-swingup
-
-# Phase 3 -- Timestep sweep at chosen N: asymptotic behavior.
-#   6 runs (3 seeds x 2 arms) at TS_TIMESTEPS=1M each.
-#   Output: plots/dmcs/<task>_timestep_sweep.png
-TS_N_ACTIONS=32 bash scripts/run_dmcs_timestep_sweep.sh cartpole-swingup
+scripts/run_dmcs.sh walker-walk efficiency     # validate the fixed code on the cleanest task
+scripts/run_dmcs.sh walker-walk robustness     # then the auto-tuning story
+scripts/run_dmcs.sh walker-walk all            # or the whole thing
+scripts/run_highway.sh efficiency              # da=1 sanity task
 ```
 
-Repeat for the remaining DMCS tasks; pick `N_ACTIONS` / `TS_N_ACTIONS` fresh for each based on its own action-sweep plot:
+Preview any invocation without running it: `DRY_RUN=1 scripts/run_dmcs.sh walker-walk all`.
 
-```bash
-bash scripts/run_dmcs_action_sweep.sh cheetah-run
-N_ACTIONS=<chosen> bash scripts/run_dmcs_architectures.sh cheetah-run
-TS_N_ACTIONS=<chosen> bash scripts/run_dmcs_timestep_sweep.sh cheetah-run
+### Task roles (a planning decision, not interchangeable rows)
 
-bash scripts/run_dmcs_action_sweep.sh walker-walk
-N_ACTIONS=<chosen> bash scripts/run_dmcs_architectures.sh walker-walk
-TS_N_ACTIONS=<chosen> bash scripts/run_dmcs_timestep_sweep.sh walker-walk
-```
+- **cartpole-swingup, walker-walk** — "discretization works here"; worth the full efficiency + robustness story (more seeds).
+- **cheetah-run** — the boundary case (action dim 6, where SAC is expected to win). Default phase is `efficiency` only: one honest figure, not the full machinery.
 
-### Highway (racetrack-v0, 1-D action)
+### Knobs (env-var overrides; see each script's header)
 
-Same three-phase structure; `racetrack-v0` is the only task so no positional arg.
-
-```bash
-bash scripts/run_highway_action_sweep.sh                              # Uniform vs Zooming, N \in {8,16,32,64}
-N_ACTIONS=<chosen> bash scripts/run_highway_architectures.sh          # SAC vs Uniform vs Zooming
-TS_N_ACTIONS=<chosen> bash scripts/run_highway_timestep_sweep.sh      # long-horizon at chosen N
-```
-
-All scripts accept env-var overrides (`SEEDS`, `N_ACTIONS`, `DQN_TIMESTEPS`, etc.). See each script's header for the full list.
-
-Default seed counts are tuned to give usable error bars without burning the GPU:
-- architectures sweeps -- 5 seeds (`SEEDS="42 43 44 45 46"`)
-- timestep sweeps -- 3 seeds (`TS_SEEDS="42 43 44"`)
-- action sweeps -- 3 seeds, hardcoded in `src/{dmcs,highway}/run_action_sweep.py`
-
-For a quick smoke test, override with a single seed (e.g. `SEEDS=42 bash scripts/run_dmcs_architectures.sh cartpole-swingup` or `TS_SEEDS=42 bash scripts/run_highway_timestep_sweep.sh`); for the action sweeps, edit `SEEDS = [42, 43, 44]` in the corresponding `run_action_sweep.py`.
-
-Training-timestep defaults vary by experiment and (for DMCS) by task:
-- DMCS architectures -- 150k for cartpole-swingup, 300k for walker-walk, 500k for cheetah-run (override via `DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
-- DMCS timestep sweep -- 1M (`TS_TIMESTEPS`), long enough to read asymptotic behavior at large N.
-- DMCS action sweep -- same per-task defaults as architectures (override via `DQN_TIMESTEPS`); intentionally compute-bounded so the uniform-vs-zooming gap at large N reflects the limited-budget regime.
-- Highway architectures -- 150k (`DQN_TIMESTEPS` / `SAC_TIMESTEPS`).
-- Highway timestep sweep -- 600k (`TS_TIMESTEPS`).
-- Highway action sweep -- 150k, hardcoded.
+`SEEDS` (default `42 43 44`), `N_VALUES`, `REF_N`, `BUFFER_PERIODS`/`INIT_DEPTHS` (zooming robustness grid), `SE_N`/`SE_TIMESTEPS` (sample-efficiency), `DQN_TIMESTEPS`/`SAC_TIMESTEPS` (per-task defaults), `PYTHON`, `DRY_RUN`. `buffer_period` is zooming's one novel knob (the paper's `H+1` buffering cadence, adapted to neural+replay); smaller = children graduate faster.
 
 Outputs land under `checkpoints/<family>/<task>/<phase>/` and `plots/<family>/...`.
 
