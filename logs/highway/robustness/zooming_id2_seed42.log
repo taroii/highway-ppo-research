@@ -1,0 +1,55 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Zooming DQN on racetrack-v0  da=1  init_depth=2 (start=4 cells)  n=16 -> total_budget=16  seed=42  steps=150000
+[   5000/150000]  ep= 313  reward(last50)=  47.01  n_per_axis=[4]  total_splits=0
+[  10000/150000]  eval(10)= 445.86 +/- 484.72  n_per_axis=[4]
+[  10000/150000]  ep= 318  reward(last50)= 126.00  n_per_axis=[4]  total_splits=0
+[  15000/150000]  ep= 321  reward(last50)= 203.43  n_per_axis=[4]  total_splits=0
+[  20000/150000]  eval(10)=1108.37 +/- 393.52  n_per_axis=[4]
+[  20000/150000]  ep= 326  reward(last50)= 302.88  n_per_axis=[4]  total_splits=0
+[  25000/150000]  ep= 331  reward(last50)= 388.45  n_per_axis=[4]  total_splits=0
+[  30000/150000]  eval(10)= 795.10 +/- 547.52  n_per_axis=[12]
+[  30000/150000]  ep= 337  reward(last50)= 473.14  n_per_axis=[12]  total_splits=4
+[  35000/150000]  ep= 341  reward(last50)= 547.00  n_per_axis=[15]  total_splits=7
+[  40000/150000]  eval(10)= 504.46 +/- 536.00  n_per_axis=[16]
+[  40000/150000]  ep= 350  reward(last50)= 622.40  n_per_axis=[16]  total_splits=8
+[  45000/150000]  ep= 359  reward(last50)= 686.40  n_per_axis=[15]  total_splits=8
+[  50000/150000]  eval(10)= 349.56 +/- 414.90  n_per_axis=[15]
+[  50000/150000]  ep= 373  reward(last50)= 532.63  n_per_axis=[15]  total_splits=9
+[  55000/150000]  ep= 377  reward(last50)= 564.91  n_per_axis=[15]  total_splits=9
+[  60000/150000]  eval(10)= 731.57 +/- 486.07  n_per_axis=[15]
+[  60000/150000]  ep= 385  reward(last50)= 490.97  n_per_axis=[15]  total_splits=9
+[  65000/150000]  ep= 392  reward(last50)= 459.05  n_per_axis=[16]  total_splits=10
+[  70000/150000]  eval(10)= 941.33 +/- 346.51  n_per_axis=[16]
+[  70000/150000]  ep= 396  reward(last50)= 503.96  n_per_axis=[16]  total_splits=10
+[  75000/150000]  ep= 412  reward(last50)= 460.25  n_per_axis=[15]  total_splits=10
+[  80000/150000]  eval(10)= 834.41 +/- 527.85  n_per_axis=[15]
+[  80000/150000]  ep= 417  reward(last50)= 509.63  n_per_axis=[15]  total_splits=10
+[  85000/150000]  ep= 426  reward(last50)= 497.73  n_per_axis=[15]  total_splits=10
+[  90000/150000]  eval(10)= 835.05 +/- 539.85  n_per_axis=[15]
+[  90000/150000]  ep= 436  reward(last50)= 496.12  n_per_axis=[15]  total_splits=10
+[  95000/150000]  ep= 444  reward(last50)= 460.66  n_per_axis=[15]  total_splits=10
+[ 100000/150000]  eval(10)= 853.94 +/- 569.87  n_per_axis=[15]
+[ 100000/150000]  ep= 448  reward(last50)= 476.20  n_per_axis=[15]  total_splits=10
+[ 105000/150000]  ep= 455  reward(last50)= 529.62  n_per_axis=[15]  total_splits=10
+[ 110000/150000]  eval(10)= 805.01 +/- 551.99  n_per_axis=[15]
+[ 110000/150000]  ep= 459  reward(last50)= 593.07  n_per_axis=[15]  total_splits=10
+[ 115000/150000]  ep= 464  reward(last50)= 667.53  n_per_axis=[15]  total_splits=10
+[ 120000/150000]  eval(10)= 900.23 +/- 575.94  n_per_axis=[15]
+[ 120000/150000]  ep= 467  reward(last50)= 700.37  n_per_axis=[15]  total_splits=10
+[ 125000/150000]  ep= 471  reward(last50)= 724.12  n_per_axis=[15]  total_splits=10
+[ 130000/150000]  eval(10)= 566.81 +/- 527.64  n_per_axis=[16]
+[ 130000/150000]  ep= 482  reward(last50)= 718.87  n_per_axis=[16]  total_splits=11
+[ 135000/150000]  ep= 488  reward(last50)= 781.67  n_per_axis=[16]  total_splits=11
+[ 140000/150000]  eval(10)= 485.56 +/- 519.54  n_per_axis=[16]
+[ 140000/150000]  ep= 494  reward(last50)= 783.96  n_per_axis=[16]  total_splits=11
+[ 145000/150000]  ep= 498  reward(last50)= 816.73  n_per_axis=[16]  total_splits=11
+[ 150000/150000]  eval(10)= 869.85 +/- 575.00  n_per_axis=[16]
+[ 150000/150000]  ep= 503  reward(last50)= 779.98  n_per_axis=[16]  total_splits=11
+Saved BranchingDQN checkpoint to checkpoints/highway/robustness/zooming_id2_seed42.pt
+
+Evaluating (deterministic)...
+Eval(20): mean=856.57  std=589.54
+Final n_per_axis: [16]  total_cells: 16/16  total_splits: 11

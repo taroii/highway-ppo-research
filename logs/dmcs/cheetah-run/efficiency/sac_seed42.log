@@ -1,0 +1,86 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+SAC on dm_control/cheetah-run  seed=42  steps=500000
+[  10000/500000]  ep=  10  reward(last50)=   3.61  alpha=0.1000
+[  20000/500000]  eval(5)=  28.91 +/- 1.86    alpha=0.0290
+[  20000/500000]  ep=  20  reward(last50)=   5.08  alpha=0.0290
+[  30000/500000]  ep=  30  reward(last50)=  18.59  alpha=0.0099
+[  40000/500000]  eval(5)=  50.67 +/- 28.96   alpha=0.0042
+[  40000/500000]  ep=  40  reward(last50)=  28.46  alpha=0.0042
+[  50000/500000]  ep=  50  reward(last50)=  32.12  alpha=0.0035
+[  60000/500000]  eval(5)= 158.79 +/- 8.61    alpha=0.0033
+[  60000/500000]  ep=  60  reward(last50)=  48.25  alpha=0.0033
+[  70000/500000]  ep=  70  reward(last50)=  75.36  alpha=0.0031
+[  80000/500000]  eval(5)= 241.45 +/- 3.47    alpha=0.0031
+[  80000/500000]  ep=  80  reward(last50)=  90.42  alpha=0.0031
+[  90000/500000]  ep=  90  reward(last50)= 119.60  alpha=0.0034
+[ 100000/500000]  eval(5)= 141.42 +/- 94.90   alpha=0.0044
+[ 100000/500000]  ep= 100  reward(last50)= 132.05  alpha=0.0044
+[ 110000/500000]  ep= 110  reward(last50)= 160.93  alpha=0.0045
+[ 120000/500000]  eval(5)= 305.45 +/- 5.05    alpha=0.0042
+[ 120000/500000]  ep= 120  reward(last50)= 179.65  alpha=0.0042
+[ 130000/500000]  ep= 130  reward(last50)= 219.50  alpha=0.0046
+[ 140000/500000]  eval(5)= 330.97 +/- 30.51   alpha=0.0051
+[ 140000/500000]  ep= 140  reward(last50)= 243.45  alpha=0.0051
+[ 150000/500000]  ep= 150  reward(last50)= 283.77  alpha=0.0053
+[ 160000/500000]  eval(5)= 351.78 +/- 14.90   alpha=0.0055
+[ 160000/500000]  ep= 160  reward(last50)= 306.19  alpha=0.0055
+[ 170000/500000]  ep= 170  reward(last50)= 322.84  alpha=0.0059
+[ 180000/500000]  eval(5)= 391.53 +/- 1.96    alpha=0.0060
+[ 180000/500000]  ep= 180  reward(last50)= 334.16  alpha=0.0060
+[ 190000/500000]  ep= 190  reward(last50)= 346.35  alpha=0.0067
+[ 200000/500000]  eval(5)= 418.50 +/- 3.30    alpha=0.0070
+[ 200000/500000]  ep= 200  reward(last50)= 365.87  alpha=0.0070
+[ 210000/500000]  ep= 210  reward(last50)= 381.57  alpha=0.0073
+[ 220000/500000]  eval(5)= 292.73 +/- 129.76  alpha=0.0079
+[ 220000/500000]  ep= 220  reward(last50)= 402.71  alpha=0.0079
+[ 230000/500000]  ep= 230  reward(last50)= 404.52  alpha=0.0081
+[ 240000/500000]  eval(5)= 426.24 +/- 7.84    alpha=0.0090
+[ 240000/500000]  ep= 240  reward(last50)= 409.34  alpha=0.0090
+[ 250000/500000]  ep= 250  reward(last50)= 400.15  alpha=0.0083
+[ 260000/500000]  eval(5)= 351.98 +/- 126.60  alpha=0.0085
+[ 260000/500000]  ep= 260  reward(last50)= 379.00  alpha=0.0085
+[ 270000/500000]  ep= 270  reward(last50)= 337.87  alpha=0.0082
+[ 280000/500000]  eval(5)= 465.11 +/- 3.20    alpha=0.0084
+[ 280000/500000]  ep= 280  reward(last50)= 297.84  alpha=0.0084
+[ 290000/500000]  ep= 290  reward(last50)= 303.44  alpha=0.0085
+[ 300000/500000]  eval(5)= 439.69 +/- 49.31   alpha=0.0087
+[ 300000/500000]  ep= 300  reward(last50)= 320.94  alpha=0.0087
+[ 310000/500000]  ep= 310  reward(last50)= 348.70  alpha=0.0086
+[ 320000/500000]  eval(5)= 463.94 +/- 13.26   alpha=0.0089
+[ 320000/500000]  ep= 320  reward(last50)= 392.99  alpha=0.0089
+[ 330000/500000]  ep= 330  reward(last50)= 444.93  alpha=0.0090
+[ 340000/500000]  eval(5)= 462.12 +/- 9.18    alpha=0.0092
+[ 340000/500000]  ep= 340  reward(last50)= 447.79  alpha=0.0092
+[ 350000/500000]  ep= 350  reward(last50)= 449.13  alpha=0.0097
+[ 360000/500000]  eval(5)= 472.43 +/- 9.76    alpha=0.0095
+[ 360000/500000]  ep= 360  reward(last50)= 448.10  alpha=0.0095
+[ 370000/500000]  ep= 370  reward(last50)= 448.86  alpha=0.0094
+[ 380000/500000]  eval(5)= 509.66 +/- 15.22   alpha=0.0096
+[ 380000/500000]  ep= 380  reward(last50)= 450.12  alpha=0.0096
+[ 390000/500000]  ep= 390  reward(last50)= 450.71  alpha=0.0098
+[ 400000/500000]  eval(5)= 496.88 +/- 15.87   alpha=0.0097
+[ 400000/500000]  ep= 400  reward(last50)= 456.75  alpha=0.0097
+[ 410000/500000]  ep= 410  reward(last50)= 465.77  alpha=0.0103
+[ 420000/500000]  eval(5)= 493.69 +/- 6.36    alpha=0.0104
+[ 420000/500000]  ep= 420  reward(last50)= 471.92  alpha=0.0104
+[ 430000/500000]  ep= 430  reward(last50)= 479.37  alpha=0.0105
+[ 440000/500000]  eval(5)= 487.42 +/- 7.43    alpha=0.0099
+[ 440000/500000]  ep= 440  reward(last50)= 483.82  alpha=0.0099
+[ 450000/500000]  ep= 450  reward(last50)= 475.96  alpha=0.0106
+[ 460000/500000]  eval(5)= 493.92 +/- 8.17    alpha=0.0103
+[ 460000/500000]  ep= 460  reward(last50)= 471.24  alpha=0.0103
+[ 470000/500000]  ep= 470  reward(last50)= 476.38  alpha=0.0105
+[ 480000/500000]  eval(5)= 511.42 +/- 21.12   alpha=0.0102
+[ 480000/500000]  ep= 480  reward(last50)= 478.79  alpha=0.0102
+[ 490000/500000]  ep= 490  reward(last50)= 476.37  alpha=0.0100
+[ 500000/500000]  eval(5)= 531.56 +/- 2.51    alpha=0.0104
+[ 500000/500000]  ep= 500  reward(last50)= 488.25  alpha=0.0104
+Saved SAC checkpoint to checkpoints/dmcs/cheetah-run/efficiency/sac_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=525.49  std=8.99

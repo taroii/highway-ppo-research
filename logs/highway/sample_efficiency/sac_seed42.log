@@ -1,0 +1,189 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+SAC on racetrack-v0  seed=42  steps=600000
+[   5000/600000]  ep= 456  reward(last50)=   6.89  alpha=0.1000
+[  10000/600000]  eval(10)= 580.54 +/- 652.23  alpha=0.0840
+[  10000/600000]  ep= 495  reward(last50)=  78.95  alpha=0.0840
+[  15000/600000]  ep= 502  reward(last50)= 161.74  alpha=0.0714
+[  20000/600000]  eval(10)=1106.37 +/- 517.99  alpha=0.0623
+[  20000/600000]  ep= 506  reward(last50)= 242.24  alpha=0.0623
+[  25000/600000]  ep= 511  reward(last50)= 333.30  alpha=0.0602
+[  30000/600000]  eval(10)= 978.75 +/- 588.30  alpha=0.0639
+[  30000/600000]  ep= 515  reward(last50)= 414.45  alpha=0.0639
+[  35000/600000]  ep= 519  reward(last50)= 494.17  alpha=0.0679
+[  40000/600000]  eval(10)=1280.86 +/- 264.02  alpha=0.0715
+[  40000/600000]  ep= 523  reward(last50)= 597.81  alpha=0.0715
+[  45000/600000]  ep= 527  reward(last50)= 674.56  alpha=0.0761
+[  50000/600000]  eval(10)= 888.28 +/- 593.86  alpha=0.0816
+[  50000/600000]  ep= 531  reward(last50)= 757.72  alpha=0.0816
+[  55000/600000]  ep= 535  reward(last50)= 816.02  alpha=0.0859
+[  60000/600000]  eval(10)=1112.55 +/- 514.15  alpha=0.0850
+[  60000/600000]  ep= 539  reward(last50)= 893.55  alpha=0.0850
+[  65000/600000]  ep= 543  reward(last50)= 970.77  alpha=0.0863
+[  70000/600000]  eval(10)= 889.24 +/- 605.59  alpha=0.0879
+[  70000/600000]  ep= 550  reward(last50)= 975.48  alpha=0.0879
+[  75000/600000]  ep= 553  reward(last50)=1026.11  alpha=0.0902
+[  80000/600000]  eval(10)=1052.80 +/- 507.73  alpha=0.0928
+[  80000/600000]  ep= 558  reward(last50)=1001.42  alpha=0.0928
+[  85000/600000]  ep= 562  reward(last50)=1042.49  alpha=0.0938
+[  90000/600000]  eval(10)=1246.71 +/- 401.06  alpha=0.0948
+[  90000/600000]  ep= 565  reward(last50)=1068.02  alpha=0.0948
+[  95000/600000]  ep= 568  reward(last50)=1068.66  alpha=0.0951
+[ 100000/600000]  eval(10)=1111.62 +/- 529.36  alpha=0.0928
+[ 100000/600000]  ep= 573  reward(last50)=1070.05  alpha=0.0928
+[ 105000/600000]  ep= 576  reward(last50)=1096.70  alpha=0.0930
+[ 110000/600000]  eval(10)=1120.60 +/- 521.29  alpha=0.0936
+[ 110000/600000]  ep= 580  reward(last50)=1070.60  alpha=0.0936
+[ 115000/600000]  ep= 585  reward(last50)=1085.72  alpha=0.0944
+[ 120000/600000]  eval(10)=1112.52 +/- 532.57  alpha=0.0949
+[ 120000/600000]  ep= 588  reward(last50)=1112.60  alpha=0.0949
+[ 125000/600000]  ep= 592  reward(last50)=1087.07  alpha=0.0968
+[ 130000/600000]  eval(10)= 987.05 +/- 606.15  alpha=0.0958
+[ 130000/600000]  ep= 597  reward(last50)=1087.93  alpha=0.0958
+[ 135000/600000]  ep= 602  reward(last50)=1111.95  alpha=0.0968
+[ 140000/600000]  eval(10)=1249.19 +/- 393.29  alpha=0.0981
+[ 140000/600000]  ep= 605  reward(last50)=1138.07  alpha=0.0981
+[ 145000/600000]  ep= 608  reward(last50)=1165.12  alpha=0.0965
+[ 150000/600000]  eval(10)=1383.62 +/- 5.17    alpha=0.0957
+[ 150000/600000]  ep= 616  reward(last50)=1046.14  alpha=0.0957
+[ 155000/600000]  ep= 620  reward(last50)=1047.32  alpha=0.0952
+[ 160000/600000]  eval(10)= 986.88 +/- 612.82  alpha=0.0955
+[ 160000/600000]  ep= 623  reward(last50)=1074.68  alpha=0.0955
+[ 165000/600000]  ep= 626  reward(last50)=1075.07  alpha=0.0954
+[ 170000/600000]  eval(10)=1124.46 +/- 529.42  alpha=0.0946
+[ 170000/600000]  ep= 630  reward(last50)=1102.36  alpha=0.0946
+[ 175000/600000]  ep= 633  reward(last50)=1128.81  alpha=0.0939
+[ 180000/600000]  eval(10)= 993.44 +/- 606.32  alpha=0.0936
+[ 180000/600000]  ep= 636  reward(last50)=1129.28  alpha=0.0936
+[ 185000/600000]  ep= 642  reward(last50)=1090.54  alpha=0.0944
+[ 190000/600000]  eval(10)= 875.26 +/- 633.33  alpha=0.0950
+[ 190000/600000]  ep= 645  reward(last50)=1116.42  alpha=0.0950
+[ 195000/600000]  ep= 650  reward(last50)=1117.69  alpha=0.0954
+[ 200000/600000]  eval(10)=1393.33 +/- 2.91    alpha=0.0951
+[ 200000/600000]  ep= 653  reward(last50)=1144.08  alpha=0.0951
+[ 205000/600000]  ep= 658  reward(last50)=1095.52  alpha=0.0954
+[ 210000/600000]  eval(10)=1138.95 +/- 511.14  alpha=0.0949
+[ 210000/600000]  ep= 662  reward(last50)=1122.06  alpha=0.0949
+[ 215000/600000]  ep= 668  reward(last50)=1137.95  alpha=0.0938
+[ 220000/600000]  eval(10)=1126.67 +/- 533.72  alpha=0.0945
+[ 220000/600000]  ep= 671  reward(last50)=1137.84  alpha=0.0945
+[ 225000/600000]  ep= 675  reward(last50)=1111.70  alpha=0.0941
+[ 230000/600000]  eval(10)= 990.62 +/- 614.33  alpha=0.0964
+[ 230000/600000]  ep= 679  reward(last50)=1111.65  alpha=0.0964
+[ 235000/600000]  ep= 684  reward(last50)=1060.57  alpha=0.0941
+[ 240000/600000]  eval(10)=1363.75 +/- 77.00   alpha=0.0961
+[ 240000/600000]  ep= 687  reward(last50)=1061.01  alpha=0.0961
+[ 245000/600000]  ep= 691  reward(last50)=1076.96  alpha=0.0945
+[ 250000/600000]  eval(10)=1132.20 +/- 531.37  alpha=0.0955
+[ 250000/600000]  ep= 698  reward(last50)=1022.36  alpha=0.0955
+[ 255000/600000]  ep= 701  reward(last50)=1047.69  alpha=0.0951
+[ 260000/600000]  eval(10)=1259.47 +/- 401.75  alpha=0.0944
+[ 260000/600000]  ep= 704  reward(last50)=1047.90  alpha=0.0944
+[ 265000/600000]  ep= 708  reward(last50)=1097.87  alpha=0.0944
+[ 270000/600000]  eval(10)=1396.97 +/- 3.45    alpha=0.0942
+[ 270000/600000]  ep= 711  reward(last50)=1124.11  alpha=0.0942
+[ 275000/600000]  ep= 714  reward(last50)=1152.13  alpha=0.0956
+[ 280000/600000]  eval(10)=1265.06 +/- 393.15  alpha=0.0958
+[ 280000/600000]  ep= 718  reward(last50)=1178.29  alpha=0.0958
+[ 285000/600000]  ep= 722  reward(last50)=1152.61  alpha=0.0942
+[ 290000/600000]  eval(10)=1397.13 +/- 4.90    alpha=0.0950
+[ 290000/600000]  ep= 725  reward(last50)=1179.76  alpha=0.0950
+[ 295000/600000]  ep= 730  reward(last50)=1130.65  alpha=0.0971
+[ 300000/600000]  eval(10)=1128.03 +/- 540.80  alpha=0.0953
+[ 300000/600000]  ep= 734  reward(last50)=1182.69  alpha=0.0953
+[ 305000/600000]  ep= 738  reward(last50)=1156.89  alpha=0.0929
+[ 310000/600000]  eval(10)=1042.68 +/- 544.85  alpha=0.0948
+[ 310000/600000]  ep= 741  reward(last50)=1183.16  alpha=0.0948
+[ 315000/600000]  ep= 745  reward(last50)=1236.15  alpha=0.0920
+[ 320000/600000]  eval(10)= 986.82 +/- 614.02  alpha=0.0933
+[ 320000/600000]  ep= 749  reward(last50)=1237.17  alpha=0.0933
+[ 325000/600000]  ep= 752  reward(last50)=1237.76  alpha=0.0915
+[ 330000/600000]  eval(10)= 864.11 +/- 652.16  alpha=0.0922
+[ 330000/600000]  ep= 757  reward(last50)=1183.97  alpha=0.0922
+[ 335000/600000]  ep= 761  reward(last50)=1184.38  alpha=0.0946
+[ 340000/600000]  eval(10)=1398.15 +/- 4.42    alpha=0.0950
+[ 340000/600000]  ep= 764  reward(last50)=1184.24  alpha=0.0950
+[ 345000/600000]  ep= 767  reward(last50)=1184.63  alpha=0.0942
+[ 350000/600000]  eval(10)=1262.38 +/- 403.17  alpha=0.0939
+[ 350000/600000]  ep= 771  reward(last50)=1210.19  alpha=0.0939
+[ 355000/600000]  ep= 774  reward(last50)=1210.30  alpha=0.0952
+[ 360000/600000]  eval(10)=1140.20 +/- 519.67  alpha=0.0966
+[ 360000/600000]  ep= 777  reward(last50)=1234.27  alpha=0.0966
+[ 365000/600000]  ep= 781  reward(last50)=1260.48  alpha=0.0968
+[ 370000/600000]  eval(10)=1402.08 +/- 3.14    alpha=0.0969
+[ 370000/600000]  ep= 785  reward(last50)=1236.94  alpha=0.0969
+[ 375000/600000]  ep= 789  reward(last50)=1245.21  alpha=0.0989
+[ 380000/600000]  eval(10)=1264.01 +/- 405.17  alpha=0.0986
+[ 380000/600000]  ep= 792  reward(last50)=1245.14  alpha=0.0986
+[ 385000/600000]  ep= 796  reward(last50)=1245.40  alpha=0.0983
+[ 390000/600000]  eval(10)=1393.30 +/- 7.49    alpha=0.1003
+[ 390000/600000]  ep= 799  reward(last50)=1270.84  alpha=0.1003
+[ 395000/600000]  ep= 802  reward(last50)=1271.25  alpha=0.1024
+[ 400000/600000]  eval(10)=1397.60 +/- 5.19    alpha=0.1031
+[ 400000/600000]  ep= 806  reward(last50)=1298.78  alpha=0.1031
+[ 405000/600000]  ep= 809  reward(last50)=1325.56  alpha=0.1048
+[ 410000/600000]  eval(10)=1261.30 +/- 406.63  alpha=0.1044
+[ 410000/600000]  ep= 812  reward(last50)=1325.34  alpha=0.1044
+[ 415000/600000]  ep= 816  reward(last50)=1325.31  alpha=0.1029
+[ 420000/600000]  eval(10)=1398.59 +/- 4.53    alpha=0.1023
+[ 420000/600000]  ep= 819  reward(last50)=1325.69  alpha=0.1023
+[ 425000/600000]  ep= 822  reward(last50)=1326.10  alpha=0.1036
+[ 430000/600000]  eval(10)=1268.33 +/- 387.86  alpha=0.1035
+[ 430000/600000]  ep= 826  reward(last50)=1326.26  alpha=0.1035
+[ 435000/600000]  ep= 829  reward(last50)=1326.37  alpha=0.1033
+[ 440000/600000]  eval(10)=1398.36 +/- 6.06    alpha=0.1026
+[ 440000/600000]  ep= 832  reward(last50)=1326.10  alpha=0.1026
+[ 445000/600000]  ep= 836  reward(last50)=1338.99  alpha=0.1027
+[ 450000/600000]  eval(10)=1396.44 +/- 4.22    alpha=0.1013
+[ 450000/600000]  ep= 839  reward(last50)=1356.91  alpha=0.1013
+[ 455000/600000]  ep= 843  reward(last50)=1353.15  alpha=0.1025
+[ 460000/600000]  eval(10)=1268.13 +/- 396.51  alpha=0.1018
+[ 460000/600000]  ep= 846  reward(last50)=1352.95  alpha=0.1018
+[ 465000/600000]  ep= 849  reward(last50)=1353.30  alpha=0.1007
+[ 470000/600000]  eval(10)=1011.00 +/- 597.39  alpha=0.1017
+[ 470000/600000]  ep= 853  reward(last50)=1353.20  alpha=0.1017
+[ 475000/600000]  ep= 857  reward(last50)=1322.34  alpha=0.1024
+[ 480000/600000]  eval(10)=1231.00 +/- 402.10  alpha=0.1028
+[ 480000/600000]  ep= 861  reward(last50)=1322.24  alpha=0.1028
+[ 485000/600000]  ep= 864  reward(last50)=1322.27  alpha=0.1025
+[ 490000/600000]  eval(10)=1399.94 +/- 3.68    alpha=0.1029
+[ 490000/600000]  ep= 868  reward(last50)=1295.68  alpha=0.1029
+[ 495000/600000]  ep= 874  reward(last50)=1218.37  alpha=0.1030
+[ 500000/600000]  eval(10)=1401.02 +/- 5.07    alpha=0.1048
+[ 500000/600000]  ep= 879  reward(last50)=1191.70  alpha=0.1048
+[ 505000/600000]  ep= 882  reward(last50)=1191.81  alpha=0.1069
+[ 510000/600000]  eval(10)=1269.23 +/- 394.21  alpha=0.1058
+[ 510000/600000]  ep= 885  reward(last50)=1202.97  alpha=0.1058
+[ 515000/600000]  ep= 891  reward(last50)=1152.82  alpha=0.1068
+[ 520000/600000]  eval(10)=1262.55 +/- 397.33  alpha=0.1035
+[ 520000/600000]  ep= 896  reward(last50)=1101.98  alpha=0.1035
+[ 525000/600000]  ep= 899  reward(last50)=1102.30  alpha=0.1063
+[ 530000/600000]  eval(10)= 865.50 +/- 646.47  alpha=0.1047
+[ 530000/600000]  ep= 904  reward(last50)=1065.03  alpha=0.1047
+[ 535000/600000]  ep= 908  reward(last50)=1068.82  alpha=0.1065
+[ 540000/600000]  eval(10)=1268.70 +/- 396.30  alpha=0.1095
+[ 540000/600000]  ep= 912  reward(last50)=1043.05  alpha=0.1095
+[ 545000/600000]  ep= 918  reward(last50)=1019.39  alpha=0.1084
+[ 550000/600000]  eval(10)=1399.21 +/- 5.55    alpha=0.1095
+[ 550000/600000]  ep= 921  reward(last50)=1044.58  alpha=0.1095
+[ 555000/600000]  ep= 924  reward(last50)=1096.83  alpha=0.1121
+[ 560000/600000]  eval(10)=1267.06 +/- 405.08  alpha=0.1113
+[ 560000/600000]  ep= 928  reward(last50)=1123.71  alpha=0.1113
+[ 565000/600000]  ep= 932  reward(last50)=1097.50  alpha=0.1092
+[ 570000/600000]  eval(10)=1134.98 +/- 535.47  alpha=0.1117
+[ 570000/600000]  ep= 935  reward(last50)=1097.47  alpha=0.1117
+[ 575000/600000]  ep= 938  reward(last50)=1124.51  alpha=0.1107
+[ 580000/600000]  eval(10)=1401.70 +/- 6.47    alpha=0.1112
+[ 580000/600000]  ep= 943  reward(last50)=1148.72  alpha=0.1112
+[ 585000/600000]  ep= 946  reward(last50)=1174.34  alpha=0.1109
+[ 590000/600000]  eval(10)=1401.10 +/- 3.93    alpha=0.1092
+[ 590000/600000]  ep= 949  reward(last50)=1173.80  alpha=0.1092
+[ 595000/600000]  ep= 953  reward(last50)=1183.79  alpha=0.1106
+[ 600000/600000]  eval(10)=1266.86 +/- 385.83  alpha=0.1123
+[ 600000/600000]  ep= 956  reward(last50)=1210.06  alpha=0.1123
+Saved SAC checkpoint to checkpoints/highway/sample_efficiency/sac_seed42.pt
+
+Evaluating (deterministic)...
+Eval(20): mean=1194.76  std=477.18

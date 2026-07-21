@@ -1,0 +1,35 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Uniform DQN on dm_control/cartpole-swingup  da=1  n=128 (per axis -> 128 total cells)  seed=42  steps=150000
+[  10000/150000]  ep=  10  reward(last50)=  39.06  n_per_axis=[128]  total_splits=0
+[  20000/150000]  eval(5)= 187.28 +/- 2.83    n_per_axis=[128]
+[  20000/150000]  ep=  20  reward(last50)= 118.36  n_per_axis=[128]  total_splits=0
+[  30000/150000]  ep=  30  reward(last50)= 182.40  n_per_axis=[128]  total_splits=0
+[  40000/150000]  eval(5)= 672.49 +/- 8.22    n_per_axis=[128]
+[  40000/150000]  ep=  40  reward(last50)= 225.91  n_per_axis=[128]  total_splits=0
+[  50000/150000]  ep=  50  reward(last50)= 267.17  n_per_axis=[128]  total_splits=0
+[  60000/150000]  eval(5)= 146.31 +/- 7.58    n_per_axis=[128]
+[  60000/150000]  ep=  60  reward(last50)= 363.65  n_per_axis=[128]  total_splits=0
+[  70000/150000]  ep=  70  reward(last50)= 440.70  n_per_axis=[128]  total_splits=0
+[  80000/150000]  eval(5)= 741.89 +/- 4.45    n_per_axis=[128]
+[  80000/150000]  ep=  80  reward(last50)= 445.82  n_per_axis=[128]  total_splits=0
+[  90000/150000]  ep=  90  reward(last50)= 439.99  n_per_axis=[128]  total_splits=0
+[ 100000/150000]  eval(5)= 220.20 +/- 49.95   n_per_axis=[128]
+[ 100000/150000]  ep= 100  reward(last50)= 441.69  n_per_axis=[128]  total_splits=0
+[ 110000/150000]  ep= 110  reward(last50)= 404.42  n_per_axis=[128]  total_splits=0
+[ 120000/150000]  eval(5)= 277.93 +/- 126.13  n_per_axis=[128]
+[ 120000/150000]  ep= 120  reward(last50)= 390.01  n_per_axis=[128]  total_splits=0
+[ 130000/150000]  ep= 130  reward(last50)= 378.07  n_per_axis=[128]  total_splits=0
+[ 140000/150000]  eval(5)= 350.43 +/- 84.64   n_per_axis=[128]
+[ 140000/150000]  ep= 140  reward(last50)= 385.62  n_per_axis=[128]  total_splits=0
+[ 150000/150000]  eval(5)= 509.20 +/- 175.36  n_per_axis=[128]
+[ 150000/150000]  ep= 150  reward(last50)= 373.05  n_per_axis=[128]  total_splits=0
+Saved BranchingDQN checkpoint to checkpoints/dmcs/cartpole-swingup/efficiency/uniform_n128_seed42.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=376.78  std=156.14
+Final n_per_axis: [128]  total_cells: 128  (uniform; no splits)

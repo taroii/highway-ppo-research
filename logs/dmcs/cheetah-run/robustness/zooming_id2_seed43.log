@@ -1,0 +1,88 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+Zooming DQN on dm_control/cheetah-run  da=6  init_depth=2 (start=24 cells)  n=32 -> total_budget=192  seed=43  steps=500000
+[  10000/500000]  ep=  10  reward(last50)=  12.00  n_per_axis=[12, 12, 12, 12, 12, 12]  total_splits=24
+[  20000/500000]  eval(5)=  85.74 +/- 3.42    n_per_axis=[24, 24, 24, 20, 24, 24]
+[  20000/500000]  ep=  20  reward(last50)=  22.44  n_per_axis=[24, 24, 24, 20, 24, 24]  total_splits=70
+[  30000/500000]  ep=  30  reward(last50)=  40.35  n_per_axis=[30, 27, 30, 30, 27, 27]  total_splits=90
+[  40000/500000]  eval(5)=  99.13 +/- 8.33    n_per_axis=[35, 33, 31, 28, 35, 30]
+[  40000/500000]  ep=  40  reward(last50)=  58.33  n_per_axis=[35, 33, 31, 28, 35, 30]  total_splits=111
+[  50000/500000]  ep=  50  reward(last50)=  70.03  n_per_axis=[38, 33, 30, 28, 34, 28]  total_splits=116
+[  60000/500000]  eval(5)= 176.85 +/- 17.29   n_per_axis=[37, 32, 29, 30, 34, 30]
+[  60000/500000]  ep=  60  reward(last50)=  94.00  n_per_axis=[37, 32, 29, 30, 34, 30]  total_splits=119
+[  70000/500000]  ep=  70  reward(last50)= 121.57  n_per_axis=[37, 32, 29, 30, 34, 30]  total_splits=119
+[  80000/500000]  eval(5)= 180.54 +/- 14.99   n_per_axis=[36, 32, 30, 30, 34, 30]
+[  80000/500000]  ep=  80  reward(last50)= 133.79  n_per_axis=[36, 32, 30, 30, 34, 30]  total_splits=120
+[  90000/500000]  ep=  90  reward(last50)= 149.37  n_per_axis=[36, 32, 30, 30, 34, 30]  total_splits=120
+[ 100000/500000]  eval(5)= 229.93 +/- 44.80   n_per_axis=[34, 34, 29, 30, 34, 30]
+[ 100000/500000]  ep= 100  reward(last50)= 170.91  n_per_axis=[34, 34, 29, 30, 34, 30]  total_splits=121
+[ 110000/500000]  ep= 110  reward(last50)= 188.15  n_per_axis=[34, 36, 29, 28, 36, 29]  total_splits=123
+[ 120000/500000]  eval(5)= 109.51 +/- 40.05   n_per_axis=[34, 36, 28, 28, 35, 31]
+[ 120000/500000]  ep= 120  reward(last50)= 204.74  n_per_axis=[34, 36, 28, 28, 35, 31]  total_splits=124
+[ 130000/500000]  ep= 130  reward(last50)= 219.06  n_per_axis=[33, 38, 27, 28, 35, 31]  total_splits=125
+[ 140000/500000]  eval(5)= 240.37 +/- 29.18   n_per_axis=[33, 36, 27, 28, 36, 31]
+[ 140000/500000]  ep= 140  reward(last50)= 221.58  n_per_axis=[33, 36, 27, 28, 36, 31]  total_splits=126
+[ 150000/500000]  ep= 150  reward(last50)= 230.15  n_per_axis=[33, 36, 26, 28, 36, 33]  total_splits=127
+[ 160000/500000]  eval(5)= 288.03 +/- 12.51   n_per_axis=[35, 36, 26, 27, 36, 32]
+[ 160000/500000]  ep= 160  reward(last50)= 238.12  n_per_axis=[35, 36, 26, 27, 36, 32]  total_splits=128
+[ 170000/500000]  ep= 170  reward(last50)= 234.26  n_per_axis=[40, 34, 26, 27, 34, 31]  total_splits=131
+[ 180000/500000]  eval(5)= 259.78 +/- 73.94   n_per_axis=[40, 34, 26, 27, 33, 31]
+[ 180000/500000]  ep= 180  reward(last50)= 248.90  n_per_axis=[40, 34, 26, 27, 33, 31]  total_splits=131
+[ 190000/500000]  ep= 190  reward(last50)= 261.98  n_per_axis=[39, 34, 27, 27, 33, 32]  total_splits=133
+[ 200000/500000]  eval(5)= 290.80 +/- 93.93   n_per_axis=[39, 33, 27, 29, 32, 32]
+[ 200000/500000]  ep= 200  reward(last50)= 259.30  n_per_axis=[39, 33, 27, 29, 32, 32]  total_splits=134
+[ 210000/500000]  ep= 210  reward(last50)= 274.51  n_per_axis=[38, 33, 27, 29, 32, 33]  total_splits=135
+[ 220000/500000]  eval(5)= 329.98 +/- 16.99   n_per_axis=[38, 32, 27, 29, 33, 32]
+[ 220000/500000]  ep= 220  reward(last50)= 291.66  n_per_axis=[38, 32, 27, 29, 33, 32]  total_splits=137
+[ 230000/500000]  ep= 230  reward(last50)= 299.43  n_per_axis=[40, 31, 27, 29, 32, 32]  total_splits=138
+[ 240000/500000]  eval(5)= 365.98 +/- 15.91   n_per_axis=[40, 31, 26, 29, 34, 32]
+[ 240000/500000]  ep= 240  reward(last50)= 300.11  n_per_axis=[40, 31, 26, 29, 34, 32]  total_splits=139
+[ 250000/500000]  ep= 250  reward(last50)= 315.82  n_per_axis=[40, 30, 28, 28, 34, 32]  total_splits=140
+[ 260000/500000]  eval(5)= 341.63 +/- 16.57   n_per_axis=[40, 30, 28, 28, 34, 32]
+[ 260000/500000]  ep= 260  reward(last50)= 317.29  n_per_axis=[40, 30, 28, 28, 34, 32]  total_splits=140
+[ 270000/500000]  ep= 270  reward(last50)= 326.56  n_per_axis=[40, 30, 28, 28, 34, 32]  total_splits=140
+[ 280000/500000]  eval(5)= 380.83 +/- 24.43   n_per_axis=[39, 30, 30, 29, 33, 31]
+[ 280000/500000]  ep= 280  reward(last50)= 335.88  n_per_axis=[39, 30, 30, 29, 33, 31]  total_splits=142
+[ 290000/500000]  ep= 290  reward(last50)= 350.62  n_per_axis=[39, 30, 30, 29, 33, 30]  total_splits=142
+[ 300000/500000]  eval(5)= 358.48 +/- 111.58  n_per_axis=[39, 31, 30, 29, 33, 30]
+[ 300000/500000]  ep= 300  reward(last50)= 340.58  n_per_axis=[39, 31, 30, 29, 33, 30]  total_splits=143
+[ 310000/500000]  ep= 310  reward(last50)= 343.97  n_per_axis=[39, 30, 31, 29, 33, 30]  total_splits=144
+[ 320000/500000]  eval(5)= 304.52 +/- 131.11  n_per_axis=[39, 30, 31, 29, 33, 30]
+[ 320000/500000]  ep= 320  reward(last50)= 340.38  n_per_axis=[39, 30, 31, 29, 33, 30]  total_splits=144
+[ 330000/500000]  ep= 330  reward(last50)= 349.11  n_per_axis=[39, 30, 31, 29, 33, 30]  total_splits=144
+[ 340000/500000]  eval(5)= 258.72 +/- 6.58    n_per_axis=[39, 30, 31, 29, 33, 30]
+[ 340000/500000]  ep= 340  reward(last50)= 346.90  n_per_axis=[39, 30, 31, 29, 33, 30]  total_splits=144
+[ 350000/500000]  ep= 350  reward(last50)= 369.25  n_per_axis=[39, 30, 31, 29, 33, 29]  total_splits=144
+[ 360000/500000]  eval(5)= 403.12 +/- 9.07    n_per_axis=[38, 32, 31, 29, 33, 29]
+[ 360000/500000]  ep= 360  reward(last50)= 379.46  n_per_axis=[38, 32, 31, 29, 33, 29]  total_splits=145
+[ 370000/500000]  ep= 370  reward(last50)= 384.94  n_per_axis=[38, 32, 31, 29, 32, 29]  total_splits=145
+[ 380000/500000]  eval(5)= 465.61 +/- 35.22   n_per_axis=[38, 32, 31, 29, 32, 29]
+[ 380000/500000]  ep= 380  reward(last50)= 380.96  n_per_axis=[38, 32, 31, 29, 32, 29]  total_splits=145
+[ 390000/500000]  ep= 390  reward(last50)= 386.02  n_per_axis=[37, 32, 33, 29, 32, 29]  total_splits=146
+[ 400000/500000]  eval(5)= 276.07 +/- 31.15   n_per_axis=[36, 32, 33, 29, 32, 29]
+[ 400000/500000]  ep= 400  reward(last50)= 397.06  n_per_axis=[36, 32, 33, 29, 32, 29]  total_splits=146
+[ 410000/500000]  ep= 410  reward(last50)= 397.63  n_per_axis=[36, 32, 33, 29, 32, 29]  total_splits=146
+[ 420000/500000]  eval(5)= 425.63 +/- 63.15   n_per_axis=[36, 31, 33, 29, 34, 29]
+[ 420000/500000]  ep= 420  reward(last50)= 396.98  n_per_axis=[36, 31, 33, 29, 34, 29]  total_splits=147
+[ 430000/500000]  ep= 430  reward(last50)= 398.20  n_per_axis=[36, 31, 33, 29, 33, 29]  total_splits=147
+[ 440000/500000]  eval(5)= 297.23 +/- 32.71   n_per_axis=[35, 31, 35, 28, 33, 29]
+[ 440000/500000]  ep= 440  reward(last50)= 385.01  n_per_axis=[35, 31, 35, 28, 33, 29]  total_splits=148
+[ 450000/500000]  ep= 450  reward(last50)= 364.69  n_per_axis=[35, 31, 35, 28, 33, 29]  total_splits=148
+[ 460000/500000]  eval(5)= 434.40 +/- 138.49  n_per_axis=[35, 31, 35, 28, 33, 29]
+[ 460000/500000]  ep= 460  reward(last50)= 368.80  n_per_axis=[35, 31, 35, 28, 33, 29]  total_splits=148
+[ 470000/500000]  ep= 470  reward(last50)= 370.90  n_per_axis=[35, 31, 35, 28, 33, 30]  total_splits=149
+[ 480000/500000]  eval(5)= 220.59 +/- 104.60  n_per_axis=[35, 31, 35, 28, 33, 30]
+[ 480000/500000]  ep= 480  reward(last50)= 379.75  n_per_axis=[35, 31, 35, 28, 33, 30]  total_splits=149
+[ 490000/500000]  ep= 490  reward(last50)= 403.20  n_per_axis=[35, 31, 35, 28, 33, 30]  total_splits=149
+[ 500000/500000]  eval(5)= 322.59 +/- 166.10  n_per_axis=[35, 31, 35, 28, 33, 30]
+[ 500000/500000]  ep= 500  reward(last50)= 416.74  n_per_axis=[35, 31, 35, 28, 33, 30]  total_splits=149
+Saved BranchingDQN checkpoint to checkpoints/dmcs/cheetah-run/robustness/zooming_id2_seed43.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=422.49  std=178.76
+Final n_per_axis: [35, 31, 35, 28, 33, 30]  total_cells: 192/192  total_splits: 149
+Split history: 80 events, steps 10000 to 470000

@@ -1,0 +1,56 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/glfw/__init__.py:917: GLFWError: (65550) b'X11: The DISPLAY environment variable is missing'
+  warnings.warn(message, GLFWError)
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+SAC on dm_control/walker-walk  seed=43  steps=300000
+[  10000/300000]  ep=  10  reward(last50)=  33.48  alpha=0.1000
+[  20000/300000]  eval(5)=  45.85 +/- 8.63    alpha=0.0291
+[  20000/300000]  ep=  20  reward(last50)=  37.58  alpha=0.0291
+[  30000/300000]  ep=  30  reward(last50)=  58.91  alpha=0.0104
+[  40000/300000]  eval(5)=  76.23 +/- 27.74   alpha=0.0046
+[  40000/300000]  ep=  40  reward(last50)=  73.46  alpha=0.0046
+[  50000/300000]  ep=  50  reward(last50)= 102.88  alpha=0.0052
+[  60000/300000]  eval(5)= 137.57 +/- 84.98   alpha=0.0063
+[  60000/300000]  ep=  60  reward(last50)= 164.52  alpha=0.0063
+[  70000/300000]  ep=  70  reward(last50)= 208.79  alpha=0.0093
+[  80000/300000]  eval(5)= 385.23 +/- 162.37  alpha=0.0096
+[  80000/300000]  ep=  80  reward(last50)= 268.80  alpha=0.0096
+[  90000/300000]  ep=  90  reward(last50)= 336.24  alpha=0.0092
+[ 100000/300000]  eval(5)= 593.33 +/- 14.39   alpha=0.0103
+[ 100000/300000]  ep= 100  reward(last50)= 391.60  alpha=0.0103
+[ 110000/300000]  ep= 110  reward(last50)= 432.76  alpha=0.0131
+[ 120000/300000]  eval(5)= 441.02 +/- 210.20  alpha=0.0107
+[ 120000/300000]  ep= 120  reward(last50)= 485.24  alpha=0.0107
+[ 130000/300000]  ep= 130  reward(last50)= 497.36  alpha=0.0115
+[ 140000/300000]  eval(5)= 488.77 +/- 215.32  alpha=0.0133
+[ 140000/300000]  ep= 140  reward(last50)= 523.12  alpha=0.0133
+[ 150000/300000]  ep= 150  reward(last50)= 546.17  alpha=0.0132
+[ 160000/300000]  eval(5)= 651.72 +/- 13.12   alpha=0.0140
+[ 160000/300000]  ep= 160  reward(last50)= 560.85  alpha=0.0140
+[ 170000/300000]  ep= 170  reward(last50)= 582.56  alpha=0.0138
+[ 180000/300000]  eval(5)= 720.37 +/- 15.77   alpha=0.0144
+[ 180000/300000]  ep= 180  reward(last50)= 622.83  alpha=0.0144
+[ 190000/300000]  ep= 190  reward(last50)= 635.07  alpha=0.0149
+[ 200000/300000]  eval(5)= 680.21 +/- 19.17   alpha=0.0150
+[ 200000/300000]  ep= 200  reward(last50)= 645.06  alpha=0.0150
+[ 210000/300000]  ep= 210  reward(last50)= 657.67  alpha=0.0149
+[ 220000/300000]  eval(5)= 767.24 +/- 34.23   alpha=0.0160
+[ 220000/300000]  ep= 220  reward(last50)= 667.86  alpha=0.0160
+[ 230000/300000]  ep= 230  reward(last50)= 691.13  alpha=0.0167
+[ 240000/300000]  eval(5)= 872.70 +/- 22.33   alpha=0.0170
+[ 240000/300000]  ep= 240  reward(last50)= 726.60  alpha=0.0170
+[ 250000/300000]  ep= 250  reward(last50)= 768.19  alpha=0.0173
+[ 260000/300000]  eval(5)= 801.92 +/- 7.18    alpha=0.0185
+[ 260000/300000]  ep= 260  reward(last50)= 812.04  alpha=0.0185
+[ 270000/300000]  ep= 270  reward(last50)= 851.68  alpha=0.0187
+[ 280000/300000]  eval(5)= 936.96 +/- 11.65   alpha=0.0188
+[ 280000/300000]  ep= 280  reward(last50)= 883.89  alpha=0.0188
+[ 290000/300000]  ep= 290  reward(last50)= 902.44  alpha=0.0192
+[ 300000/300000]  eval(5)= 959.42 +/- 14.13   alpha=0.0191
+[ 300000/300000]  ep= 300  reward(last50)= 915.71  alpha=0.0191
+Saved SAC checkpoint to checkpoints/dmcs/walker-walk/efficiency/sac_seed43.pt
+
+Evaluating (deterministic)...
+Eval(10): mean=936.55  std=21.84

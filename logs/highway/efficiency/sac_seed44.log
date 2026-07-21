@@ -1,0 +1,54 @@
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/pygame/pkgdata.py:25: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import resource_stream, resource_exists
+/home/bruinml/anaconda3/envs/highway/lib/python3.11/site-packages/torch/cuda/__init__.py:180: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12080). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return torch._C._cuda_getDeviceCount() > 0
+SAC on racetrack-v0  seed=44  steps=150000
+[   5000/150000]  ep= 449  reward(last50)=   5.34  alpha=0.1000
+[  10000/150000]  eval(10)= 315.86 +/- 522.81  alpha=0.0838
+[  10000/150000]  ep= 475  reward(last50)=  71.13  alpha=0.0838
+[  15000/150000]  ep= 481  reward(last50)= 150.31  alpha=0.0708
+[  20000/150000]  eval(10)= 863.94 +/- 637.43  alpha=0.0603
+[  20000/150000]  ep= 485  reward(last50)= 251.97  alpha=0.0603
+[  25000/150000]  ep= 490  reward(last50)= 334.70  alpha=0.0548
+[  30000/150000]  eval(10)= 979.11 +/- 578.44  alpha=0.0540
+[  30000/150000]  ep= 494  reward(last50)= 415.79  alpha=0.0540
+[  35000/150000]  ep= 499  reward(last50)= 498.42  alpha=0.0577
+[  40000/150000]  eval(10)=1111.05 +/- 523.68  alpha=0.0618
+[  40000/150000]  ep= 504  reward(last50)= 605.87  alpha=0.0618
+[  45000/150000]  ep= 508  reward(last50)= 686.06  alpha=0.0647
+[  50000/150000]  eval(10)= 823.20 +/- 587.46  alpha=0.0644
+[  50000/150000]  ep= 513  reward(last50)= 762.55  alpha=0.0644
+[  55000/150000]  ep= 519  reward(last50)= 841.13  alpha=0.0656
+[  60000/150000]  eval(10)= 957.13 +/- 570.41  alpha=0.0682
+[  60000/150000]  ep= 524  reward(last50)= 872.75  alpha=0.0682
+[  65000/150000]  ep= 529  reward(last50)= 944.31  alpha=0.0720
+[  70000/150000]  eval(10)=1163.50 +/- 449.22  alpha=0.0749
+[  70000/150000]  ep= 532  reward(last50)= 946.77  alpha=0.0749
+[  75000/150000]  ep= 537  reward(last50)= 908.77  alpha=0.0745
+[  80000/150000]  eval(10)=1214.05 +/- 384.76  alpha=0.0748
+[  80000/150000]  ep= 542  reward(last50)= 942.12  alpha=0.0748
+[  85000/150000]  ep= 547  reward(last50)= 917.58  alpha=0.0749
+[  90000/150000]  eval(10)= 888.19 +/- 614.55  alpha=0.0753
+[  90000/150000]  ep= 551  reward(last50)= 918.72  alpha=0.0753
+[  95000/150000]  ep= 555  reward(last50)= 944.85  alpha=0.0755
+[ 100000/150000]  eval(10)=1257.19 +/- 397.74  alpha=0.0745
+[ 100000/150000]  ep= 558  reward(last50)= 971.01  alpha=0.0745
+[ 105000/150000]  ep= 562  reward(last50)= 973.41  alpha=0.0754
+[ 110000/150000]  eval(10)= 761.39 +/- 620.46  alpha=0.0758
+[ 110000/150000]  ep= 568  reward(last50)= 999.32  alpha=0.0758
+[ 115000/150000]  ep= 573  reward(last50)= 999.59  alpha=0.0763
+[ 120000/150000]  eval(10)=1265.44 +/- 368.12  alpha=0.0780
+[ 120000/150000]  ep= 577  reward(last50)=1036.47  alpha=0.0780
+[ 125000/150000]  ep= 581  reward(last50)=1011.63  alpha=0.0768
+[ 130000/150000]  eval(10)=1387.16 +/- 5.18    alpha=0.0762
+[ 130000/150000]  ep= 584  reward(last50)=1031.48  alpha=0.0762
+[ 135000/150000]  ep= 588  reward(last50)=1055.68  alpha=0.0761
+[ 140000/150000]  eval(10)=1006.51 +/- 592.31  alpha=0.0762
+[ 140000/150000]  ep= 592  reward(last50)=1075.63  alpha=0.0762
+[ 145000/150000]  ep= 596  reward(last50)=1101.88  alpha=0.0765
+[ 150000/150000]  eval(10)=1253.32 +/- 394.44  alpha=0.0761
+[ 150000/150000]  ep= 601  reward(last50)=1101.63  alpha=0.0761
+Saved SAC checkpoint to checkpoints/highway/efficiency/sac_seed44.pt
+
+Evaluating (deterministic)...
+Eval(20): mean=1260.87  std=376.56
