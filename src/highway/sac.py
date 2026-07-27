@@ -9,6 +9,7 @@ embeddings from its actor trunk to fit k-means clusters.
 from __future__ import annotations
 
 import random
+import time
 from pathlib import Path
 from typing import List
 
@@ -193,6 +194,9 @@ class SAC:
         self.buffer = ReplayBuffer(self.obs_dim, self.action_dim, buffer_capacity, self.device)
         # (step, deterministic-eval mean, std) sampled during learn().
         self.eval_curve: List[tuple] = []
+        self.train_seconds = 0.0
+        self.wall_seconds = 0.0
+        self.eval_seconds = 0.0
 
     @property
     def alpha(self):
@@ -247,7 +251,9 @@ class SAC:
         obs, _ = self.env.reset()
         episode_rewards: List[float] = []
         self.eval_curve = []
+        self.eval_seconds = 0.0
         current = 0.0
+        _t_start = time.perf_counter()
 
         for step in range(1, total_timesteps + 1):
             obs_flat = obs.flatten().astype(np.float32)
@@ -275,10 +281,12 @@ class SAC:
 
             if eval_env is not None and (step % eval_every == 0
                                          or step == total_timesteps):
+                _t_eval = time.perf_counter()
                 mean, std = evaluate_policy(
                     lambda o: self.predict(o, deterministic=True),
                     eval_env, eval_episodes,
                 )
+                self.eval_seconds += time.perf_counter() - _t_eval
                 self.eval_curve.append((step, mean, std))
                 print(f"[{step:>7d}/{total_timesteps}]  "
                       f"eval({eval_episodes})={mean:>7.2f} +/- {std:<6.2f}  "
@@ -289,6 +297,12 @@ class SAC:
                 print(f"[{step:>7d}/{total_timesteps}]  ep={len(episode_rewards):>4d}  "
                       f"reward(last50)={np.mean(recent):>7.2f}  alpha={self.alpha.item():.4f}")
 
+        self.wall_seconds = time.perf_counter() - _t_start
+        self.train_seconds = self.wall_seconds - self.eval_seconds
+        print(f"[train complete] {total_timesteps} steps in "
+              f"{self.train_seconds:.1f}s training "
+              f"({total_timesteps / max(self.train_seconds, 1e-9):.0f} steps/s), "
+              f"+{self.eval_seconds:.1f}s eval")
         return episode_rewards
 
     def save(self, path: str, episode_rewards: List[float] | None = None) -> None:
@@ -303,6 +317,9 @@ class SAC:
             "hidden_dim": self.hidden_dim,
             "episode_rewards": episode_rewards or [],
             "eval_curve": self.eval_curve,
+            "train_seconds": self.train_seconds,
+            "wall_seconds": self.wall_seconds,
+            "eval_seconds": self.eval_seconds,
         }, path)
         print(f"Saved SAC checkpoint to {path}")
 

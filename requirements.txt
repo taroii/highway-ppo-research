@@ -6,3 +6,9 @@ stable-baselines3
 tensorboard
 gymnasium[other]
 shimmy[dm-control]
+# Aggregate statistics for the figures (IQM + bootstrap CIs, performance
+# profiles, probability of improvement). rliable's `arch` dependency currently
+# requires numpy < 2, so pin it; verified to coexist with torch 2.x + dm_control.
+rliable
+arch==7.2.0
+pandas<2.2

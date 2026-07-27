@@ -86,6 +86,22 @@ def load_curve_preferring_eval(
     return np.arange(len(online)), online, "online"
 
 
+def load_train_seconds(path: Path) -> Optional[float]:
+    """Wall-clock training seconds (excluding periodic eval) recorded in the
+    checkpoint, or None for checkpoints written before compute tracking."""
+    data = torch.load(path, weights_only=False)
+    v = data.get("train_seconds")
+    return float(v) if v else None
+
+
+def load_total_steps(path: Path) -> Optional[int]:
+    """Env-step count for the run, read off the last eval-curve point
+    (which is logged at the final step)."""
+    data = torch.load(path, weights_only=False)
+    curve = data.get("eval_curve")
+    return int(curve[-1][0]) if curve else None
+
+
 def final_eval(path: Path, k: int = 3) -> float:
     """Scalar summary reward for the action/timestep sweeps: mean of the
     last ``k`` eval points.  Falls back to the last-50 online-episode mean

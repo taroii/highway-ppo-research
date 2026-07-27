@@ -90,13 +90,21 @@ LG="logs/dmcs/${TASK}"
 PL="plots/dmcs"
 mkdir -p "$PL"
 
-failed=(); total=0; ok=0
+failed=(); total=0; ok=0; skipped=0
+SKIP_EXISTING="${SKIP_EXISTING:-0}"
 
 run_one() {   # run_one <log-subdir> <label> <cmd...>
     local sub="$1" label="$2"; shift 2
     local logdir="$LG/$sub"; mkdir -p "$logdir"
     local log="$logdir/${label}.log"
+    # extract the --output <path> from the command (for resume/skip)
+    local outpath="" prev=""
+    for a in "$@"; do [ "$prev" = "--output" ] && outpath="$a"; prev="$a"; done
     total=$((total + 1))
+    if [ "$SKIP_EXISTING" = "1" ] && [ -n "$outpath" ] && [ -s "$outpath" ]; then
+        skipped=$((skipped + 1)); ok=$((ok + 1))
+        echo "=== SKIP   $sub/$label (checkpoint exists)"; return
+    fi
     echo; echo "=== [$(date '+%F %T')] START  $sub/$label"
     echo "    cmd: $*"
     if [ "$DRY_RUN" = "1" ]; then echo "    (dry-run)"; ok=$((ok + 1)); return; fi
@@ -175,5 +183,5 @@ case "$PHASE" in
     *) echo "unknown phase '$PHASE' (efficiency|robustness|sample-efficiency|all)" >&2; exit 2 ;;
 esac
 
-echo; echo "=== $PHASE done: ${ok}/${total} runs ok ==="
+echo; echo "=== $PHASE done: ${ok}/${total} runs ok (${skipped} skipped as already-present) ==="
 if [ "${#failed[@]}" -gt 0 ]; then echo "failed:"; printf "  %s\n" "${failed[@]}"; fi

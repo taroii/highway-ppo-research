@@ -21,6 +21,7 @@ Action-selection policies (``EpsGreedy``, ``UCB``) and the
 from __future__ import annotations
 
 import random
+import time
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -208,6 +209,11 @@ class BranchingDQN:
         self.split_history: List[Tuple[int, int, int]] = []
         # (step, deterministic-eval mean, std) sampled during learn().
         self.eval_curve: List[Tuple[int, float, float]] = []
+        # wall-clock accounting (set by learn()); train_seconds excludes the
+        # periodic deterministic-eval episodes so it reflects training compute.
+        self.train_seconds = 0.0
+        self.wall_seconds = 0.0
+        self.eval_seconds = 0.0
 
     # ------------------------------------------------------------------
     # Action selection
@@ -338,7 +344,9 @@ class BranchingDQN:
         obs, _ = self.env.reset()
         episode_rewards: List[float] = []
         self.eval_curve = []
+        self.eval_seconds = 0.0
         current = 0.0
+        _t_start = time.perf_counter()
 
         for step in range(1, total_timesteps + 1):
             obs_flat = obs.flatten().astype(np.float32)
@@ -370,7 +378,9 @@ class BranchingDQN:
 
             if eval_env is not None and (step % eval_every == 0
                                          or step == total_timesteps):
+                _t_eval = time.perf_counter()
                 self._run_eval(eval_env, eval_episodes, step)
+                self.eval_seconds += time.perf_counter() - _t_eval
                 e_step, e_mean, e_std = self.eval_curve[-1]
                 print(f"[{step:>7d}/{total_timesteps}]  "
                       f"eval({eval_episodes})={e_mean:>7.2f} +/- {e_std:<6.2f}  "
@@ -383,6 +393,12 @@ class BranchingDQN:
                       f"n_per_axis={self.grid.n_per_axis()}  "
                       f"total_splits={self.total_splits}")
 
+        self.wall_seconds = time.perf_counter() - _t_start
+        self.train_seconds = self.wall_seconds - self.eval_seconds
+        print(f"[train complete] {total_timesteps} steps in "
+              f"{self.train_seconds:.1f}s training "
+              f"({total_timesteps / max(self.train_seconds, 1e-9):.0f} steps/s), "
+              f"+{self.eval_seconds:.1f}s eval")
         return episode_rewards
 
     # ------------------------------------------------------------------
@@ -396,6 +412,9 @@ class BranchingDQN:
             "n_per_axis": self.grid.n_per_axis(),
             "episode_rewards": episode_rewards or [],
             "eval_curve": self.eval_curve,
+            "train_seconds": self.train_seconds,
+            "wall_seconds": self.wall_seconds,
+            "eval_seconds": self.eval_seconds,
             "split_history": self.split_history,
             "total_splits": self.total_splits,
             "total_cells": self.grid.total_cells,
