@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "C:\Users\Polar\Documents\highway-ppo-research\src\dmcs\run_uniform.py", line 37, in <module>
-    from src.dmcs.env import make_dmcs_env
-  File "C:\Users\Polar\Documents\highway-ppo-research\src\dmcs\env.py", line 3, in <module>
-    import gymnasium as gym
-ModuleNotFoundError: No module named 'gymnasium'
