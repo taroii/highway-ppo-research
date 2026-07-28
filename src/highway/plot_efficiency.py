@@ -1,5 +1,7 @@
 """
-Efficiency + ceiling plot (the headline figure of the new framing).
+Efficiency + ceiling plot. Produces the paper's efficiency figure
+(Sec. 4, "Efficiency: deterministic-evaluation return versus action
+budget N") and the per-(arm, N) IQM values behind the summary table.
 
 Deterministic-eval reward vs action budget N for both discretized arms,
 with SAC drawn as a flat reference band (it has no N).  Reads three ways

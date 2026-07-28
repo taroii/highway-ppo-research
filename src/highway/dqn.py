@@ -45,7 +45,8 @@ class EpsGreedy:
 
 
 class UCB:
-    """Q(s, a) + c(step) * sqrt(log(step) / n(a)).
+    """ZoomQ action-selection rule (paper Sec. 3.1, Eq. (UCB)):
+    Q(s, C) + c * sqrt(log(step) / n(C)), argmax over active cubes.
 
     The global term is ``log(step)`` (cumulative env steps -- monotonic,
     never reset by splits), and the denominator ``n(a)`` is the cell's own

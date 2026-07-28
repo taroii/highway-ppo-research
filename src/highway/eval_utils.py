@@ -1,5 +1,9 @@
 """Deterministic-evaluation helpers shared across all arms.
 
+Paper: the reported metric is deterministic-evaluation return (paper
+Sec. 4 "Setup" and figure/table captions): greedy, no-exploration
+episodes, distinct from the exploration-contaminated training return.
+
 Two responsibilities:
 
   1. ``evaluate_policy`` -- run greedy (no-exploration) episodes on a

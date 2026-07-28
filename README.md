@@ -2,6 +2,25 @@
 
 Research project exploring theoretically-grounded adaptive action space discretization for continuous MDPs.
 
+This repository implements **ZoomQ**, the method in the paper *"Adaptive Action Discretization for Continuous-Action Reinforcement Learning."* Source comments reference the paper section/equation/algorithm each step comes from.
+
+## Code ↔ paper map
+
+| Paper location | Code |
+|---|---|
+| Sec. 3.1 factored partition; budget `N_tot`; Appendix A dyadic tree | `src/highway/zooming.py` (cube primitives), `src/highway/zooming_factored.py` (`FactoredActionZooming`) |
+| Sec. 3.2 split rule, Eq. (N_split) | `zooming.py::n_split_threshold`, `zooming_factored.py::_split` |
+| Sec. 3.3 buffering / promotion / retirement, Eq. (N_min); Algorithm 1 | `zooming_factored.py::on_step` (redirection), `::maintain`, `::_graduate`, `::_retire` |
+| Sec. 3.1 value representation, Eq. (branching target) | `src/highway/dqn_factored.py` (`BranchingQNetwork`, `BranchingDQN._update`) |
+| Sec. 3.1 action selection, Eq. (UCB) | `src/highway/dqn.py` (`UCB`), `dqn_factored.py::select_action` |
+| Sec. 4 Uniform baseline | `src/highway/uniform_grid_factored.py` |
+| Sec. 4 deterministic-eval metric | `src/highway/eval_utils.py` |
+| Sec. 4 efficiency figure + summary table | `src/highway/plot_efficiency.py` |
+| Sec. 4 / appendix aggregate statistics (IQM, CIs, profiles) | `src/highway/plot_rliable.py`, `src/highway/rliable_utils.py` |
+| Compute appendix (wall-clock / throughput) | `src/highway/report_compute.py` |
+
+**Seeding (paper reproducibility appendix):** each agent seeds PyTorch, NumPy, and Python `random` from the run seed in its constructor (`dqn_factored.py`, `sac.py`); the environment RNG is not seeded and deterministic GPU kernels are not enabled, so runs are statistically, not bit-wise, reproducible.
+
 ## Installation
 
 ```bash

@@ -1,18 +1,29 @@
 """
-Branching DQN over a factored action grid.
+The value-based agent of \\textsc{ZoomQ}: a branching deep Q-network over
+the factored cube partition (``FactoredActionZooming``).
 
-Mirrors src/highway/dqn.py but for ``FactoredActionZooming``:
+Paper: "Adaptive Action Discretization for Continuous-Action RL" (ZoomQ).
+This file implements the "deep implementation" of Sec. 3.1 (the paper's
+analyzed object is a tabular idealization; Sec. 3.5 "Theoretical
+guarantee"). Specifically:
 
-  - Q-net: shared trunk + ``da`` independent linear heads, head ``i``
-    sized to that axis's current bin count.
-  - Replay buffer stores ``da`` action indices per transition.
-  - TD target follows the action-branching recipe (Tavakoli, Pardo,
-    Kormushev, AAAI 2018):
-        target = r + gamma * (1/da) * sum_i max_{a'_i} Q_target_i(s', a'_i)
-    The per-axis Bellman losses are summed.
-  - On a split in axis ``i`` only that head is rebuilt; child rows are
-    warm-started from their parent (parent_row + small noise), and the
-    target head's child rows are snapped to the online head's children.
+  - Value representation (paper Sec. 3.1): a shared trunk + ``da`` linear
+    heads, head ``i`` sized to that axis's current cube count -- the
+    branching Q-network of Tavakoli, Pardo, Kormushev (AAAI 2018).
+  - TD target (paper Eq. (branching target)):
+        y = r + gamma * (1/da) * sum_i max_{C in P^{(i)}} Q_target_i(s', C)
+    with the per-axis maxima over *active* cubes only; per-axis Bellman
+    losses are summed.
+  - Action selection (paper Eq. (UCB)): upper-confidence rule over active
+    cubes; see ``UCB`` in ``dqn.py``.
+  - Splits/promotions/retirements (paper Sec. 3.2--3.3; Algorithm 1) are
+    driven by ``FactoredActionZooming.maintain`` and applied to the heads
+    here. On a split, the new child rows are **freshly initialized, not
+    inherited from the parent** (paper Sec. 3.2: "fresh, non-inherited
+    estimates"); on a retirement, the parent's row is dropped and the
+    replay indices are remapped.
+  - Experiment configuration (learning rate, batch size, tau, gamma,
+    ``c``, ``B``, ``d_0``): paper Sec. 4 "Setup".
 
 Action-selection policies (``EpsGreedy``, ``UCB``) and the
 ``soft_update``/``weight_init`` helpers are reused from ``dqn.py``.
@@ -41,7 +52,9 @@ from src.highway.zooming_factored import FactoredActionZooming
 # ---------------------------------------------------------------------------
 
 class BranchingQNetwork(nn.Module):
-    """Shared trunk + one linear head per action axis."""
+    """The ZoomQ value representation (paper Sec. 3.1): a shared trunk with
+    one linear value head per action axis (branching Q-network, Tavakoli
+    et al. 2018)."""
 
     def __init__(self, obs_dim: int, n_per_axis: List[int],
                  hidden_dim: int = 256):
@@ -67,10 +80,10 @@ class BranchingQNetwork(nn.Module):
         """Append ``add_n`` rows to axis ``axis``'s head for freshly-created
         buffering children.  Existing rows keep their exact positions (pure
         append -- no survivor reindexing); the new rows are freshly
-        initialized (NO parent inheritance, per the paper's erratum: a
-        buffering child must accrue its own evidence and is unselectable
-        until it graduates, so its arbitrary starting Q can never be
-        exploited)."""
+        initialized (NO parent inheritance -- paper Sec. 3.2, "fresh,
+        non-inherited estimates": a buffering child must accrue its own
+        evidence and is unselectable until it graduates, so its arbitrary
+        starting Q can never be exploited)."""
         old = self.heads[axis]
         new = nn.Linear(old.in_features, old.out_features + add_n).to(old.weight.device)
         with torch.no_grad():
@@ -181,10 +194,11 @@ class BranchingDQN:
         self.target_update_freq = target_update_freq
         self.split_check_freq = split_check_freq
         self.split_delay = split_delay
-        # Buffering service period: every ``buffer_period``-th play of a
-        # parent with buffering children, the sample is redirected to a
-        # child (relabel-by-containment).  Adapts the paper's ``H+1`` (which
-        # came from its tabular alpha_t=(H+1)/(H+t) rule, unused here).
+        # Buffering service period == the paper's ``B`` (Sec. 3.3; Algorithm
+        # 1): every ``buffer_period``-th play of a parent with buffering
+        # children, the sample is redirected to a child. The tabular
+        # idealization uses B = H+1 (from alpha_t = (H+1)/(H+t)); here B is a
+        # hyperparameter (paper Sec. 3.3, "Optimistic-Q conditions").
         self.buffer_period = buffer_period
         self.hidden_dim = hidden_dim
         self.da = grid.da
@@ -221,6 +235,9 @@ class BranchingDQN:
 
     def select_action(self, obs: np.ndarray, step: int,
                       deterministic: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+        # Per-axis action selection (paper Eq. (UCB)): argmax over ACTIVE
+        # cubes only; buffering cubes are masked out (paper Sec. 3.3). The
+        # deterministic (eval) branch drops the confidence bonus.
         obs_t = torch.as_tensor(obs.flatten(), dtype=torch.float32,
                                 device=self.device).unsqueeze(0)
         with torch.no_grad():
@@ -243,6 +260,9 @@ class BranchingDQN:
     # ------------------------------------------------------------------
 
     def _update(self):
+        # Branching TD target (paper Eq. (branching target)):
+        #   y = r + gamma * (1/da) * sum_i max_{C in P^{(i)}} Q_target_i(s', C)
+        # with per-axis maxima over ACTIVE cubes only; per-axis losses summed.
         obs, actions, rewards, next_obs, not_dones = self.buffer.sample(self.batch_size)
         # actions: (B, da) int64
 
@@ -299,11 +319,13 @@ class BranchingDQN:
                 self.optimizer.state[p] = old_state[p]
 
     def _maintain(self, step: int) -> int:
-        """Advance the buffering lifecycle and apply the resulting Q-head
-        edits.  Per axis: retire rows (shrink) first, then append new
-        buffering child rows (grow) -- the same order the grid mutates its
-        cube lists, so head row k stays aligned with cube k.  Returns the
-        number of splits (child groups created) this round."""
+        """Apply one maintenance round (paper Algorithm 1: promote -> retire
+        -> split) to the Q-heads. ``FactoredActionZooming.maintain`` advances
+        the lifecycle (Sec. 3.2--3.3); here we mirror it on the heads. Per
+        axis: retire rows (shrink) first, then append new buffering child
+        rows (grow) -- the same order the grid mutates its cube lists, so
+        head row k stays aligned with cube k. Returns the number of splits
+        (child groups created) this round."""
         removals, appends, remaps = self.grid.maintain()
         changed = False
         n_splits = 0

@@ -1,12 +1,22 @@
 """
-Adaptive action-space zooming.
+Adaptive action-space zooming: the cube primitives and refinement
+thresholds of \\textsc{ZoomQ}.
 
-Maintains a flat list of active cubes in [0, 1]^d_action.  Each cube is
-one discrete action whose continuous value is the cube's center mapped
-to [-1, 1]^d.  When a cube's play count reaches its split threshold
-(ceil((1/s)^2)), it splits into 2^d children.  Callers observe splits
-through `SplitInfo` so they can rebuild downstream structures (Q-heads,
-policy heads) accordingly.
+Paper: "Adaptive Action Discretization for Continuous-Action
+Reinforcement Learning" (the ZoomQ paper). This module implements
+  - the axis-aligned *cube*, the partition primitive of ZoomQ
+    (paper Sec. 3.1 "Factored partition"; dyadic-tree structure in
+    Appendix A, Def. "Ancestor and descendant" and Lemma "Cube-tree
+    invariants");
+  - the split threshold ``N_split`` (paper Sec. 3.2 "When to split",
+    Eq. (N_split)) and promotion threshold ``N_min`` (paper Sec. 3.3
+    "When to promote", Eq. (N_min)).
+
+Each cube is one discrete action whose continuous value is the cube's
+center mapped to [-1, 1]^d.  When a cube's play count reaches its split
+threshold ceil((1/s)^2), it splits into 2^d children.  The per-axis
+lifecycle (buffering, promotion, retirement) is orchestrated by
+``FactoredActionZooming`` in ``zooming_factored.py``.
 """
 
 from __future__ import annotations
@@ -39,19 +49,23 @@ class Cube:
 
 @dataclass
 class CubeStats:
-    """Per-cube lifecycle state for the paper's buffering scheme.
-
-    Fields mirror Algorithm 1 of Cao & Krishnamurthy (2021):
+    """Per-cube lifecycle state for the ZoomQ buffering scheme
+    (paper Sec. 3.3 "When to promote"; Algorithm 1). Field names follow
+    the paper's counters:
       - ``n_play``  == n~ (tilde): times this *active* cube was selected.
-        Drives the split trigger (>= N_split) and is the UCB denominator.
+        Drives the split trigger (>= N_split, Eq. (N_split)) and is the
+        UCB denominator in Eq. (UCB).
       - ``n_update`` == n: samples *credited* to this cube.  For a buffering
-        child it is the number of redirected parent-plays it has received;
-        it graduates once ``n_update >= N_min(child)``.
+        child it is the number of redirected parent-plays it has received
+        (Algorithm 1, redirection step); it graduates once
+        ``n_update >= N_min(child)`` (Eq. (N_min)).
       - ``buffering``: True while the cube is a child that has not yet
-        accumulated enough of its own evidence to be selectable.
+        accumulated enough of its own evidence to be selectable
+        (paper Sec. 3.3; excluded from Eq. (UCB) and Eq. (branching target)).
       - ``parent_group``/``child_group``/``n_pending``: lineage so a parent
-        can be retired once *all* its children graduate (its domain is then
-        covered by the children, so it is no longer selectable).
+        is retired once *all* its children graduate (paper Sec. 3.3: the
+        parent's domain is then covered by the children, so it is no longer
+        selectable).
     """
     n_play: int = 0
     n_update: int = 0
@@ -63,14 +77,17 @@ class CubeStats:
 
 
 def n_split_threshold(s: float) -> int:
-    """N_split(B) = (d_max / r(B))^2 with d_max = 1 (cube in [0,1]^d).
-    A cube splits once its *play* count reaches this."""
+    """Split threshold N_split(C) = (d_max / s(C))^2 = c1 * s^-2 with
+    d_max = 1 and c1 = 1 (paper Sec. 3.2 "When to split", Eq. (N_split)).
+    A cube splits once its *play* count n(C) reaches this."""
     return math.ceil((1.0 / s) ** 2)
 
 
 def n_min_threshold(s: float) -> int:
-    """N_min(B) = N_split(B) / 4.  A buffering child graduates once its
-    *update* (redirected-sample) count reaches this."""
+    """Promotion threshold N_min(C) = N_split(C) / 4 = c2 * s^-2 with
+    c2 = c1/4 (paper Sec. 3.3 "When to promote", Eq. (N_min)). A buffering
+    child graduates once its own *update* (redirected-sample) count
+    reaches this."""
     return math.ceil((1.0 / s) ** 2 / 4.0)
 
 

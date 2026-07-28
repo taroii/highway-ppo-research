@@ -1,44 +1,52 @@
 """
-Factored adaptive zooming with a global cell budget and the paper's
-buffering phase (Cao & Krishnamurthy, "Provably adaptive reinforcement
-learning in metric spaces", 2021 -- the corrected/erratum version).
+The factored, action-only cube partition of \\textsc{ZoomQ}, with its
+buffering phase. This is the core of the new method.
 
-Wraps ``da`` independent 1-D ``ActionZooming`` trees, one per action
-axis.  Total cells are additive in ``da`` (sidesteps the joint ``2^da``
-blowup), and a single ``total_budget`` caps the *sum* of cells across
-axes (active + buffering), so the algorithm can spend more cells on
-important axes and fewer on quiet ones.
+Paper: "Adaptive Action Discretization for Continuous-Action RL" (ZoomQ).
+  - Factored partition + budget: Sec. 3.1 "Factored partition" (the
+    ``d_A`` independent per-axis trees ``P_k^{(i)}``, ``F_k^{(i)}`` and the
+    budget ``N_tot`` = ``total_budget``).
+  - Split rule: Sec. 3.2 "When to split", Eq. (N_split).
+  - Buffering / promotion / retirement: Sec. 3.3 "When to promote",
+    Eq. (N_min).
+  - Full step-by-step control flow: Algorithm 1.
+The buffering scheme follows Cao & Krishnamurthy, "Provably adaptive
+reinforcement learning in metric spaces" (2021, corrected/erratum version).
 
-Buffering phase (the reason this file is more than a splitter).  When an
-active cube's *play* count reaches ``N_split = (1/s)^2`` it splits into
-two children of half the side.  Following the paper's erratum:
+Wraps ``da`` independent 1-D ``ActionZooming`` trees, one per action axis.
+Total cells are additive in ``da`` (sidesteps the joint ``2^da`` blowup;
+paper Sec. 3.1), and a single ``total_budget`` = ``N_tot`` caps the *sum*
+of cells across axes (active + buffering).
+
+Buffering phase (paper Sec. 3.3; Algorithm 1). When an active cube's
+*play* count reaches ``N_split = (1/s)^2`` (Eq. (N_split)) it splits into
+two children of half the side:
 
   - children are created **buffering** (NOT selectable) and do **not**
-    inherit the parent's value/count (their Q-rows are re-initialized by
-    the Q-net, not copied);
-  - the **parent stays active and selectable**, covering the region;
+    inherit the parent's value/count -- their Q-rows are re-initialized by
+    the Q-net (paper Sec. 3.2: "fresh, non-inherited estimates");
+  - the **parent stays active and selectable**, covering the region
+    (paper Sec. 3.2, "the parent stays in P_k^{(i)}");
   - every ``buffer_period``-th play of the parent, that sample is
-    **redirected** to the child whose sub-cube contains the played action
-    (relabel-by-containment): the executed action is that child's centre
-    and the transition is stored under the child's index, so the child
-    slowly accumulates its *own* evidence (``n_update``);
+    **redirected** to a buffering child (Algorithm 1, redirection step;
+    paper Sec. 3.3): the executed action is that child's centre and the
+    transition is stored under the child's index, so the child accumulates
+    its *own* evidence ``n_update``;
   - a child **graduates** (buffering -> active) once ``n_update >= N_min =
-    N_split/4``; on graduation its play count is seeded to its accumulated
-    ``n_update`` so its UCB bonus activates at a neighbour scale, not a
-    spike;
-  - once **all** children of a parent graduate, the parent's domain is
-    covered by the children, so it is no longer selectable -> it is
-    **retired** (its Q-row removed).
+    N_split/4`` (Eq. (N_min)); on graduation its play count is seeded to
+    its accumulated ``n_update`` so its UCB bonus activates at a neighbour
+    scale, not a spike;
+  - once **all** children of a parent graduate, the parent is **retired**
+    (paper Sec. 3.3), its Q-row removed.
 
 Net effect on budget: a completed split is +2 children then -1 retired
-parent = +1 cell, matching ``FactoredUniformActionGrid`` in steady state;
-the transient +1 (parent alive while children buffer) is charged against
-``total_budget`` like any other cell.
+parent = +1 cell (matches ``FactoredUniformActionGrid`` in steady state).
 
-Adaptation note: the paper's period is ``H+1``, which derives from its
-tabular learning-rate rule ``alpha_t = (H+1)/(H+t)``.  This repo uses a
-neural Q-net + replay instead, so ``buffer_period`` is exposed as a
-hyperparameter rather than pinned to the horizon.
+Adaptation note (paper Sec. 3.3, "Optimistic-Q conditions"): the analyzed
+tabular idealization uses period ``H+1`` from its learning-rate rule
+``alpha_t = (H+1)/(H+t)``. This deep implementation uses a neural Q-net +
+replay, so ``buffer_period`` (the paper's ``B``) is a hyperparameter, not
+pinned to the horizon.
 
 Consumed by ``BranchingDQN`` (src/highway/dqn_factored.py).
 """
@@ -58,8 +66,10 @@ from src.highway.zooming import (
 
 
 class FactoredActionZooming:
-    """``da`` independent 1-D zooming trees with a global cell budget and
-    the paper's buffering phase."""
+    """The ZoomQ action partition (paper Sec. 3.1 "Factored partition"):
+    ``da`` independent 1-D cube trees, one per action axis, with a global
+    cell budget ``total_budget`` (== the paper's ``N_tot``) and the
+    buffering phase of Sec. 3.3."""
 
     def __init__(
         self,
@@ -145,12 +155,15 @@ class FactoredActionZooming:
         """Register a play of the selected (active) cube on each axis and
         return ``(env_action, store_idx_per_axis)``.
 
-        ``idx_per_axis`` are selected *active* indices (the caller must mask
-        buffering cubes out of selection).  On every ``buffer_period``-th
-        play of a parent that has buffering children, the play is redirected
-        to the least-updated child (relabel-by-containment): the returned
-        action component is that child's centre and ``store_idx`` is the
-        child's index, so the transition trains and credits the child.
+        Implements the buffering *redirection* step of the paper (Sec. 3.3;
+        Algorithm 1: "every B-th play of a parent with buffering children,
+        redirect the sample to a child"). ``idx_per_axis`` are selected
+        *active* indices (the caller masks buffering cubes out of selection).
+        On every ``buffer_period`` (== the paper's ``B``)-th play of a parent
+        that has buffering children, the play is redirected to the
+        least-updated child: the returned action component is that child's
+        centre and ``store_idx`` is the child's index, so the transition
+        trains and credits the child (increments its ``n_update``).
         """
         env_action = np.empty(self.da, dtype=np.float64)
         store_idx = np.empty(self.da, dtype=np.int64)
@@ -180,7 +193,8 @@ class FactoredActionZooming:
     # ------------------------------------------------------------------
 
     def maintain(self) -> Tuple[List[List[int]], List[int], List[np.ndarray]]:
-        """Advance the buffering lifecycle one round and return the Q-head
+        """Advance the buffering lifecycle one round (the maintenance block of
+        Algorithm 1: promote, then retire, then split) and return the Q-head
         edits + replay-index remap the caller must apply:
 
             removals[i] -> ascending cube indices to DROP from axis i's head
@@ -207,6 +221,9 @@ class FactoredActionZooming:
         return removals, appends, remaps
 
     def _graduate(self) -> None:
+        # Promotion rule (paper Sec. 3.3, Eq. (N_min)): a buffering child
+        # graduates to active once its own update count reaches N_min; both
+        # siblings' promotion drives parent retirement (in _retire).
         for ax in self.axes:
             for j, s in enumerate(ax.stats):
                 if not s.buffering:
@@ -227,6 +244,11 @@ class FactoredActionZooming:
                             break
 
     def _retire(self) -> Tuple[List[List[int]], List[np.ndarray]]:
+        # Parent retirement (paper Sec. 3.3): once both children of a parent
+        # have graduated, the parent's region is covered by them, so it is
+        # removed from the active set. Also builds the replay-index remap
+        # (a value-based/neural detail beyond the tabular paper): a retired
+        # parent's stored transitions are relabelled onto a surviving child.
         removals: List[List[int]] = [[] for _ in range(self.da)]
         remaps: List[np.ndarray] = [np.empty(0, dtype=np.int64)
                                     for _ in range(self.da)]
@@ -264,6 +286,9 @@ class FactoredActionZooming:
         return removals, remaps
 
     def _split(self) -> List[int]:
+        # Split rule (paper Sec. 3.2, Eq. (N_split)): an active cube whose
+        # play count reaches N_split spawns two buffering children of half
+        # the side, subject to the global budget N_tot (paper Sec. 3.1).
         appends = [0 for _ in range(self.da)]
         budget = (self.total_budget - self.total_cells
                   if self.total_budget is not None
