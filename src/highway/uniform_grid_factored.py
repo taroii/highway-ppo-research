@@ -1,6 +1,6 @@
 """
 Factored uniform action grid: the \\textsc{Uniform} baseline (paper
-Sec. 4 "Setup and baselines") -- a fixed ``n``-cell-per-axis grid with
+Sec. 5 "Baselines and protocol") -- a fixed ``n``-cell-per-axis grid with
 the same branching Q-network and UCB selection as ZoomQ, at matched
 budget ``N_tot = n * da``. It never splits, so it is ZoomQ with the
 refinement schedule disabled.

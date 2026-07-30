@@ -4,26 +4,26 @@ the factored cube partition (``FactoredActionZooming``).
 
 Paper: "Adaptive Action Discretization for Continuous-Action RL" (ZoomQ).
 This file implements the "deep implementation" of Sec. 3.1 (the paper's
-analyzed object is a tabular idealization; Sec. 3.5 "Theoretical
-guarantee"). Specifically:
+analyzed object is a tabular idealization, analyzed in Sec. 4
+"Theoretical guarantee"). Specifically:
 
   - Value representation (paper Sec. 3.1): a shared trunk + ``da`` linear
     heads, head ``i`` sized to that axis's current cube count -- the
     branching Q-network of Tavakoli, Pardo, Kormushev (AAAI 2018).
-  - TD target (paper Eq. (branching target)):
+  - TD target (paper Eq. (1) (branching target)):
         y = r + gamma * (1/da) * sum_i max_{C in P^{(i)}} Q_target_i(s', C)
     with the per-axis maxima over *active* cubes only; per-axis Bellman
     losses are summed.
-  - Action selection (paper Eq. (UCB)): upper-confidence rule over active
+  - Action selection (paper Eq. (2) (UCB)): upper-confidence rule over active
     cubes; see ``UCB`` in ``dqn.py``.
   - Splits/promotions/retirements (paper Sec. 3.2--3.3; Algorithm 1) are
     driven by ``FactoredActionZooming.maintain`` and applied to the heads
     here. On a split, the new child rows are **freshly initialized, not
-    inherited from the parent** (paper Sec. 3.2: "fresh, non-inherited
-    estimates"); on a retirement, the parent's row is dropped and the
-    replay indices are remapped.
+    inherited from the parent** (paper Sec. 3.2: children "do not inherit
+    the parent's estimate at creation"); on a retirement, the parent's row
+    is dropped and the replay indices are remapped.
   - Experiment configuration (learning rate, batch size, tau, gamma,
-    ``c``, ``B``, ``d_0``): paper Sec. 4 "Setup".
+    ``c``, ``B``, ``d_0``): paper Sec. 5 "Setup".
 
 Action-selection policies (``EpsGreedy``, ``UCB``) and the
 ``soft_update``/``weight_init`` helpers are reused from ``dqn.py``.
@@ -80,10 +80,10 @@ class BranchingQNetwork(nn.Module):
         """Append ``add_n`` rows to axis ``axis``'s head for freshly-created
         buffering children.  Existing rows keep their exact positions (pure
         append -- no survivor reindexing); the new rows are freshly
-        initialized (NO parent inheritance -- paper Sec. 3.2, "fresh,
-        non-inherited estimates": a buffering child must accrue its own
-        evidence and is unselectable until it graduates, so its arbitrary
-        starting Q can never be exploited)."""
+        initialized (NO parent inheritance -- paper Sec. 3.2, children "do
+        not inherit the parent's estimate at creation": a buffering child
+        must accrue its own evidence and is unselectable until it graduates,
+        so its arbitrary starting Q can never be exploited)."""
         old = self.heads[axis]
         new = nn.Linear(old.in_features, old.out_features + add_n).to(old.weight.device)
         with torch.no_grad():
@@ -197,8 +197,9 @@ class BranchingDQN:
         # Buffering service period == the paper's ``B`` (Sec. 3.3; Algorithm
         # 1): every ``buffer_period``-th play of a parent with buffering
         # children, the sample is redirected to a child. The tabular
-        # idealization uses B = H+1 (from alpha_t = (H+1)/(H+t)); here B is a
-        # hyperparameter (paper Sec. 3.3, "Optimistic-Q conditions").
+        # idealization uses B = H+1 (from alpha_t = (H+1)/(H+t), the learning
+        # rate of Assumption 3 "Optimistic-Q conditions", Sec. 4); here B is a
+        # hyperparameter.
         self.buffer_period = buffer_period
         self.hidden_dim = hidden_dim
         self.da = grid.da
@@ -235,7 +236,7 @@ class BranchingDQN:
 
     def select_action(self, obs: np.ndarray, step: int,
                       deterministic: bool = False) -> Tuple[np.ndarray, np.ndarray]:
-        # Per-axis action selection (paper Eq. (UCB)): argmax over ACTIVE
+        # Per-axis action selection (paper Eq. (2) (UCB)): argmax over ACTIVE
         # cubes only; buffering cubes are masked out (paper Sec. 3.3). The
         # deterministic (eval) branch drops the confidence bonus.
         obs_t = torch.as_tensor(obs.flatten(), dtype=torch.float32,
@@ -260,7 +261,7 @@ class BranchingDQN:
     # ------------------------------------------------------------------
 
     def _update(self):
-        # Branching TD target (paper Eq. (branching target)):
+        # Branching TD target (paper Eq. (1) (branching target)):
         #   y = r + gamma * (1/da) * sum_i max_{C in P^{(i)}} Q_target_i(s', C)
         # with per-axis maxima over ACTIVE cubes only; per-axis losses summed.
         obs, actions, rewards, next_obs, not_dones = self.buffer.sample(self.batch_size)

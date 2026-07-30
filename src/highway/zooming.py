@@ -6,11 +6,11 @@ Paper: "Adaptive Action Discretization for Continuous-Action
 Reinforcement Learning" (the ZoomQ paper). This module implements
   - the axis-aligned *cube*, the partition primitive of ZoomQ
     (paper Sec. 3.1 "Factored partition"; dyadic-tree structure in
-    Appendix A, Def. "Ancestor and descendant" and Lemma "Cube-tree
-    invariants");
+    Appendix A, Definition 6 "Ancestor and descendant in the box tree"
+    and Lemma 7 "Box-tree invariants");
   - the split threshold ``N_split`` (paper Sec. 3.2 "When to split",
-    Eq. (N_split)) and promotion threshold ``N_min`` (paper Sec. 3.3
-    "When to promote", Eq. (N_min)).
+    Eq. (3) (N_split)) and promotion threshold ``N_min`` (paper Sec. 3.3
+    "When to promote", Eq. (4) (N_min)).
 
 Each cube is one discrete action whose continuous value is the cube's
 center mapped to [-1, 1]^d.  When a cube's play count reaches its split
@@ -53,15 +53,15 @@ class CubeStats:
     (paper Sec. 3.3 "When to promote"; Algorithm 1). Field names follow
     the paper's counters:
       - ``n_play``  == n~ (tilde): times this *active* cube was selected.
-        Drives the split trigger (>= N_split, Eq. (N_split)) and is the
-        UCB denominator in Eq. (UCB).
+        Drives the split trigger (>= N_split, Eq. (3) (N_split)) and is the
+        UCB denominator in Eq. (2) (UCB).
       - ``n_update`` == n: samples *credited* to this cube.  For a buffering
         child it is the number of redirected parent-plays it has received
         (Algorithm 1, redirection step); it graduates once
-        ``n_update >= N_min(child)`` (Eq. (N_min)).
+        ``n_update >= N_min(child)`` (Eq. (4) (N_min)).
       - ``buffering``: True while the cube is a child that has not yet
         accumulated enough of its own evidence to be selectable
-        (paper Sec. 3.3; excluded from Eq. (UCB) and Eq. (branching target)).
+        (paper Sec. 3.3; excluded from Eq. (2) (UCB) and Eq. (1) (branching target)).
       - ``parent_group``/``child_group``/``n_pending``: lineage so a parent
         is retired once *all* its children graduate (paper Sec. 3.3: the
         parent's domain is then covered by the children, so it is no longer
@@ -78,14 +78,14 @@ class CubeStats:
 
 def n_split_threshold(s: float) -> int:
     """Split threshold N_split(C) = (d_max / s(C))^2 = c1 * s^-2 with
-    d_max = 1 and c1 = 1 (paper Sec. 3.2 "When to split", Eq. (N_split)).
+    d_max = 1 and c1 = 1 (paper Sec. 3.2 "When to split", Eq. (3) (N_split)).
     A cube splits once its *play* count n(C) reaches this."""
     return math.ceil((1.0 / s) ** 2)
 
 
 def n_min_threshold(s: float) -> int:
     """Promotion threshold N_min(C) = N_split(C) / 4 = c2 * s^-2 with
-    c2 = c1/4 (paper Sec. 3.3 "When to promote", Eq. (N_min)). A buffering
+    c2 = c1/4 (paper Sec. 3.3 "When to promote", Eq. (4) (N_min)). A buffering
     child graduates once its own *update* (redirected-sample) count
     reaches this."""
     return math.ceil((1.0 / s) ** 2 / 4.0)

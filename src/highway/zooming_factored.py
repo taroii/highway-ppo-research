@@ -6,9 +6,9 @@ Paper: "Adaptive Action Discretization for Continuous-Action RL" (ZoomQ).
   - Factored partition + budget: Sec. 3.1 "Factored partition" (the
     ``d_A`` independent per-axis trees ``P_k^{(i)}``, ``F_k^{(i)}`` and the
     budget ``N_tot`` = ``total_budget``).
-  - Split rule: Sec. 3.2 "When to split", Eq. (N_split).
+  - Split rule: Sec. 3.2 "When to split", Eq. (3) (N_split).
   - Buffering / promotion / retirement: Sec. 3.3 "When to promote",
-    Eq. (N_min).
+    Eq. (4) (N_min).
   - Full step-by-step control flow: Algorithm 1.
 The buffering scheme follows Cao & Krishnamurthy, "Provably adaptive
 reinforcement learning in metric spaces" (2021, corrected/erratum version).
@@ -19,21 +19,22 @@ paper Sec. 3.1), and a single ``total_budget`` = ``N_tot`` caps the *sum*
 of cells across axes (active + buffering).
 
 Buffering phase (paper Sec. 3.3; Algorithm 1). When an active cube's
-*play* count reaches ``N_split = (1/s)^2`` (Eq. (N_split)) it splits into
+*play* count reaches ``N_split = (1/s)^2`` (Eq. (3) (N_split)) it splits into
 two children of half the side:
 
   - children are created **buffering** (NOT selectable) and do **not**
     inherit the parent's value/count -- their Q-rows are re-initialized by
-    the Q-net (paper Sec. 3.2: "fresh, non-inherited estimates");
+    the Q-net (paper Sec. 3.2: children "do not inherit the parent's
+    estimate at creation");
   - the **parent stays active and selectable**, covering the region
-    (paper Sec. 3.2, "the parent stays in P_k^{(i)}");
+    (paper Sec. 3.2, "The parent remains in P_k^{(i)}");
   - every ``buffer_period``-th play of the parent, that sample is
     **redirected** to a buffering child (Algorithm 1, redirection step;
     paper Sec. 3.3): the executed action is that child's centre and the
     transition is stored under the child's index, so the child accumulates
     its *own* evidence ``n_update``;
   - a child **graduates** (buffering -> active) once ``n_update >= N_min =
-    N_split/4`` (Eq. (N_min)); on graduation its play count is seeded to
+    N_split/4`` (Eq. (4) (N_min)); on graduation its play count is seeded to
     its accumulated ``n_update`` so its UCB bonus activates at a neighbour
     scale, not a spike;
   - once **all** children of a parent graduate, the parent is **retired**
@@ -42,7 +43,7 @@ two children of half the side:
 Net effect on budget: a completed split is +2 children then -1 retired
 parent = +1 cell (matches ``FactoredUniformActionGrid`` in steady state).
 
-Adaptation note (paper Sec. 3.3, "Optimistic-Q conditions"): the analyzed
+Adaptation note (paper Assumption 3 "Optimistic-Q conditions", Sec. 4): the analyzed
 tabular idealization uses period ``H+1`` from its learning-rate rule
 ``alpha_t = (H+1)/(H+t)``. This deep implementation uses a neural Q-net +
 replay, so ``buffer_period`` (the paper's ``B``) is a hyperparameter, not
@@ -221,7 +222,7 @@ class FactoredActionZooming:
         return removals, appends, remaps
 
     def _graduate(self) -> None:
-        # Promotion rule (paper Sec. 3.3, Eq. (N_min)): a buffering child
+        # Promotion rule (paper Sec. 3.3, Eq. (4) (N_min)): a buffering child
         # graduates to active once its own update count reaches N_min; both
         # siblings' promotion drives parent retirement (in _retire).
         for ax in self.axes:
@@ -286,7 +287,7 @@ class FactoredActionZooming:
         return removals, remaps
 
     def _split(self) -> List[int]:
-        # Split rule (paper Sec. 3.2, Eq. (N_split)): an active cube whose
+        # Split rule (paper Sec. 3.2, Eq. (3) (N_split)): an active cube whose
         # play count reaches N_split spawns two buffering children of half
         # the side, subject to the global budget N_tot (paper Sec. 3.1).
         appends = [0 for _ in range(self.da)]

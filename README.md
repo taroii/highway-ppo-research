@@ -9,14 +9,14 @@ This repository implements **ZoomQ**, the method in the paper *"Adaptive Action 
 | Paper location | Code |
 |---|---|
 | Sec. 3.1 factored partition; budget `N_tot`; Appendix A dyadic tree | `src/highway/zooming.py` (cube primitives), `src/highway/zooming_factored.py` (`FactoredActionZooming`) |
-| Sec. 3.2 split rule, Eq. (N_split) | `zooming.py::n_split_threshold`, `zooming_factored.py::_split` |
-| Sec. 3.3 buffering / promotion / retirement, Eq. (N_min); Algorithm 1 | `zooming_factored.py::on_step` (redirection), `::maintain`, `::_graduate`, `::_retire` |
-| Sec. 3.1 value representation, Eq. (branching target) | `src/highway/dqn_factored.py` (`BranchingQNetwork`, `BranchingDQN._update`) |
-| Sec. 3.1 action selection, Eq. (UCB) | `src/highway/dqn.py` (`UCB`), `dqn_factored.py::select_action` |
-| Sec. 4 Uniform baseline | `src/highway/uniform_grid_factored.py` |
-| Sec. 4 deterministic-eval metric | `src/highway/eval_utils.py` |
-| Sec. 4 efficiency figure + summary table | `src/highway/plot_efficiency.py` |
-| Sec. 4 / appendix aggregate statistics (IQM, CIs, profiles) | `src/highway/plot_rliable.py`, `src/highway/rliable_utils.py` |
+| Sec. 3.2 split rule, Eq. (3) (N_split) | `zooming.py::n_split_threshold`, `zooming_factored.py::_split` |
+| Sec. 3.3 buffering / promotion / retirement, Eq. (4) (N_min); Algorithm 1 | `zooming_factored.py::on_step` (redirection), `::maintain`, `::_graduate`, `::_retire` |
+| Sec. 3.1 value representation, Eq. (1) (branching target) | `src/highway/dqn_factored.py` (`BranchingQNetwork`, `BranchingDQN._update`) |
+| Sec. 3.1 action selection, Eq. (2) (UCB) | `src/highway/dqn.py` (`UCB`), `dqn_factored.py::select_action` |
+| Sec. 5 Uniform baseline | `src/highway/uniform_grid_factored.py` |
+| Sec. 5 deterministic-eval metric | `src/highway/eval_utils.py` |
+| Sec. 5 efficiency figure (Fig. 2) + summary table (Table 1) | `src/highway/plot_efficiency.py` |
+| Sec. 5 aggregate statistics (IQM, CIs, profiles); higher-seed view beyond the submitted 3-seed tables | `src/highway/plot_rliable.py`, `src/highway/rliable_utils.py` |
 | Compute appendix (wall-clock / throughput) | `src/highway/report_compute.py` |
 
 **Seeding (paper reproducibility appendix):** each agent seeds PyTorch, NumPy, and Python `random` from the run seed in its constructor (`dqn_factored.py`, `sac.py`); the environment RNG is not seeded and deterministic GPU kernels are not enabled, so runs are statistically, not bit-wise, reproducible.

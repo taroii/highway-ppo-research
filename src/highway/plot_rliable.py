@@ -2,8 +2,9 @@
 Aggregate comparison via the ``rliable`` package (Agarwal et al. 2021):
 interquartile mean with stratified-bootstrap 95% confidence intervals, a
 performance profile, and probability of improvement -- aggregated across
-tasks at a matched action budget. Produces the paper's aggregate /
-robust-statistics figure (Sec. 4 / appendix).
+tasks at a matched action budget. Supports the Sec. 5 experiments as an
+aggregate view at higher seed counts (not a figure in the submitted
+three-seed version).
 
 Requires ``rliable`` (``pip install rliable``); its ``arch`` dependency
 currently needs numpy < 2 (see README pin).

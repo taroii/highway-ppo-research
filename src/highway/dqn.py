@@ -45,7 +45,7 @@ class EpsGreedy:
 
 
 class UCB:
-    """ZoomQ action-selection rule (paper Sec. 3.1, Eq. (UCB)):
+    """ZoomQ action-selection rule (paper Sec. 3.1, Eq. (2) (UCB)):
     Q(s, C) + c * sqrt(log(step) / n(C)), argmax over active cubes.
 
     The global term is ``log(step)`` (cumulative env steps -- monotonic,
